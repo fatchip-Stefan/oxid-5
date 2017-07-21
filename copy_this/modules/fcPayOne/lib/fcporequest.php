@@ -1280,6 +1280,56 @@ class fcpoRequest extends oxSuperCfg {
     }
 
     /**
+     * Requests amazon configuration
+     *
+     * @param void
+     * @return array
+     */
+    public function sendRequestGetAmazonPayConfiguration() {
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+
+        $this->addParameter('request', 'genericpayment'); //Request method
+        $this->addParameter('mode', $this->getOperationMode('fcpoamazonpay')); //PayOne Portal Operation Mode (live or test)
+        $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID')); //ID of PayOne Sub-Account
+
+        $this->addParameter('clearingtype', 'wlt');
+        $this->addParameter('wallettype', 'AMZ');
+
+        $this->addParameter('add_paydata[action]', 'getconfiguration');
+
+        $oCurr = $oConfig->getActShopCurrencyObject();
+        $this->addParameter('currency', $oCurr->name);
+
+        return $this->send();
+    }
+
+    /**
+     * Sends request for receiving amazon referenceid
+     *
+     * @param string $sAmazonReferenceId
+     * @return array
+     */
+    public function sendRequestGetAmazonOrderReferenceDetails($sAmazonReferenceId) {
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+
+        $this->addParameter('request', 'genericpayment'); //Request method
+        $this->addParameter('mode', $this->getOperationMode('fcpoamazonpay')); //PayOne Portal Operation Mode (live or test)
+        $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID')); //ID of PayOne Sub-Account
+
+        $this->addParameter('clearingtype', 'wlt');
+        $this->addParameter('wallettype', 'AMZ');
+
+        $this->addParameter('add_paydata[action]', 'getorderreferencedetails');
+        $this->addParameter('add_paydata[amazon_reference_id]', $sAmazonReferenceId);
+
+        $oCurr = $oConfig->getActShopCurrencyObject();
+        $this->addParameter('currency', $oCurr->name);
+
+        return $this->send();
+    }
+
+
+    /**
      * Send request to PAYONE Server-API with request-type "genericpayment"
      * 
      * @return array

@@ -44,6 +44,7 @@ class fcpayone_events
         'fcpocommerzfinanz',
         'fcpoklarna_installment',
     );
+
     public static $sQueryTableFcporefnr = "
         CREATE TABLE fcporefnr (
           FCPO_REFNR int(11) NOT NULL AUTO_INCREMENT,
@@ -308,6 +309,7 @@ class fcpayone_events
         'fcpopo_debitnote' => 'Payolution Lastschrift',
         'fcpopo_installment' => 'Payolution Ratenkauf',
         'fcporp_bill' => 'Ratepay Rechnungskauf',
+        'fcpoamazonpay' => 'AmazonPay',
     );
 
     /**

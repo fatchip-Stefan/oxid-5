@@ -70,8 +70,36 @@ class fcpayone_ajax extends oxBase {
         parent::__construct();
         $this->_oFcpoHelper = oxNew('fcpohelper');
     }
-    
-    
+
+    /**
+     * Triggers a call on payoneapi for receiving
+     *
+     * @param $sParamsJson
+     * @reutrn void
+     */
+    public function fcpoGetAmazonReferenceId($sParamsJson) {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $aParams = json_decode($sParamsJson,true);
+        $sAmazonReferenceId = $aParams['fcpoAmazonReferenceId'];
+        $oSession->deleteVariable('fcpoAmazonReferenceId');
+        $oSession->setVariable('fcpoAmazonReferenceId', $sAmazonReferenceId);
+
+        $oRequest = $this->_oFcpoHelper->getFactoryObject();
+        $aResponse = $oRequest->sendRequestGetAmazonOrderReferenceDetails($sAmazonReferenceId);
+
+        if ($aResponse['status'] == 'OK') {
+            $oUser = $this->_oFcpoHelper->getFactoryObject('oxuser');
+            $oSession->deleteVariable('fcpoAmazonWorkorderId');
+            $oSession->setVariable('fcpoAmazonWorkorderId', $aResponse['workorderid']);
+            $oUser->fcpoSetAmazonOrderReferenceDetailsResponse($aResponse);
+        } else {
+            $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+            $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
+            $sShopUrl = $oConfig->getShopUrl();
+            $oUtils->redirect($sShopUrl."index.php?cl=basket");
+        }
+    }
+
     /**
      * Performs a precheck for payolution installment
      * 
@@ -287,5 +315,9 @@ if ($sPaymentId) {
             // we have got a calculation result. Parse it to needed html
             echo $oPayoneAjax->fcpoParseCalculation2Html($mResult);
         }
+    }
+
+    if ($sAction == 'get_amazon_reference_details' && $sPaymentId == 'fcpoamazonpay') {
+        $oPayoneAjax->fcpoGetAmazonReferenceId($sParamsJson);
     }
 }

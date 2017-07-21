@@ -186,6 +186,90 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
         return $oLang->getLanguageAbbr($sLangId);
     }
-    
+
+    /**
+     * Returns if amazonpay is active and though button can be displayed
+     *
+     * @param void
+     * @return bool
+     */
+    public function fcpoCanDisplayAmazonPayButton() {
+        $oPayment = oxNew('oxpayment');
+        $oPayment->load('fcpoamazonpay');
+        $blIsActive = $oPayment->oxpayments__oxactive->value;
+
+        return $blIsActive;
+    }
+
+    /**
+     * Returns amazon widgets url depending if mode is live or test
+     */
+    public function fcpoGetAmazonWidgetsUrl() {
+        $oPayment = oxNew('oxpayment');
+        $oPayment->load('fcpoamazonpay');
+        $blIsLive = $oPayment->oxpayments__fcpolivemode->value;
+
+        $sAmazonWidgetsUrl = 'https://static-eu.payments-amazon.com/OffAmazonPayments/eur/sandbox/lpa/js/Widgets.js';
+        if ($blIsLive) {
+            $sAmazonWidgetsUrl = 'https://static-eu.payments-amazon.com/OffAmazonPayments/eur/lpa/js/Widgets.js';
+        }
+
+        return $sAmazonWidgetsUrl;
+    }
+
+    /**
+     * Returns amazon client id
+     *
+     * @return string
+     */
+    public function fcpoGetAmazonPayClientId() {
+        $oConfig = oxRegistry::getConfig();
+        $sClientId = $oConfig->getConfigParam('sFCPOAmazonPayClientId');
+
+        return (string)$sClientId;
+    }
+
+    /**
+     * Returns amazon seller id
+     *
+     * @return string
+     */
+    public function fcpoGetAmazonPaySellerId() {
+        $oConfig = oxRegistry::getConfig();
+        $sSellerId = $oConfig->getConfigParam('sFCPOAmazonPaySellerId');
+
+        return (string)$sSellerId;
+    }
+
+    /**
+     * Returns url that will be send to amazon for redirect after login
+     *
+     * @param void
+     * @return string
+     */
+    public function fcpoGetAmazonRedirectUrl() {
+        $oConfig = oxRegistry::getConfig();
+        $sShopUrl = $oConfig->getShopUrl();
+        $sRedirectUrl = $sShopUrl."index.php?cl=user&fnc=fcpoamazonloginreturn";
+
+        return $sRedirectUrl;
+    }
+
+    /**
+     * Method returns if there is an active amazon session
+     *
+     * @param void
+     * @return bool
+     */
+    public function fcpoAmazonLoginSessionActive() {
+        $oSession = oxRegistry::getSession();
+        $sAmazonLoginAccessToken = $oSession->getVariable('sAmazonLoginAccessToken');
+        $blLoggedIn = false;
+        if ($sAmazonLoginAccessToken) {
+            $blLoggedIn = true;
+        }
+
+        return $blLoggedIn;
+    }
 
 }

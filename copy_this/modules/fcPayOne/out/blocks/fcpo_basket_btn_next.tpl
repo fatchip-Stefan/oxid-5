@@ -7,3 +7,6 @@
         <input type="image" src="[{$oView->fcpoGetPayPalExpressPic()}]" style="float: right;margin-right:10px;">
     </form>
 [{/if}]
+[{if $oViewConf->fcpoCanDisplayAmazonPayButton()}]
+    [{include file=$oViewConf->fcpoGetAbsModuleTemplateFrontendPath('fcpayone_amazon_paybutton.tpl')}]
+[{/if}]

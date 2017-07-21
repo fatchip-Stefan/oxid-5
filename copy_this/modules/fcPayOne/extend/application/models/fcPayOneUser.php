@@ -37,6 +37,16 @@ class fcPayOneUser extends fcPayOneUser_parent {
     }
 
     /**
+     * Method manages adding/merging userdata
+     *
+     * @param array $aResponse
+     * @return void
+     */
+    public function fcpoSetAmazonOrderReferenceDetailsResponse($aResponse) {
+        die(dumpVar($aResponse));
+    }
+
+    /**
      * Sets the credit-worthiness of the user
      *
      * @param array $aResponse response of a API request

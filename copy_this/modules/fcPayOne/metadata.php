@@ -39,6 +39,7 @@ $aModule = array(
     'extend'        => array(
         // controllers
         'basket'                            => 'fcPayOne/extend/application/controllers/fcPayOneBasketView',
+        'user'                              => 'fcPayOne/extend/application/controllers/fcPayOneUserView',
         'order'                             => 'fcPayOne/extend/application/controllers/fcPayOneOrderView',
         'payment'                           => 'fcPayOne/extend/application/controllers/fcPayOnePaymentView',
         'thankyou'                          => 'fcPayOne/extend/application/controllers/fcPayOneThankyouView',
@@ -131,6 +132,11 @@ $aModule = array(
         'onDeactivate'                      => 'fcpayone_events::onDeactivate',
     ),
     'blocks'        => array(
+        array(
+            'template' => 'page/checkout/user.tpl',
+            'block' => 'checkout_user_main',
+            'file' => 'fcpo_user_override'
+        ),
         array(
             'template' => '_formparams.tpl',
             'block' => 'admin_formparams',

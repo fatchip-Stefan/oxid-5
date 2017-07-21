@@ -870,6 +870,38 @@
             </dl>      
         </div>
     </div>
+
+    <div class="groupExp">
+        <div>
+            <a href="#" onclick="_groupExp(this);return false;" class="rc"><b>[{oxmultilang ident="FCPO_CONFIG_GROUP_AMAZONPAY"}]</b></a>
+            <dl>
+                <dt>
+                    <input type="text" class="txt" name="confstrs[sFCPOAmazonPaySellerId]" value="[{$confstrs.sFCPOAmazonPaySellerId}]" disabled>
+                    [{oxinputhelp ident="FCPO_HELP_AMAZONPAY_SELLERID"}]
+                </dt>
+                <dd>
+                    [{oxmultilang ident="FCPO_AMAZONPAY_SELLERID"}]
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+            <dl>
+                <dt>
+                    <input type="text" class="txt" name="confstrs[sFCPOAmazonPayClientId]" value="[{$confstrs.sFCPOAmazonPayClientId}]" disabled>
+                    [{oxinputhelp ident="FCPO_HELP_AMAZONPAY_CLIENTID"}]
+                </dt>
+                <dd>
+                    [{oxmultilang ident="FCPO_AMAZONPAY_CLIENTID"}]
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+            <dl>
+                <dt><input type="submit" class="edittext" name="getAmazonPayConfiguration" value="[{oxmultilang ident="FCPO_AMAZONPAY_GET_CONFIG"}]" onClick="Javascript:document.myedit.fnc.value='save'" [{$readonly}]></dt>
+                <dd></dd>
+                <div class="spacer"></div>
+            </dl>
+        </div>
+    </div>
+
                 
     <br>
     <input type="submit" class="edittext" name="save" value="[{oxmultilang ident="GENERAL_SAVE"}]" onClick="Javascript:document.myedit.fnc.value='save'" [{$readonly}]>
