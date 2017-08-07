@@ -83,9 +83,11 @@ class fcpayone_ajax extends oxBase {
         $sAmazonReferenceId = $aParams['fcpoAmazonReferenceId'];
         $oSession->deleteVariable('fcpoAmazonReferenceId');
         $oSession->setVariable('fcpoAmazonReferenceId', $sAmazonReferenceId);
+        $sAmazonLoginAccessToken = $oSession->getVariable('sAmazonLoginAccessToken');
+        $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
 
-        $oRequest = $this->_oFcpoHelper->getFactoryObject();
-        $aResponse = $oRequest->sendRequestGetAmazonOrderReferenceDetails($sAmazonReferenceId);
+        $oRequest = $this->_oFcpoHelper->getFactoryObject('fcporequest');
+        $aResponse = $oRequest->sendRequestGetAmazonOrderReferenceDetails($sAmazonReferenceId, $sAmazonLoginAccessToken);
 
         if ($aResponse['status'] == 'OK') {
             $oUser = $this->_oFcpoHelper->getFactoryObject('oxuser');
@@ -94,7 +96,6 @@ class fcpayone_ajax extends oxBase {
             $oUser->fcpoSetAmazonOrderReferenceDetailsResponse($aResponse);
         } else {
             $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-            $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
             $sShopUrl = $oConfig->getShopUrl();
             $oUtils->redirect($sShopUrl."index.php?cl=basket");
         }

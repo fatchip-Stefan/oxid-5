@@ -1309,7 +1309,7 @@ class fcpoRequest extends oxSuperCfg {
      * @param string $sAmazonReferenceId
      * @return array
      */
-    public function sendRequestGetAmazonOrderReferenceDetails($sAmazonReferenceId) {
+    public function sendRequestGetAmazonOrderReferenceDetails($sAmazonReferenceId, $sAmazonAddressToken) {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
 
         $this->addParameter('request', 'genericpayment'); //Request method
@@ -1321,6 +1321,7 @@ class fcpoRequest extends oxSuperCfg {
 
         $this->addParameter('add_paydata[action]', 'getorderreferencedetails');
         $this->addParameter('add_paydata[amazon_reference_id]', $sAmazonReferenceId);
+        $this->addParameter('add_paydata[amazon_address_token]', $sAmazonAddressToken);
 
         $oCurr = $oConfig->getActShopCurrencyObject();
         $this->addParameter('currency', $oCurr->name);

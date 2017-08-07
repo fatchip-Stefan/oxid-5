@@ -10,6 +10,9 @@ class fcPayOneUserView extends fcPayOneUserView_parent {
 
     /**
      * Method will be called when returning from amazonlogin
+     *
+     * @param void
+     * @return void
      */
     public function fcpoAmazonLoginReturn() {
         $oConfig = $this->getConfig();
@@ -38,6 +41,30 @@ class fcPayOneUserView extends fcPayOneUserView_parent {
 
         // go ahead with rendering
         $this->render();
+    }
+
+    /**
+     * Method will be called when amazon user has been recognized as existing as a standard user
+     * with a set password. In this case the user needs to login to make sure that this account
+     * won't be compromised
+     *
+     * @param void
+     * @return void
+     */
+    public function fcpoAmazonMergeUserMandatory() {
+        $this->_blLoginMandatory = true;
+        // go ahead with rendering
+        $this->render();
+    }
+
+    /**
+     * Template getter for decision to show a login form or not
+     *
+     * @param void
+     * @return bool
+     */
+    public function fcpoGetLoginMandatoryForAmazonPay() {
+        return $this->_blLoginMandatory;
     }
 
 }

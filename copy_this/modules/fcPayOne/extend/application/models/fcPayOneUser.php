@@ -43,7 +43,98 @@ class fcPayOneUser extends fcPayOneUser_parent {
      * @return void
      */
     public function fcpoSetAmazonOrderReferenceDetailsResponse($aResponse) {
-        die(dumpVar($aResponse));
+        $sAmazonEmailAddress = $aResponse['add_paydata[email]'];
+        $blUserWithPasswdExists = $this->_fcpoUserExists($sAmazonEmailAddress, true);
+
+        if ($blUserWithPasswdExists) {
+            $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
+            $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+            $sShopUrl = $oConfig->getShopUrl();
+            $oUtils->redirect($sShopUrl."index.php?cl=user&fnc=fcpoamzmergeusermandatory");
+        } else {
+            $this->_fcpoAddOrUpdateAmazonUser($aResponse);
+        }
+    }
+
+    /**
+     * Checks if a user should be added or updated and redirects to matching method
+     *
+     * @param $aResponse
+     * @return void
+     */
+    protected function _fcpoAddOrUpdateAmazonUser($aResponse) {
+        $sAmazonEmailAddress = $aResponse['add_paydata[email]'];
+        $blUserExists = $this->_fcpoUserExists($sAmazonEmailAddress);
+        if ($blUserExists) {
+            $this->_fcpoUpdateAmazonUser($aResponse);
+        } else {
+            $this->_fcpoAddAmazonUser($aResponse);
+        }
+    }
+
+    /**
+     * Method adds a new amazon user into OXIDs user system. User won't get a password
+     *
+     * @param $aResponse
+     * @return void
+     */
+    protected function _fcpoAddAmazonUser($aResponse) {
+        /**
+         * Array
+        (
+        [status] => OK
+        [add_paydata[shipping_street]] => Schützstraße 123
+        [add_paydata[workorderid]] => WX1A1SG9BTPXR1FU
+        [add_paydata[shipping_zip]] => 80939
+        [add_paydata[shipping_city]] => München
+        [add_paydata[shipping_type]] => Physical
+        [add_paydata[shipping_name]] => Max Mustermann
+        [add_paydata[shipping_firstname]] => Max
+        [add_paydata[shipping_telephonenumber]] => +491731112222
+        [add_paydata[shipping_country]] => DE
+        [add_paydata[shipping_lastname]] => Mustermann
+        [add_paydata[email]] => andre.herrmann.fc@gmail.com
+        [workorderid] => WX1A1SG9BTPXR1FU
+        )
+         */
+
+    }
+
+    protected function _fcpoUpdateAmazonUser($aResponse) {
+
+    }
+
+    /**
+     * Method checks if a user WITH password exists using the given email-address
+     *
+     * @param string $sAmazonEmailAddress
+     * @return bool
+     */
+    protected function _fcpoUserExists($sAmazonEmailAddress, $blWithPasswd=false) {
+        $blReturn = false;
+        $sUserOxid = $this->_fcpoGetUserOxidByEmail($sAmazonEmailAddress);
+        if ($sUserOxid && !$blWithPasswd) {
+            $blReturn = true;
+        } elseif ($sUserOxid && $blWithPasswd) {
+            $this->load($sUserOxid);
+            $blReturn = ($this->oxuser__oxpassword->value) ? true : false;
+        }
+
+        return $blReturn;
+    }
+
+    /**
+     * Method delivers OXID of a user by offfering an email address or false if email does not exist
+     *
+     * @param string $sAmazonEmailAddress
+     * @return mixed
+     */
+    protected function _fcpoGetUserOxidByEmail($sAmazonEmailAddress) {
+        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+        $sQuery = "SELECT OXID FROM oxuser WHERE OXUSERNAME=".$oDb->quote($sAmazonEmailAddress);
+        $mReturn = $oDb->GetOne($sQuery);
+
+        return $mReturn;
     }
 
     /**
