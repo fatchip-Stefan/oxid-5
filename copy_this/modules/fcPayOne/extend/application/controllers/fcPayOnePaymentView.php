@@ -724,6 +724,24 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     }
 
     /**
+     * Method will be triggered by amazon checkout. Will make sure that paymentid is set to
+     * amazon payment
+     *
+     * @param void
+     * @return void
+     */
+    public function validateAmazonPayment() {
+        $oSession = $this->getSession();
+        $oBasket = $oSession->getBasket();
+
+        $oSession->deleteVariable('paymentid');
+        $oSession->setVariable('paymentid', 'fcpoamazonpay');
+        $oBasket->setPayment('fcpoamazonpay');
+
+        return 'order';
+    }
+
+    /**
      * Extends oxid standard method validatePayment
      * Extends it with the creditworthiness check for the user
      * 
@@ -741,10 +759,10 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         $oUser = $this->getUser();
 
         $sPaymentId = $this->_fcpoGetPaymentId();
+
         $this->_fcpoCheckKlarnaUpdateUser($sPaymentId);
 
         $mReturn = parent::validatePayment();
-        
         $mReturn = $this->_processParentReturnValue($mReturn);
         $mReturn = $this->_fcpoProcessValidation($mReturn, $sPaymentId);
 
@@ -1173,6 +1191,10 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return mixed
      */
     protected function _fcpoProcessValidation($mReturn, $sPaymentId) {
+        if ($sPaymentId == 'fcpoamazonpay') {
+            $mReturn = 'order';
+        }
+
         if ($mReturn == 'order') { // success
             $this->_fcpoSetKlarnaCampaigns();
 
@@ -2150,6 +2172,8 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         if (!$sPaymentId) {
             $sPaymentId = $this->_oFcpoHelper->fcpoGetSessionVariable('paymentid');
         }
+
+        $this->_oFcpoHelper->fcpoSetSessionVariable('paymentid', $sPaymentId);
 
         return $sPaymentId;
     }

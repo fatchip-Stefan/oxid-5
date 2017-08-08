@@ -57,7 +57,8 @@ class fcPayOneUser extends fcPayOneUser_parent {
     }
 
     /**
-     * Checks if a user should be added or updated and redirects to matching method
+     * Checks if a user should be added or updated, redirects to matching method
+     * and logs user in
      *
      * @param $aResponse
      * @return void
@@ -66,42 +67,108 @@ class fcPayOneUser extends fcPayOneUser_parent {
         $sAmazonEmailAddress = $aResponse['add_paydata[email]'];
         $blUserExists = $this->_fcpoUserExists($sAmazonEmailAddress);
         if ($blUserExists) {
-            $this->_fcpoUpdateAmazonUser($aResponse);
+            $sUserId = $this->_fcpoUpdateAmazonUser($aResponse);
         } else {
-            $this->_fcpoAddAmazonUser($aResponse);
+            $sUserId = $this->_fcpoAddAmazonUser($aResponse);
         }
+
+        $this->_oFcpoHelper->fcpoSetSessionVariable('usr', $sUserId);
     }
 
     /**
      * Method adds a new amazon user into OXIDs user system. User won't get a password
      *
      * @param $aResponse
-     * @return void
+     * @return string
      */
     protected function _fcpoAddAmazonUser($aResponse) {
-        /**
-         * Array
-        (
-        [status] => OK
-        [add_paydata[shipping_street]] => Schützstraße 123
-        [add_paydata[workorderid]] => WX1A1SG9BTPXR1FU
-        [add_paydata[shipping_zip]] => 80939
-        [add_paydata[shipping_city]] => München
-        [add_paydata[shipping_type]] => Physical
-        [add_paydata[shipping_name]] => Max Mustermann
-        [add_paydata[shipping_firstname]] => Max
-        [add_paydata[shipping_telephonenumber]] => +491731112222
-        [add_paydata[shipping_country]] => DE
-        [add_paydata[shipping_lastname]] => Mustermann
-        [add_paydata[email]] => andre.herrmann.fc@gmail.com
-        [workorderid] => WX1A1SG9BTPXR1FU
-        )
-         */
+        $aStreetParts = $this->_fcpoSplitStreetAndStreetNr($aResponse['add_paydata[shipping_street]']);
+        $sCountryId = $this->_fcpoGetCountryIdByIso2($aResponse['add_paydata[shipping_country]']);
 
+        $oUser = $this->_oFcpoHelper->getFactoryObject('oxUser');
+        $sUserOxid = $oUser->getId();
+        $oUser->oxuser__oxusername = new oxField($aResponse['add_paydata[email]']);
+        $oUser->oxuser__oxstreet = new oxField($aStreetParts['street']);
+        $oUser->oxuser__oxstreetnr = new oxField($aStreetParts['streetnr']);
+        $oUser->oxuser__oxzip = new oxField($aResponse['add_paydata[shipping_zip]']);
+        $oUser->oxuser__oxfon = new oxField($aResponse['add_paydata[shipping_telephonenumber]']);
+        $oUser->oxuser__oxfname = new oxField($aResponse['add_paydata[shipping_firstname]']);
+        $oUser->oxuser__oxlname = new oxField($aResponse['add_paydata[shipping_lastname]']);
+        $oUser->oxuser__oxcity = new oxField($aResponse['add_paydata[shipping_city]']);
+        $oUser->oxuser__oxcountryid = new oxField($sCountryId);
+
+        $oUser->save();
+
+        return $sUserOxid;
     }
 
+    /**
+     * Updating user. Checking current address, if different add new address as additional address to user
+     * iff current address is not known until now
+     *
+     * @param $aResponse
+     * @return string
+     */
     protected function _fcpoUpdateAmazonUser($aResponse) {
+        $sAmazonEmailAddress = $aResponse['add_paydata[email]'];
+        $sUserOxid = $this->_fcpoGetUserOxidByEmail($sAmazonEmailAddress);
 
+        $oUser = $this->_oFcpoHelper->getFactoryObject('oxUser');
+        $oUser->load($sUserOxid);
+
+        $aStreetParts = $this->_fcpoSplitStreetAndStreetNr($aResponse['add_paydata[shipping_street]']);
+        $sCountryId = $this->_fcpoGetCountryIdByIso2($aResponse['add_paydata[shipping_country]']);
+
+        $oUser->oxuser__oxusername = new oxField($aResponse['add_paydata[email]']);
+        $oUser->oxuser__oxstreet = new oxField($aStreetParts['street']);
+        $oUser->oxuser__oxstreetnr = new oxField($aStreetParts['streetnr']);
+        $oUser->oxuser__oxzip = new oxField($aResponse['add_paydata[shipping_zip]']);
+        $oUser->oxuser__oxfon = new oxField($aResponse['add_paydata[shipping_telephonenumber]']);
+        $oUser->oxuser__oxfname = new oxField(trim($aResponse['add_paydata[shipping_firstname]']));
+        $oUser->oxuser__oxlname = new oxField(trim($aResponse['add_paydata[shipping_lastname]']));
+        $oUser->oxuser__oxcity = new oxField($aResponse['add_paydata[shipping_city]']);
+        $oUser->oxuser__oxcountryid = new oxField($sCountryId);
+
+        $oUser->save();
+
+        return $sUserOxid;
+    }
+
+    /**
+     * Method splits street and streetnr from string
+     *
+     * @param string $sStreetAndStreetNr
+     * @return array
+     */
+    protected function _fcpoSplitStreetAndStreetNr($sStreetAndStreetNr) {
+        /**
+         * @todo currently very basic by simply splitting ot space
+         */
+        $aReturn = array();
+        $aParts = explode(' ', $sStreetAndStreetNr);
+        foreach ($aParts as $iIndex=>$sPart) {
+            if ($iIndex==(count($aParts)-1)) {
+                $aReturn['streetnr'] = $sPart;
+            } else {
+                $aStreetNames[] = $sPart;
+            }
+        }
+        $aReturn['street'] = implode(' ', $aStreetNames);
+
+        return $aReturn;
+    }
+
+    /**
+     * Returns id of a countrycode
+     *
+     * @param $sIso2Country
+     * @return string
+     */
+    protected function _fcpoGetCountryIdByIso2($sIso2Country) {
+        $oCountry = $this->_oFcpoHelper->getFactoryObject('oxCountry');
+        $sOxid = $oCountry->getIdByCode($sIso2Country);
+
+        return $sOxid;
     }
 
     /**

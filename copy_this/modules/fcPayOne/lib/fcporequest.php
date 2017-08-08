@@ -461,6 +461,9 @@ class fcpoRequest extends oxSuperCfg {
             case 'fcporp_bill':
                 $blAddRedirectUrls = $this->_fcpoAddRatePayParameters($oOrder);
                 break;
+            case 'fcpoamazonpay':
+                $blAddRedirectUrls = $this->_fcpoAddAmazonPayParameters($oOrder);
+                break;
             default:
                 return false;
         }
@@ -917,6 +920,22 @@ class fcpoRequest extends oxSuperCfg {
 
         return $dReturnPrice;
     }
+
+    protected function _fcpoAddAmazonPayParameters($oOrder) {
+        $sAmazonWorkorderId = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonWorkorderId');
+        $sAmazonAddressToken = $this->_oFcpoHelper->fcpoGetSessionVariable('sAmazonLoginAccessToken');
+        $sAmazonReferenceId = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonReferenceId');
+
+        $this->addParameter('clearingtype', 'wlt');
+        $this->addParameter('wallettype', 'AMZ');
+        $this->addParameter('workorderid', $sAmazonWorkorderId);
+        $this->addParameter('add_paydata[amazon_reference_id]', $sAmazonReferenceId);
+        $this->addParameter('add_paydata[amazon_address_token]', $sAmazonAddressToken);
+
+        return false;
+
+    }
+
 
     /**
      * Adds needed parameters for payolution

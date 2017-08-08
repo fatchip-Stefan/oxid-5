@@ -26,10 +26,12 @@ class fcPayOneUserView extends fcPayOneUserView_parent {
         $sAmazonLoginScope = $oConfig->getRequestParameter('scope');
 
         $blNeededDataAvailable = ($sAmazonLoginAccessToken && $sAmazonLoginScope);
-
+        $sPaymentId = 'fcpoamazonpay';
         if ($blNeededDataAvailable) {
             $oSession->setVariable('sAmazonLoginAccessToken', $sAmazonLoginAccessToken);
             $oSession->setVariable('sAmazonLoginScope', $sAmazonLoginScope);
+            $oSession->setVariable('paymentid', $sPaymentId);
+            $oSession->setVariable('_selected_paymentid', $sPaymentId);
             $oBasket = $oSession->getBasket();
             $oBasket->setPayment('fcpoamazonpay');
         } else {

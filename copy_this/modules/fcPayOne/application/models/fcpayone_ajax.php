@@ -93,6 +93,8 @@ class fcpayone_ajax extends oxBase {
             $oUser = $this->_oFcpoHelper->getFactoryObject('oxuser');
             $oSession->deleteVariable('fcpoAmazonWorkorderId');
             $oSession->setVariable('fcpoAmazonWorkorderId', $aResponse['workorderid']);
+            $oSession->deleteVariable('paymentid');
+            $oSession->setVariable('paymentid', 'fcpoamazonpay');
             $oUser->fcpoSetAmazonOrderReferenceDetailsResponse($aResponse);
         } else {
             $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
