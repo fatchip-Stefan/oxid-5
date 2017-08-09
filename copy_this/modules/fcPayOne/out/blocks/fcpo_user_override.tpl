@@ -1,0 +1,7 @@
+[{if $oViewConf->fcpoAmazonLoginSessionActive()}]
+    [{assign var="sFcPoTemplatePath" value=$oViewConf->fcpoGetActiveThemePath()}]
+    [{assign var="sFcPoTemplatePath" value=$sFcPoTemplatePath|cat:'/fcpo_amazonpay_user.tpl'}]
+    [{include file=$oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePath)}]
+[{else}]
+    [{$smarty.block.parent}]
+[{/if}]

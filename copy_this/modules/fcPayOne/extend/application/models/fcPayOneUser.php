@@ -96,6 +96,7 @@ class fcPayOneUser extends fcPayOneUser_parent {
         $oUser->oxuser__oxlname = new oxField($aResponse['add_paydata[shipping_lastname]']);
         $oUser->oxuser__oxcity = new oxField($aResponse['add_paydata[shipping_city]']);
         $oUser->oxuser__oxcountryid = new oxField($sCountryId);
+        $oUser->addToGroup('oxidnotyetordered');
 
         $oUser->save();
 

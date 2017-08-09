@@ -932,8 +932,7 @@ class fcpoRequest extends oxSuperCfg {
         $this->addParameter('add_paydata[amazon_reference_id]', $sAmazonReferenceId);
         $this->addParameter('add_paydata[amazon_address_token]', $sAmazonAddressToken);
 
-        return false;
-
+        return true;
     }
 
 

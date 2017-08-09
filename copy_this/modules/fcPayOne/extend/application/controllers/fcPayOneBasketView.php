@@ -49,6 +49,33 @@ class fcPayOneBasketView extends fcPayOneBasketView_parent {
     }
 
     /**
+     * Overloading render method for checking on amazon logoff
+     *
+     * @param void
+     * @return string
+     */
+    public function render() {
+        $this->_fcpoCheckForAmazonLogoff();
+        return parent::render();
+    }
+
+    /**
+     * Method checks for param fcpoamzaction and logoff from Amazon Session if
+     * value is set to logoff
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoCheckForAmazonLogoff()  {
+        $sAmzAction = $this->_oFcpoHelper->fcpoGetRequestParameter('fcpoamzaction');
+        if ($sAmzAction == 'logoff') {
+            $this->_oFcpoHelper->fcpoDeleteSessionVariable('sAmazonLoginAccessToken');
+            $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoAmazonWorkorderId');
+            $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoAmazonReferenceId');
+        }
+    }
+
+    /**
      * Returns wether paypal express is active or not
      * 
      * @param void

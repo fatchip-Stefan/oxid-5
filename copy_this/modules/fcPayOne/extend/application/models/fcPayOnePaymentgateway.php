@@ -40,7 +40,6 @@ class fcPayOnePaymentgateway extends fcPayOnePaymentgateway_parent {
 
         $this->_iLastErrorNo = null;
         $this->_sLastError = null;
-        
         $oResponse = $oOrder->fcHandleAuthorization(false, $this);
         
         return $oResponse;

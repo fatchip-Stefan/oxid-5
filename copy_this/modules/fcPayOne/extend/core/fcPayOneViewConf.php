@@ -40,6 +40,16 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
     protected $_sFcPoHostedJsUrl = 'https://secure.pay1.de/client-api/js/v1/payone_hosted_min.js';
 
     /**
+     * List of handled themes
+     * @var array
+     */
+    protected $_aSupportedThemes = array(
+        'flow' => 'flow',
+        'azure' => 'azure',
+        'mobile' => 'mobile',
+    );
+
+    /**
      * Initializing needed things
      */
     public function __construct() {
@@ -241,6 +251,18 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
         return (string)$sSellerId;
     }
 
+    public function fcpoGetAmazonPayButtonType() {
+        return 'PwA';
+    }
+
+    public function fcpoGetAmazonPayButtonColor() {
+        return 'Gold';
+    }
+
+    public function fcpoGetAmazonPayButtonLanguage() {
+        return 'none';
+    }
+
     /**
      * Returns url that will be send to amazon for redirect after login
      *
@@ -272,4 +294,31 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
         return $blLoggedIn;
     }
 
+    /**
+     * Method returns active theme path by checking current theme and its parent
+     * If theme is not assignable, 'azure' will be the fallback
+     *
+     * @param void
+     * @return string
+     */
+    public function fcpoGetActiveThemePath() {
+        $sReturn = 'azure';
+        $oTheme = $this->_oFcpoHelper->getFactoryObject('oxTheme');
+
+        $sCurrentActiveId = $oTheme->getActiveThemeId();
+        $oTheme->load($sCurrentActiveId);
+        $aThemeIds = array_keys($this->_aSupportedThemes);
+        $sCurrentParentId = $oTheme->getInfo('parentTheme');
+
+        // we're more interested on the parent then on child theme
+        if ($sCurrentParentId) {
+            $sCurrentActiveId = $sCurrentParentId;
+        }
+
+        if (in_array($sCurrentActiveId, $aThemeIds)) {
+            $sReturn = $this->_aSupportedThemes[$sCurrentActiveId];
+        }
+
+        return $sReturn;
+    }
 }
