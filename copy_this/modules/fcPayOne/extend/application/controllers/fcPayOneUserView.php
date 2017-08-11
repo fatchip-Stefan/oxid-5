@@ -9,6 +9,31 @@
 class fcPayOneUserView extends fcPayOneUserView_parent {
 
     /**
+     * Helper object for dealing with different shop versions
+     * @var object
+     */
+    protected $_oFcpoHelper = null;
+
+    /**
+     * Helper object for dealing with different shop versions
+     * @var object
+     */
+    protected $_oFcpoDb = null;
+
+
+    /**
+     * init object construction
+     *
+     * @return null
+     */
+    public function __construct() {
+        parent::__construct();
+        $this->_oFcpoHelper = oxNew('fcpohelper');
+        $this->_oFcpoDb = oxDb::getDb();
+        $this->_blIsPayolutionInstallmentAjax = false;
+    }
+
+    /**
      * Method will be called when returning from amazonlogin
      *
      * @param void
@@ -44,29 +69,4 @@ class fcPayOneUserView extends fcPayOneUserView_parent {
         // go ahead with rendering
         $this->render();
     }
-
-    /**
-     * Method will be called when amazon user has been recognized as existing as a standard user
-     * with a set password. In this case the user needs to login to make sure that this account
-     * won't be compromised
-     *
-     * @param void
-     * @return void
-     */
-    public function fcpoAmazonMergeUserMandatory() {
-        $this->_blLoginMandatory = true;
-        // go ahead with rendering
-        $this->render();
-    }
-
-    /**
-     * Template getter for decision to show a login form or not
-     *
-     * @param void
-     * @return bool
-     */
-    public function fcpoGetLoginMandatoryForAmazonPay() {
-        return $this->_blLoginMandatory;
-    }
-
 }

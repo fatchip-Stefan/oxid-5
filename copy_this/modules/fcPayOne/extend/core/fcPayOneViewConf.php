@@ -251,16 +251,43 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
         return (string)$sSellerId;
     }
 
+    /**
+     * Returns config value for button type
+     *
+     * @param void
+     * @return string
+     */
     public function fcpoGetAmazonPayButtonType() {
-        return 'PwA';
+        $oConfig = oxRegistry::getConfig();
+        $sValue = $oConfig->getConfigParam('sFCPOAmazonButtonType');
+
+        return (string)$sValue;
     }
 
+    /**
+     * Returns config value for button color
+     *
+     * @param void
+     * @return string
+     */
     public function fcpoGetAmazonPayButtonColor() {
-        return 'Gold';
+        $oConfig = oxRegistry::getConfig();
+        $sValue = $oConfig->getConfigParam('sFCPOAmazonButtonColor');
+
+        return (string)$sValue;
     }
 
+    /**
+     * Returns config value for button language
+     *
+     * @param void
+     * @return string
+     */
     public function fcpoGetAmazonPayButtonLanguage() {
-        return 'none';
+        $oConfig = oxRegistry::getConfig();
+        $sValue = $oConfig->getConfigParam('sFCPOAmazonButtonLanguage');
+
+        return (string)$sValue;
     }
 
     /**
@@ -321,4 +348,33 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
 
         return $sReturn;
     }
+
+    /**
+     * Makes this Email unique to be able to handle amazon users different from standard users
+     * Currently the email address simply gets a prefix
+     *
+     * @param $sEmail
+     * @return string
+     */
+    public function fcpoAmazonEmailEncode($sEmail) {
+        $sAmazonEmail = "fcpoamz_".$sEmail;
+
+        return $sAmazonEmail;
+    }
+
+    /**
+     * Returns the origin email of an amazon encoded email
+     *
+     * @param $sEmail
+     * @return string
+     */
+    public function fcpoAmazonEmailDecode($sEmail) {
+        $sOriginEmail = $sEmail;
+        if (strpos($sEmail, 'fcpoamz_') !== false) {
+            $sOriginEmail = str_replace('fcpoamz_', '', $sEmail);
+        }
+
+        return $sOriginEmail;
+    }
+
 }

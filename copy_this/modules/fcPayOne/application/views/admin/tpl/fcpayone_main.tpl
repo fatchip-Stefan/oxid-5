@@ -899,6 +899,48 @@
                 <dd></dd>
                 <div class="spacer"></div>
             </dl>
+            <dl>
+                <dt>
+                    <select name="confstrs[sFCPOAmazonButtonType]">
+                        <option value="PwA" [{if $confstrs.sFCPOAmazonButtonType == "PwA"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_BUTTON_TYPE_PwA"}]</option>
+                        <option value="Pay" [{if $confstrs.sFCPOAmazonButtonType == "Pay"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_BUTTON_TYPE_Pay"}]</option>
+                        <option value="A" [{if $confstrs.sFCPOAmazonButtonType == "A"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_BUTTON_TYPE_A"}]</option>
+                    </select>
+                </dt>
+                <dd>
+                    [{oxmultilang ident="FCPO_AMAZONPAY_BUTTON_TYPE"}]
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+            <dl>
+                <dt>
+                    <select name="confstrs[sFCPOAmazonButtonColor]">
+                        <option value="Gold" [{if $confstrs.sFCPOAmazonButtonColor == "Gold"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_BUTTON_COLOR_GOLD"}]</option>
+                        <option value="LightGray" [{if $confstrs.sFCPOAmazonButtonColor == "LightGray"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_BUTTON_TYPE_LIGHT_GRAY"}]</option>
+                        <option value="DarkGray" [{if $confstrs.sFCPOAmazonButtonColor == "DarkGray"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_BUTTON_TYPE_DARKGRAY"}]</option>
+                    </select>
+                </dt>
+                <dd>
+                    [{oxmultilang ident="FCPO_AMAZONPAY_BUTTON_COLOR"}]
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+            <dl>
+                <dt>
+                    <select name="confstrs[sFCPOAmazonButtonLanguage]">
+                        <option value="none" [{if $confstrs.sFCPOAmazonButtonLanguage == "none"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_BUTTON_LANG_NONE"}]</option>
+                        <option value="en-GB" [{if $confstrs.sFCPOAmazonButtonLanguage == "en-GB"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_BUTTON_LANG_ENGLISH_UK"}]</option>
+                        <option value="de-DE" [{if $confstrs.sFCPOAmazonButtonLanguage == "de-DE"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_BUTTON_LANG_GERMAN_GERMANY"}]</option>
+                        <option value="fr-FR" [{if $confstrs.sFCPOAmazonButtonLanguage == "fr-FR"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_BUTTON_LANG_FRENCH_FRANCE"}]</option>
+                        <option value="it-IT" [{if $confstrs.sFCPOAmazonButtonLanguage == "it-IT"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_BUTTON_LANG_ITALIAN_ITALY"}]</option>
+                        <option value="es-ES" [{if $confstrs.sFCPOAmazonButtonLanguage == "es-ES"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_BUTTON_LANG_SPANISH_SPAIN"}]</option>
+                    </select>
+                </dt>
+                <dd>
+                    [{oxmultilang ident="FCPO_AMAZONPAY_BUTTON_LANG"}]
+                </dd>
+                <div class="spacer"></div>
+            </dl>
         </div>
     </div>
 

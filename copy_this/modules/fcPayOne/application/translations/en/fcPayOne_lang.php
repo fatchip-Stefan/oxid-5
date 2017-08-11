@@ -167,6 +167,8 @@ $aLang = array(
     'FCPO_AMAZON_SELECT_ADDRESS'                    => 'Choose Shipping-Address from Amazon-Addressbook',
     'FCPO_AMAZON_SELECT_PAYMENT'                    => 'Choose Payment from Amazon-Wallet',
     'FCPO_AMAZON_LOGOFF'                            => 'Stop AmazonPay and go back to standard checkout',
+    'FCPO_AMAZON_PROBLEM'                           => 'There is a problem',
+    'FCPO_AMAZON_NO_SHIPPING_TO_COUNTRY'            => 'There is no shipping possibility for your selected delivery country. Please click <a href="index.php?cl=user" style="color:green;">here</a> for returning to address selection.',
 );
 
 /*

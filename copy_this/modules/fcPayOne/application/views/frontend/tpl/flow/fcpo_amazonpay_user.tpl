@@ -16,7 +16,7 @@
         [{$oViewConf->getNavFormParams()}]
         <input type="hidden" name="cl" value="payment">
         <input type="hidden" name="option" value="[{$oView->getLoginOption()}]">
-        <input type="hidden" name="fnc" value="">
+        <input type="hidden" name="fnc" value="fcpoAmazonUserLogin">
         <input type="hidden" name="lgn_cook" value="0">
         <input type="hidden" name="blshowshipaddress" value="1">
 

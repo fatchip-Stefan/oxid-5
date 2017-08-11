@@ -922,6 +922,10 @@ class fcpoRequest extends oxSuperCfg {
     }
 
     protected function _fcpoAddAmazonPayParameters($oOrder) {
+        $oUser = $oOrder->getOrderUser();
+        $oViewConf = $this->_oFcpoHelper->getFactoryObject('oxViewConfig');
+
+
         $sAmazonWorkorderId = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonWorkorderId');
         $sAmazonAddressToken = $this->_oFcpoHelper->fcpoGetSessionVariable('sAmazonLoginAccessToken');
         $sAmazonReferenceId = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonReferenceId');
@@ -931,6 +935,7 @@ class fcpoRequest extends oxSuperCfg {
         $this->addParameter('workorderid', $sAmazonWorkorderId);
         $this->addParameter('add_paydata[amazon_reference_id]', $sAmazonReferenceId);
         $this->addParameter('add_paydata[amazon_address_token]', $sAmazonAddressToken);
+        $this->addParameter('email', $oViewConf->fcpoAmazonEmailDecode($oUser->oxuser__oxusername->value));
 
         return true;
     }

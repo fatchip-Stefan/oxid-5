@@ -43,17 +43,34 @@ class fcPayOneUser extends fcPayOneUser_parent {
      * @return void
      */
     public function fcpoSetAmazonOrderReferenceDetailsResponse($aResponse) {
-        $sAmazonEmailAddress = $aResponse['add_paydata[email]'];
-        $blUserWithPasswdExists = $this->_fcpoUserExists($sAmazonEmailAddress, true);
+        $sAmazonEmailAddress = $this->_fcpoAmazonEmailEncode($aResponse['add_paydata[email]']);
+        $aResponse['add_paydata[email]'] = $sAmazonEmailAddress;
+        $this->_fcpoAddOrUpdateAmazonUser($aResponse);
+    }
 
-        if ($blUserWithPasswdExists) {
-            $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
-            $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-            $sShopUrl = $oConfig->getShopUrl();
-            $oUtils->redirect($sShopUrl."index.php?cl=user&fnc=fcpoamzmergeusermandatory");
-        } else {
-            $this->_fcpoAddOrUpdateAmazonUser($aResponse);
-        }
+    /**
+     * Makes this Email unique to be able to handle amazon users different from standard users
+     * Currently the email address simply gets a prefix
+     *
+     * @param $sEmail
+     * @return string
+     */
+    protected function _fcpoAmazonEmailEncode($sEmail) {
+        $oViewConf = $this->_oFcpoHelper->getFactoryObject('oxViewConfig');
+
+        return $oViewConf->fcpoAmazonEmailEncode($sEmail);
+    }
+
+    /**
+     * Returns the origin email of an amazon encoded email
+     *
+     * @param $sEmail
+     * @return string
+     */
+    protected function _fcpoAmazonEmailDecode($sEmail) {
+        $oViewConf = $this->_oFcpoHelper->getFactoryObject('oxViewConfig');
+
+        return $oViewConf->fcpoAmazonEmailDecode($sEmail);
     }
 
     /**
@@ -71,7 +88,7 @@ class fcPayOneUser extends fcPayOneUser_parent {
         } else {
             $sUserId = $this->_fcpoAddAmazonUser($aResponse);
         }
-
+        // logoff and on again
         $this->_oFcpoHelper->fcpoSetSessionVariable('usr', $sUserId);
     }
 
@@ -129,6 +146,7 @@ class fcPayOneUser extends fcPayOneUser_parent {
         $oUser->oxuser__oxlname = new oxField(trim($aResponse['add_paydata[shipping_lastname]']));
         $oUser->oxuser__oxcity = new oxField($aResponse['add_paydata[shipping_city]']);
         $oUser->oxuser__oxcountryid = new oxField($sCountryId);
+        $oUser->addToGroup('oxidnotyetordered');
 
         $oUser->save();
 

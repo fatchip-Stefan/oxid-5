@@ -22,6 +22,7 @@
         <div class="panel-heading"><h3 class="panel-title">[{oxmultilang ident="FCPO_AMAZON_SELECT_PAYMENT"}]</h3></div>
         <div class="panel-body">
             <div id="walletWidgetDiv"></div>
+            <hr>
             <a href="index.php?cl=basket&fcpoamzaction=logoff">[{oxmultilang ident="FCPO_AMAZON_LOGOFF"}]</a>
         </div>
     </div>

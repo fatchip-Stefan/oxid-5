@@ -1,7 +1,12 @@
 [{if $oViewConf->fcpoAmazonLoginSessionActive()}]
     [{assign var="sFcPoTemplatePath" value=$oView->fcpoGetActiveThemePath()}]
-    [{assign var="sFcPoTemplatePath" value=$sFcPoTemplatePath|cat:'/fcpo_amazonpay_payment.tpl'}]
-    [{include file=$oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePath)}]
+    [{if $oView->getAllSets()}]
+        [{assign var="sFcPoTemplatePath" value=$sFcPoTemplatePath|cat:'/fcpo_amazonpay_payment.tpl'}]
+        [{include file=$oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePath)}]
+    [{else}]
+        [{assign var="sFcPoTemplatePath" value=$sFcPoTemplatePath|cat:'/fcpo_amazonpay_wrong_address.tpl'}]
+        [{include file=$oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePath)}]
+    [{/if}]
 [{else}]
     <script type="text/javascript">
         var oFcPayoneData = oFcPayoneData || [];

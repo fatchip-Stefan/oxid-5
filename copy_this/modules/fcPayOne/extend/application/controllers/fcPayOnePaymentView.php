@@ -142,6 +142,22 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     }
 
     /**
+     * Method checks if user should log into shop for merging
+     *
+     * @param void
+     * @return void
+     */
+    public function fcpoAmazonUserLogin() {
+        $blAmazonMergeUserMandatory = (bool) $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonMergeUserMandatory');
+        if ($blAmazonMergeUserMandatory) {
+            $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
+            $oUtils->redirect('index.php?cl=user');
+        }
+
+        $this->render();
+    }
+
+    /**
      * Returns matched profile
      * 
      * @param string $sPaymentId
