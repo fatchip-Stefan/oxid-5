@@ -977,7 +977,7 @@ class fcpoRequest extends oxSuperCfg {
                 $aBankData['fcpo_payolution_' . $sFieldNameAddition . '_accountholder'] &&
                 $aBankData['fcpo_payolution_' . $sFieldNameAddition . '_iban'] &&
                 $aBankData['fcpo_payolution_' . $sFieldNameAddition . '_bic']
-                );
+        );
 
         if ($blValidBankData) {
             $this->addParameter('iban', $aBankData['fcpo_payolution_' . $sFieldNameAddition . '_iban']);
