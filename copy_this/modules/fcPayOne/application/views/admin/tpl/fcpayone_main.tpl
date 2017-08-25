@@ -941,6 +941,19 @@
                 </dd>
                 <div class="spacer"></div>
             </dl>
+            <dl>
+                <dt>
+                    <select name="confstrs[sFCPOAmazonMode]">
+                        <option value="alwayssync" [{if $confstrs.sFCPOAmazonMode == "alwayssync"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_MODE_ALWAYSSYNC"}]</option>
+                        <option value="alwaysasync" [{if $confstrs.sFCPOAmazonMode == "alwaysasync"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_MODE_ALWAYSASYNC"}]</option>
+                        <option value="firstsyncthenasync" [{if $confstrs.sFCPOAmazonMode == "firstsyncthenasync"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_MODE_FIRSTSYNCTHENSYNC"}]</option>
+                    </select>
+                </dt>
+                <dd>
+                    [{oxmultilang ident="FCPO_AMAZONPAY_MODE"}]
+                </dd>
+                <div class="spacer"></div>
+            </dl>
         </div>
     </div>
 

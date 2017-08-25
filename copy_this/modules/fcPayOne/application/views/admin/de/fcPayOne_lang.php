@@ -438,6 +438,10 @@ $aLang = array(
     'FCPO_AMAZONPAY_BUTTON_LANG_FRENCH_FRANCE'  => 'Französisch (Frankreich)',
     'FCPO_AMAZONPAY_BUTTON_LANG_ITALIAN_ITALY'  => 'Italienisch (Italien)',
     'FCPO_AMAZONPAY_BUTTON_LANG_SPANISH_SPAIN'  => 'Spanisch (Spanien)',
+    'FCPO_AMAZONPAY_MODE'                       => 'Amazon-Modus',
+    'FCPO_AMAZONPAY_MODE_ALWAYSSYNC'            => 'Immer Synchron',
+    'FCPO_AMAZONPAY_MODE_ALWAYSASYNC'           => 'Immer Asynchron',
+    'FCPO_AMAZONPAY_MODE_FIRSTSYNCTHENSYNC'     => 'Erst Synchron, dann Asynchron versuchen',
 );
 
 /*

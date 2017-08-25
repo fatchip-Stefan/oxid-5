@@ -206,10 +206,17 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
     public function fcpoCanDisplayAmazonPayButton() {
         $oPayment = oxNew('oxpayment');
         $oPayment->load('fcpoamazonpay');
-        $blIsActive = $oPayment->oxpayments__oxactive->value;
+        $blIsActive = (bool) $oPayment->oxpayments__oxactive->value;
+        $sActClassName = $this->getActiveClassName();
+        $sActUrlClass = $this->_oFcpoHelper->fcpoGetRequestParameter('cl');
+
+        if ($sActClassName == 'oxwminibasket' && $sActUrlClass == 'basket') {
+            $blIsActive = false;
+        }
 
         return $blIsActive;
     }
+
 
     /**
      * Returns amazon widgets url depending if mode is live or test

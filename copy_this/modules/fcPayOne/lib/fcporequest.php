@@ -712,9 +712,42 @@ class fcpoRequest extends oxSuperCfg {
             if (fcPayOnePayment::fcIsPayOneFrontendApiPaymentType($oOrder->oxorder__oxpaymenttype->value)) {
                 return $this->_handleFrontendApiCall();
             }
-            return $this->send();
+            $mOutput = $this->send();
+            if ($oOrder->oxorder__oxpaymenttype->value == 'fcpoamazonpay') {
+                $mOutput = $this->_fcpoHandleAmazonAuthorizationResponse($mOutput);
+            }
+            return $mOutput;
         } else {
             return false;
+        }
+    }
+
+    /**
+     * Analyze response of amazon pay authorization call and try recalling with async
+     * depending on configuration
+     *
+     * @param $mOutput
+     * @return mixed array|bool
+     */
+    protected function _fcpoHandleAmazonAuthorizationResponse($mOutput) {
+        $blPassThrough = (is_bool($mOutput) || (is_array($mOutput) && $mOutput['status'] == 'APPROVED'));
+        if ($blPassThrough) {
+            return $mOutput;
+        }
+
+        // so we need to analyze which problem occured and how we gonna react on it
+        $oConfig = $this->getConfig();
+        $sAmazonMode = $oConfig->getConfigParam('sFCPOAmazonMode');
+        $blRetryWithAsync = (
+            $mOutput['status'] == 'PENDING' &&
+            $mOutput['errorcode'] == '980' &&
+            $sAmazonMode == 'firstsyncthenasync'
+        );
+
+        if ($blRetryWithAsync) {
+            $iAmazonTimeOut = $this->_fcpoGetAmazonTimeout('alwaysasync');
+            $this->addParameter('add_paydata[amazon_timeout]', $iAmazonTimeOut);
+            return $this->send();
         }
     }
 
@@ -929,15 +962,45 @@ class fcpoRequest extends oxSuperCfg {
         $sAmazonWorkorderId = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonWorkorderId');
         $sAmazonAddressToken = $this->_oFcpoHelper->fcpoGetSessionVariable('sAmazonLoginAccessToken');
         $sAmazonReferenceId = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonReferenceId');
+        $iAmazonTimeout = $this->_fcpoGetAmazonTimeout();
 
         $this->addParameter('clearingtype', 'wlt');
         $this->addParameter('wallettype', 'AMZ');
         $this->addParameter('workorderid', $sAmazonWorkorderId);
         $this->addParameter('add_paydata[amazon_reference_id]', $sAmazonReferenceId);
         $this->addParameter('add_paydata[amazon_address_token]', $sAmazonAddressToken);
+        $this->addParameter('add_paydata[amazon_timeout]', $iAmazonTimeout);
         $this->addParameter('email', $oViewConf->fcpoAmazonEmailDecode($oUser->oxuser__oxusername->value));
 
         return true;
+    }
+
+    /**
+     * Handles the timeout that should be used wether amazon will be used
+     * in sync, async or compined mode
+     *
+     * @param $sAmazonMode
+     * @return int
+     */
+    protected function _fcpoGetAmazonTimeout($sAmazonMode = null) {
+        $oConfig = $this->getConfig();
+        if ($sAmazonMode === null) {
+            $sAmazonMode = $oConfig->getConfigParam('sFCPOAmazonMode');
+        }
+
+        switch($sAmazonMode) {
+            case 'alwayssync':
+            case 'firstsyncthenasync':
+                $iAmazonTimeout = 0;
+                break;
+            case 'alwaysasync':
+                $iAmazonTimeout = 1440;
+                break;
+            default:
+                $iAmazonTimeout = 1440;
+        }
+
+        return $iAmazonTimeout;
     }
 
 
@@ -1327,9 +1390,10 @@ class fcpoRequest extends oxSuperCfg {
     }
 
     /**
-     * Sends request for receiving amazon referenceid
+     * Sends request for receiving amazon addressdata
      *
      * @param string $sAmazonReferenceId
+     * @param string $sAmazonAddressToken
      * @return array
      */
     public function sendRequestGetAmazonOrderReferenceDetails($sAmazonReferenceId, $sAmazonAddressToken) {
@@ -1348,6 +1412,36 @@ class fcpoRequest extends oxSuperCfg {
 
         $oCurr = $oConfig->getActShopCurrencyObject();
         $this->addParameter('currency', $oCurr->name);
+
+        return $this->send();
+    }
+
+    /**
+     * Sends request for receiving amazon referenceid
+     *
+     * @param string $sAmazonReferenceId
+     * @param string $sAmazonAddressToken
+     * @return array
+     */
+    public function sendRequestSetAmazonOrderReferenceDetails($sAmazonReferenceId, $sAmazonAddressToken) {
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $sAmazonWorkorderId = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonWorkorderId');
+
+        $this->addParameter('request', 'genericpayment'); //Request method
+        $this->addParameter('mode', $this->getOperationMode('fcpoamazonpay')); //PayOne Portal Operation Mode (live or test)
+        $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID')); //ID of PayOne Sub-Account
+
+        $this->addParameter('clearingtype', 'wlt');
+        $this->addParameter('wallettype', 'AMZ');
+
+        $this->addParameter('add_paydata[action]', 'setorderreferencedetails');
+        $this->addParameter('add_paydata[amazon_reference_id]', $sAmazonReferenceId);
+        $this->addParameter('add_paydata[amazon_address_token]', $sAmazonAddressToken);
+
+        $oCurr = $oConfig->getActShopCurrencyObject();
+        $this->addParameter('currency', $oCurr->name);
+
+        $this->addParameter('workorderid', $sAmazonWorkorderId);
 
         return $this->send();
     }
