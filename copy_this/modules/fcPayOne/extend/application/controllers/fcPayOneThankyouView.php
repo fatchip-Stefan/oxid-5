@@ -44,6 +44,12 @@ class fcPayOneThankyouView extends fcPayOneThankyouView_parent {
      * @var string
      */
     protected $_sBarzahlenHtml = null;
+
+    /**
+     * Flag indicates if current order is/was of type amazon
+     * @var bool
+     */
+    protected $_blIsAmazonOrder = false;
     
     
     /**
@@ -134,12 +140,54 @@ class fcPayOneThankyouView extends fcPayOneThankyouView_parent {
         if($oUser) {
             $this->_oFcpoHelper->fcpoSetSessionVariable('sFcpoUserId', $oUser->getId());
         }
+
+        $this->_fcpoHandleAmazonThankyou();
         
         $sReturn = parent::render();
         
         return $sReturn;
     }
-    
+
+    /**
+     * Returns if current order is of type amazon
+     *
+     * @param void
+     * @return bool
+     */
+    public function fcpoIsAmazonOrder() {
+        return $this->_blIsAmazonOrder;
+    }
+
+    /**
+     * Loggs off Amazon if this is an Amazon order
+     */
+    protected function _fcpoHandleAmazonThankyou() {
+        $blIsAmazonOrder = $this->_fcpoDetermineAmazonOrder();
+        if ($blIsAmazonOrder) {
+            $this->_blIsAmazonOrder = true;
+            $this->_oFcpoHelper->fcpoDeleteSessionVariable('sAmazonLoginAccessToken');
+            $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoAmazonWorkorderId');
+            $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoAmazonReferenceId');
+            $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoAmazonPayAddressWidgetLocked');
+        }
+    }
+
+    /**
+     * Checks if current order is of type amazon
+     *
+     * @param void
+     * @return bool
+     */
+    protected function _fcpoDetermineAmazonOrder() {
+        $blReturn = false;
+        $sAmazonLoginAccessToken = $this->_oFcpoHelper->fcpoGetSessionVariable('sAmazonLoginAccessToken');
+        if ($sAmazonLoginAccessToken) {
+            $blReturn = true;
+        }
+
+        return $blReturn;
+    }
+
     
     /**
      * Returns the html of barzahlen instructions

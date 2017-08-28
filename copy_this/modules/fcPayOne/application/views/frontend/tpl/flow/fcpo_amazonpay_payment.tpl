@@ -7,7 +7,16 @@
         height: 240px;
         max-height: 400px;
     }
+    #readOnlyWalletWidgetDiv {
+        min-width: 266px;
+        width: 100%;
+        max-width: 900px;
+        min-height: 145px;
+        height: 165px;
+        max-height: 180px;
+    }
 </style>
+
 
 <form action="[{$oViewConf->getSslSelfLink()}]" class="form-horizontal js-oxValidate payment" id="payment" name="order" method="post" novalidate="novalidate">
     <div class="hidden">

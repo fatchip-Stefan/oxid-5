@@ -6,6 +6,9 @@
         min-height: 228px;
         height: 240px;
         max-height: 400px;
+        [{if $oViewConf->fcpoGetAmazonPayAddressWidgetIsReadOnly()}]
+            displayMode: "Read";
+        [{/if}]
     }
 </style>
 

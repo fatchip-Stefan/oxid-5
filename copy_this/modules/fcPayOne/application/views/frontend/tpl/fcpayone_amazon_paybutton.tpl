@@ -9,7 +9,7 @@
             type: '[{$oViewConf->fcpoGetAmazonPayButtonType()}]',
             color: '[{$oViewConf->fcpoGetAmazonPayButtonColor()}]',
             size: 'medium',
-            language: '[{$oViewConf->fcpoGetAmazonPayButtonLanguage()}]',
+            language: 'none',
             authorization: function() {
                 loginOptions = {scope: 'profile payments:widget payments:shipping_address payments:billing_address', popup: true};
                 authRequest = amazon.Login.authorize (loginOptions, '[{$oViewConf->fcpoGetAmazonRedirectUrl()}]');

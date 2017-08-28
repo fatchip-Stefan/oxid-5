@@ -738,8 +738,9 @@ class fcpoRequest extends oxSuperCfg {
         // so we need to analyze which problem occured and how we gonna react on it
         $oConfig = $this->getConfig();
         $sAmazonMode = $oConfig->getConfigParam('sFCPOAmazonMode');
+
         $blRetryWithAsync = (
-            $mOutput['status'] == 'PENDING' &&
+            $mOutput['status'] == 'ERROR' &&
             $mOutput['errorcode'] == '980' &&
             $sAmazonMode == 'firstsyncthenasync'
         );
@@ -748,6 +749,15 @@ class fcpoRequest extends oxSuperCfg {
             $iAmazonTimeOut = $this->_fcpoGetAmazonTimeout('alwaysasync');
             $this->addParameter('add_paydata[amazon_timeout]', $iAmazonTimeOut);
             return $this->send();
+        }
+
+        $blRetryWithAddressLocked = (
+            $mOutput['status'] == 'ERROR' &&
+            $mOutput['errorcode'] == '981'
+        );
+
+        if ($blRetryWithAddressLocked) {
+            $this->_oFcpoHelper->fcpoSetSessionVariable('fcpoAmazonPayAddressWidgetLocked', true);
         }
     }
 

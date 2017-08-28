@@ -927,22 +927,6 @@
             </dl>
             <dl>
                 <dt>
-                    <select name="confstrs[sFCPOAmazonButtonLanguage]">
-                        <option value="none" [{if $confstrs.sFCPOAmazonButtonLanguage == "none"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_BUTTON_LANG_NONE"}]</option>
-                        <option value="en-GB" [{if $confstrs.sFCPOAmazonButtonLanguage == "en-GB"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_BUTTON_LANG_ENGLISH_UK"}]</option>
-                        <option value="de-DE" [{if $confstrs.sFCPOAmazonButtonLanguage == "de-DE"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_BUTTON_LANG_GERMAN_GERMANY"}]</option>
-                        <option value="fr-FR" [{if $confstrs.sFCPOAmazonButtonLanguage == "fr-FR"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_BUTTON_LANG_FRENCH_FRANCE"}]</option>
-                        <option value="it-IT" [{if $confstrs.sFCPOAmazonButtonLanguage == "it-IT"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_BUTTON_LANG_ITALIAN_ITALY"}]</option>
-                        <option value="es-ES" [{if $confstrs.sFCPOAmazonButtonLanguage == "es-ES"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_BUTTON_LANG_SPANISH_SPAIN"}]</option>
-                    </select>
-                </dt>
-                <dd>
-                    [{oxmultilang ident="FCPO_AMAZONPAY_BUTTON_LANG"}]
-                </dd>
-                <div class="spacer"></div>
-            </dl>
-            <dl>
-                <dt>
                     <select name="confstrs[sFCPOAmazonMode]">
                         <option value="alwayssync" [{if $confstrs.sFCPOAmazonMode == "alwayssync"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_MODE_ALWAYSSYNC"}]</option>
                         <option value="alwaysasync" [{if $confstrs.sFCPOAmazonMode == "alwaysasync"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_MODE_ALWAYSASYNC"}]</option>

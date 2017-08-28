@@ -11,4 +11,10 @@
         <br><br>
         <a href="[{$sMandatePdfUrl}]" class="link" target="_blank">[{oxmultilang ident="FCPO_THANKYOU_PDF_LINK"}]</a>
     [{/if}]
+    [{if $oView->fcpoIsAmazonOrder()}]
+        <br><br>
+        <div>
+            [{oxmultilang ident="FCPO_AMAZON_THANKYOU_MESSAGE"}]
+        </div>
+    [{/if}]
 [{/if}]

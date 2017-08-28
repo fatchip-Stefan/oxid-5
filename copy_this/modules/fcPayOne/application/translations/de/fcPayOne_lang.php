@@ -176,6 +176,7 @@ $aLang = array(
     'FCPO_AMAZON_LOGOFF'                            => 'Den AmazonPay Bestellprozess beenden und zurück zum Standard-Checkout',
     'FCPO_AMAZON_PROBLEM'                           => 'Es gibt ein Problem',
     'FCPO_AMAZON_NO_SHIPPING_TO_COUNTRY'            => 'Für das Land Ihrer angegebene Adresse existiert keine Versandmöglichkeit. Bitte klicken Sie <a href="index.php?cl=user" style="color:green;">hier</a> um zur Adressauswahl zurückzukehren.',
+    'FCPO_AMAZON_THANKYOU_MESSAGE'                  => 'Ihre Zahlung mit Amazon Pay ist derzeit noch in Prüfung.Bitte beachten Sie, dass wir uns mit Ihnen in Kürze per Email in Verbindung setzen werden, falls noch Unklarheiten bestehen sollten.',
 );
 
 /*

@@ -297,16 +297,15 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
     }
 
     /**
-     * Returns config value for button language
+     * Returns if address widget should be displayed readonly
      *
      * @param void
-     * @return string
+     * @return bool
      */
-    public function fcpoGetAmazonPayButtonLanguage() {
-        $oConfig = oxRegistry::getConfig();
-        $sValue = $oConfig->getConfigParam('sFCPOAmazonButtonLanguage');
+    public function fcpoGetAmazonPayAddressWidgetIsReadOnly() {
+        $blAmazonPayAddressWidgetLocked = (bool) $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonPayAddressWidgetLocked');
 
-        return (string)$sValue;
+        return $blAmazonPayAddressWidgetLocked;
     }
 
     /**
