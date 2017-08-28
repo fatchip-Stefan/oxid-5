@@ -259,6 +259,18 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
     }
 
     /**
+     * Method returns previously saved reference id
+     *
+     * @param void
+     * @return mixed
+     */
+    public function fcpoGetAmazonPayReferenceId() {
+        $sAmazonReferenceId = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonReferenceId');
+
+        return $sAmazonReferenceId;
+    }
+
+    /**
      * Returns config value for button type
      *
      * @param void

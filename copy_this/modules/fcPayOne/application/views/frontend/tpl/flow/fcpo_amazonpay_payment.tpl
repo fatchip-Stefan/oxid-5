@@ -34,6 +34,7 @@
             new OffAmazonPayments.Widgets.Wallet({
                 sellerId: '[{$oViewConf->fcpoGetAmazonPaySellerId()}]',
                 scope: 'profile payments:widget payments:shipping_address payments:billing_address',
+                amazonOrderReferenceId: '[{$oViewConf->fcpoGetAmazonPayReferenceId()}]',
                 onOrderReferenceCreate: function(orderReference) {
                 },
                 design: {
