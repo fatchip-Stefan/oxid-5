@@ -20,6 +20,16 @@
  */
 class fcPayOneOrder extends fcPayOneOrder_parent {
 
+    const FCPO_AMAZON_ERROR_TRANSACTION_TIMED_OUT = 980;
+    const FCPO_AMAZON_ERROR_INVALID_PAYMENT_METHOD = 981;
+    const FCPO_AMAZON_ERROR_REJECTED = 982;
+    const FCPO_AMAZON_ERROR_PROCESSING_FAILURE = 983;
+    const FCPO_AMAZON_ERROR_BUYER_EQUALS_SELLER = 984;
+    const FCPO_AMAZON_ERROR_PAYMENT_NOT_ALLOWED = 985;
+    const FCPO_AMAZON_ERROR_PAYMENT_PLAN_NOT_SET = 986;
+    const FCPO_AMAZON_ERROR_SHIPPING_ADDRESS_NOT_SET = 987;
+    const FCPO_AMAZON_ERROR_900 = 900;
+
     /**
      * Helper object for dealing with different shop versions
      * @var object
@@ -439,6 +449,46 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         }
 
         return null;
+    }
+
+    /**
+     * Overwriting _executePayment
+     *
+     * @param oxBasket $oBasket
+     * @param $oUserpayment
+     *
+     * @return mixed
+     */
+    protected function _executePayment(oxBasket $oBasket, $oUserpayment) {
+        if($this->isPayOnePaymentType() === false) {
+            return parent::_executePayment($oBasket, $oUserpayment);
+        }
+
+        $oPayTransaction = $this->_getGateway();
+        $oPayTransaction->setPaymentParams($oUserpayment);
+        $iRet = $oPayTransaction->executePayment($oBasket->getPrice()->getBruttoPrice(), $this);
+        if (is_numeric($iRet) && $iRet > 0) {
+            $this->delete();
+            return $iRet;
+        } elseif (!$iRet)  {
+            $this->delete();
+            // checking for error messages
+            if (method_exists($oPayTransaction, 'getLastError')) {
+                if (($sLastError = $oPayTransaction->getLastError())) {
+                    return $sLastError;
+                }
+            }
+            // checking for error codes
+            if (method_exists($oPayTransaction, 'getLastErrorNo')) {
+                if (($iLastErrorNo = $oPayTransaction->getLastErrorNo())) {
+                    return $iLastErrorNo;
+                }
+            }
+            return self::ORDER_STATE_PAYMENTERROR; // means no authentication
+        }
+
+
+        return true;
     }
 
     /**
@@ -1162,8 +1212,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         $mReturn = false;
 
         if ($aResponse['status'] == 'ERROR') {
-            $this->_fcpoHandleAuthorizationError($aResponse, $oPayGateway);
-            $mReturn = false;
+            $mReturn = $this->_fcpoHandleAuthorizationError($aResponse, $oPayGateway);
         } elseif ($aResponse['status'] == 'APPROVED') {
             $this->_fcpoHandleAuthorizationApproved($aResponse, $sRefNr, $sAuthorizationType, $sMode);
             $mReturn = true;
@@ -1328,29 +1377,34 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * 
      * @param array $aResponse
      * @param object $oPayGateway
-     * @return void
+     * @return mixed int|bool
      */
     protected function _fcpoHandleAuthorizationError($aResponse, $oPayGateway) {
+        $mReturn = false;
+
         if ($oPayGateway) {
             $sPaymenttype = $this->oxorder__oxpaymenttype->value;
             if ($sPaymenttype == 'fcpoamazonpay') {
-                $sMessage = $this->_fcpoGetAmazonErrorMessage($aResponse);
+                $sMessage = $this->fcpoGetAmazonErrorMessage($aResponse['errorcode']);
+                $mReturn = $this->_fcpoGetAmazonSuccessCode($aResponse['errorcode']);
             } else {
                 $sMessage = $aResponse['customermessage'];
             }
             $oPayGateway->fcSetLastErrorNr($aResponse['errorcode']);
             $oPayGateway->fcSetLastError($sMessage);
         }
+
+        return $mReturn;
     }
 
     /**
      * Returns translated amazon specific error message
      *
-     * @param $aResponse
+     * @param $sErrorCode
      * @return string
      */
-    protected function _fcpoGetAmazonErrorMessage($aResponse) {
-        $sTranslateString = $this->_fcpoGetAmazonErrorTranslationString($aResponse);
+    public function fcpoGetAmazonErrorMessage($sErrorCode) {
+        $sTranslateString = $this->fcpoGetAmazonErrorTranslationString($sErrorCode);
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
         $sMessage = $oLang->translateString($sTranslateString);
 
@@ -1358,35 +1412,50 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
     }
 
     /**
-     * Returns translation string matching to errorcode
+     * Method returns (un)success code
      *
      * @param $aResponse
+     * @param $sMessage
+     * @return mixed int|bool
+     */
+    protected function _fcpoGetAmazonSuccessCode($sErrorCode) {
+        $mRet = false;
+        if ($sErrorCode) {
+            $mRet = (int)$sErrorCode;
+        }
+        return $mRet;
+    }
+
+    /**
+     * Returns translation string matching to errorcode
+     *
+     * @param $iSuccess
      * @return string
      */
-    protected function _fcpoGetAmazonErrorTranslationString($aResponse) {
-        $sErrorCode = $aResponse['errorcode'];
+    public function fcpoGetAmazonErrorTranslationString($iSuccess) {
+        $iSuccess = (int) $iSuccess;
 
-        switch($sErrorCode) {
-            case '981':
+        switch($iSuccess) {
+            case self::FCPO_AMAZON_ERROR_INVALID_PAYMENT_METHOD:
                 $sReturn = 'FCPO_AMAZON_ERROR_INVALID_PAYMENT_METHOD';
                 break;
             case '109':
-            case '982':
+            case self::FCPO_AMAZON_ERROR_REJECTED:
                 $sReturn = 'FCPO_AMAZON_ERROR_REJECTED';
                 break;
-            case '983':
+            case self::FCPO_AMAZON_ERROR_PROCESSING_FAILURE:
                 $sReturn = 'FCPO_AMAZON_ERROR_PROCESSING_FAILURE';
                 break;
-            case '984':
+            case self::FCPO_AMAZON_ERROR_BUYER_EQUALS_SELLER:
                 $sReturn = 'FCPO_AMAZON_ERROR_BUYER_EQUALS_SELLER';
                 break;
-            case '985':
+            case self::FCPO_AMAZON_ERROR_PAYMENT_NOT_ALLOWED:
                 $sReturn = 'FCPO_AMAZON_ERROR_PAYMENT_NOT_ALLOWED';
                 break;
-            case '986':
+            case self::FCPO_AMAZON_ERROR_PAYMENT_PLAN_NOT_SET:
                 $sReturn = 'FCPO_AMAZON_ERROR_PAYMENT_PLAN_NOT_SET';
                 break;
-            case '987':
+            case self::FCPO_AMAZON_ERROR_SHIPPING_ADDRESS_NOT_SET:
                 $sReturn = 'FCPO_AMAZON_ERROR_SHIPPING_ADDRESS_NOT_SET';
                 break;
             default:

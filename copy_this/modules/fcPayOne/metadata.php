@@ -133,6 +133,11 @@ $aModule = array(
     ),
     'blocks'        => array(
         array(
+            'template' => 'page/checkout/basket.tpl',
+            'block' => 'checkout_basket_main',
+            'file' => 'fcpo_basket_override'
+        ),
+        array(
             'template' => 'widget/minibasket/minibasket.tpl',
             'block' => 'widget_minibasket_total',
             'file' => 'fcpo_minibasket_total_override',

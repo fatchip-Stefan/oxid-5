@@ -69,4 +69,22 @@ class fcPayOneUserView extends fcPayOneUserView_parent {
         // go ahead with rendering
         $this->render();
     }
+
+    /**
+     * Returns user error message if there is some. false if none
+     *
+     * @param void
+     * @return mixed string|bool
+     */
+    public function fcpoGetUserErrorMessage() {
+        $mReturn = false;
+        $sMessage = $this->_oFcpoHelper->fcpoGetRequestParameter('fcpoerror');
+        if ($sMessage) {
+            $sMessage = urldecode($sMessage);
+            $mReturn = $sMessage;
+        }
+
+        return $mReturn;
+    }
+
 }

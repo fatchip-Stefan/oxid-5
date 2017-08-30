@@ -169,6 +169,7 @@ class fcPayOneThankyouView extends fcPayOneThankyouView_parent {
             $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoAmazonWorkorderId');
             $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoAmazonReferenceId');
             $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoAmazonPayAddressWidgetLocked');
+            $this->_oFcpoHelper->fcpoDeleteSessionVariable('usr');
         }
     }
 

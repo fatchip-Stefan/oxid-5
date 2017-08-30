@@ -41,7 +41,7 @@ class fcPayOneBasketView extends fcPayOneBasketView_parent {
     /**
      * init object construction
      * 
-     * @return null
+     * @return void
      */
     public function __construct() {
         parent::__construct();
@@ -60,6 +60,23 @@ class fcPayOneBasketView extends fcPayOneBasketView_parent {
     }
 
     /**
+     * Returns basket error message if there is some. false if none
+     *
+     * @param void
+     * @return mixed string|bool
+     */
+    public function fcpoGetBasketErrorMessage() {
+        $mReturn = false;
+        $sMessage = $this->_oFcpoHelper->fcpoGetRequestParameter('fcpoerror');
+        if ($sMessage) {
+            $sMessage = urldecode($sMessage);
+            $mReturn = $sMessage;
+        }
+
+        return $mReturn;
+    }
+
+    /**
      * Method checks for param fcpoamzaction and logoff from Amazon Session if
      * value is set to logoff
      *
@@ -72,6 +89,7 @@ class fcPayOneBasketView extends fcPayOneBasketView_parent {
             $this->_oFcpoHelper->fcpoDeleteSessionVariable('sAmazonLoginAccessToken');
             $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoAmazonWorkorderId');
             $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoAmazonReferenceId');
+            $this->_oFcpoHelper->fcpoDeleteSessionVariable('usr');
         }
     }
 
