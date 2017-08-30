@@ -177,6 +177,14 @@ $aLang = array(
     'FCPO_AMAZON_PROBLEM'                           => 'Es gibt ein Problem',
     'FCPO_AMAZON_NO_SHIPPING_TO_COUNTRY'            => 'Für das Land Ihrer angegebene Adresse existiert keine Versandmöglichkeit. Bitte klicken Sie <a href="index.php?cl=user" style="color:green;">hier</a> um zur Adressauswahl zurückzukehren.',
     'FCPO_AMAZON_THANKYOU_MESSAGE'                  => 'Ihre Zahlung mit Amazon Pay ist derzeit noch in Prüfung.Bitte beachten Sie, dass wir uns mit Ihnen in Kürze per Email in Verbindung setzen werden, falls noch Unklarheiten bestehen sollten.',
+    'FCPO_AMAZON_ERROR_INVALID_PAYMENT_METHOD'      => 'Anweisungstext InvalidPaymentMethod',
+    'FCPO_AMAZON_ERROR_REJECTED'                    => 'Anweisungstext AmazonRejected',
+    'FCPO_AMAZON_ERROR_PROCESSING_FAILURE'          => 'Anweisungstext ProcessingFailure',
+    'FCPO_AMAZON_ERROR_BUYER_EQUALS_SELLER'         => 'Anweisungstext BuyerEqualsSeller',
+    'FCPO_AMAZON_ERROR_PAYMENT_NOT_ALLOWED'         => 'Anweisungstext PaymentMethodNotAllowed',
+    'FCPO_AMAZON_ERROR_PAYMENT_PLAN_NOT_SET'        => 'Anweisungstext PaymentPlanNotSet',
+    'FCPO_AMAZON_ERROR_SHIPPING_ADDRESS_NOT_SET'    => 'Anweisungstext ShippingAddressNotSet',
+    'FCPO_AMAZON_ERROR_900'                         => 'Anweisungstext n/a',
 );
 
 /*

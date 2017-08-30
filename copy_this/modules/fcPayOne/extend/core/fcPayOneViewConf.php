@@ -303,8 +303,8 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
      * @return bool
      */
     public function fcpoGetAmazonPayAddressWidgetIsReadOnly() {
-        $blAmazonPayAddressWidgetLocked = (bool) $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonPayAddressWidgetLocked');
-
+        $blAmazonPayAddressWidgetLocked =
+            (bool) $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonPayAddressWidgetLocked');
         return $blAmazonPayAddressWidgetLocked;
     }
 

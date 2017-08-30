@@ -38,7 +38,12 @@
 
 
     <script>
-        window.onAmazonLoginReady = function() {amazon.Login.setClientId('[{$oViewConf->fcpoGetAmazonPayClientId()}]'); };
+        window.onAmazonLoginReady = function() {
+            amazon.Login.setClientId('[{$oViewConf->fcpoGetAmazonPayClientId()}]');
+            [{if !$oViewConf->fcpoAmazonLoginSessionActive()}]
+                amazon.Login.logout();
+            [{/if}]
+        };
         window.onAmazonPaymentsReady = function() {
             new OffAmazonPayments.Widgets.Wallet({
                 sellerId: '[{$oViewConf->fcpoGetAmazonPaySellerId()}]',

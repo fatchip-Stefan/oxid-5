@@ -19,7 +19,7 @@
     </div>
 
     <div class="checkoutCollumns clear">
-        <div>
+        <div class="lineBox clear">
             <h3 class="blockHead">
                 [{oxmultilang ident="FCPO_AMAZON_SELECT_PAYMENT"}]
             </h3>
@@ -33,11 +33,17 @@
     </div>
 
     <script>
-        window.onAmazonLoginReady = function() {amazon.Login.setClientId('[{$oViewConf->fcpoGetAmazonPayClientId()}]'); };
+        window.onAmazonLoginReady = function() {
+            amazon.Login.setClientId('[{$oViewConf->fcpoGetAmazonPayClientId()}]');
+            [{if !$oViewConf->fcpoAmazonLoginSessionActive()}]
+                amazon.Login.logout();
+            [{/if}]
+        };
         window.onAmazonPaymentsReady = function() {
             new OffAmazonPayments.Widgets.Wallet({
                 sellerId: '[{$oViewConf->fcpoGetAmazonPaySellerId()}]',
                 scope: 'profile payments:widget payments:shipping_address payments:billing_address',
+                amazonOrderReferenceId: '[{$oViewConf->fcpoGetAmazonPayReferenceId()}]',
                 onOrderReferenceCreate: function(orderReference) {
                 },
                 design: {

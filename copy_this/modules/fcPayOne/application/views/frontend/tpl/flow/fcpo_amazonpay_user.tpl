@@ -6,6 +6,9 @@
         min-height: 228px;
         height: 240px;
         max-height: 400px;
+        [{if $oViewConf->fcpoGetAmazonPayAddressWidgetIsReadOnly()}]
+            displayMode: "Read";
+        [{/if}]
     }
 </style>
 
@@ -36,7 +39,12 @@
             </div>
         </div>
         <script>
-            window.onAmazonLoginReady = function() {amazon.Login.setClientId('[{$oViewConf->fcpoGetAmazonPayClientId()}]'); };
+            window.onAmazonLoginReady = function() {
+                amazon.Login.setClientId('[{$oViewConf->fcpoGetAmazonPayClientId()}]');
+                [{if !$oViewConf->fcpoAmazonLoginSessionActive()}]
+                    amazon.Login.logout();
+                [{/if}]
+            };
             window.onAmazonPaymentsReady = function() {
                 new OffAmazonPayments.Widgets.AddressBook({
                     sellerId: '[{$oViewConf->fcpoGetAmazonPaySellerId()}]',

@@ -735,7 +735,38 @@ class fcpoRequest extends oxSuperCfg {
             return $mOutput;
         }
 
-        // so we need to analyze which problem occured and how we gonna react on it
+        $mOutput = $this->_fcpoAmazonPayCheckTransactionTimedOut($mOutput);
+        $mOutput = $this->_fcpoAmazonPayCheckInvalidPaymentMethod($mOutput);
+
+        return $mOutput;
+    }
+
+    /**
+     * Check if invalid payment method has been selected
+     *
+     * @param $mOutput
+     * @return mixed
+     */
+    protected function _fcpoAmazonPayCheckInvalidPaymentMethod($mOutput) {
+        $blRetryWithAddressLocked = (
+            $mOutput['status'] == 'ERROR' &&
+            $mOutput['errorcode'] == '981'
+        );
+
+        if ($blRetryWithAddressLocked) {
+            $this->_oFcpoHelper->fcpoSetSessionVariable('fcpoAmazonPayAddressWidgetLocked', true);
+        }
+
+        return $mOutput;
+    }
+
+    /**
+     * Check if there is a timeout. If true, method will handle this case
+     *
+     * @param $mOutput
+     * @return mixed
+     */
+    protected function _fcpoAmazonPayCheckTransactionTimedOut($mOutput) {
         $oConfig = $this->getConfig();
         $sAmazonMode = $oConfig->getConfigParam('sFCPOAmazonMode');
 
@@ -748,17 +779,25 @@ class fcpoRequest extends oxSuperCfg {
         if ($blRetryWithAsync) {
             $iAmazonTimeOut = $this->_fcpoGetAmazonTimeout('alwaysasync');
             $this->addParameter('add_paydata[amazon_timeout]', $iAmazonTimeOut);
-            return $this->send();
+            $mOutput = $this->send();
         }
 
-        $blRetryWithAddressLocked = (
-            $mOutput['status'] == 'ERROR' &&
-            $mOutput['errorcode'] == '981'
-        );
+        return $mOutput;
+    }
 
-        if ($blRetryWithAddressLocked) {
-            $this->_oFcpoHelper->fcpoSetSessionVariable('fcpoAmazonPayAddressWidgetLocked', true);
-        }
+    /**
+     * Returns to basket with optional custom message
+     *
+     * @param null $sCustomMessage
+     * @return void
+     */
+    protected function _fcpoReturnToBasket($sCustomMessage = null) {
+        $oConfig = $this->getConfig();
+
+        // @todo: Redirect to basket with message, currently redirect without comment
+        $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
+        $sShopUrl = $oConfig->getShopUrl();
+        $oUtils->redirect($sShopUrl."index.php?cl=basket");
     }
 
     protected function _getFrontendHash($aHashParams) {
@@ -967,7 +1006,7 @@ class fcpoRequest extends oxSuperCfg {
     protected function _fcpoAddAmazonPayParameters($oOrder) {
         $oUser = $oOrder->getOrderUser();
         $oViewConf = $this->_oFcpoHelper->getFactoryObject('oxViewConfig');
-
+        $oConfig = $this->getConfig();
 
         $sAmazonWorkorderId = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonWorkorderId');
         $sAmazonAddressToken = $this->_oFcpoHelper->fcpoGetSessionVariable('sAmazonLoginAccessToken');
@@ -981,6 +1020,11 @@ class fcpoRequest extends oxSuperCfg {
         $this->addParameter('add_paydata[amazon_address_token]', $sAmazonAddressToken);
         $this->addParameter('add_paydata[amazon_timeout]', $iAmazonTimeout);
         $this->addParameter('email', $oViewConf->fcpoAmazonEmailDecode($oUser->oxuser__oxusername->value));
+
+        $sAmazonMode = $oConfig->getConfigParam('sFCPOAmazonMode');
+        if ($sAmazonMode == 'alwayssync') {
+            $this->addParameter('add_paydata[cancel_on_timeout]', 'yes');
+        }
 
         return true;
     }

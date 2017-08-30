@@ -77,6 +77,12 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
     protected $_aPaymentsProfileIdentSave = array('fcporp_bill');
 
     /**
+     * PaymentId of order
+     * @var string
+     */
+    protected $_sFcpoPaymentId = null;
+
+    /**
      * init object construction
      * 
      * @return null
@@ -313,6 +319,8 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
             return parent::finalizeOrder($oBasket, $oUser, $blRecalculatingOrder);
         }
 
+        $this->_sFcpoPaymentId = $oBasket->getPaymentId();
+
         $blSaveAfterRedirect = $this->_isRedirectAfterSave();
 
         $mRet = $this->_fcpoEarlyValidation($blSaveAfterRedirect, $oBasket, $oUser, $blRecalculatingOrder);
@@ -385,6 +393,23 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         $iRet = $this->_fcpoFinishOrder($blRecalculatingOrder, $oUser, $oBasket, $oUserPayment);
 
         return $iRet;
+    }
+
+    /**
+     * Overriding _setUser for correcting email-address
+     *
+     * @param void
+     * @return void
+     */
+    protected function _setUser($oUser) {
+        parent::_setUser($oUser);
+
+        if ($this->_sFcpoPaymentId == 'fcpoamazonpay') {
+            $oViewConf = $this->_oFcpoHelper->getFactoryObject('oxViewConfig');
+            $sPrefixEmail = $oUser->oxuser__oxusername->value;
+            $sEmail = $oViewConf->fcpoAmazonEmailDecode($sPrefixEmail);
+            $this->oxorder__oxbillemail = new oxField($sEmail);
+        }
     }
 
     /**
@@ -1307,9 +1332,68 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      */
     protected function _fcpoHandleAuthorizationError($aResponse, $oPayGateway) {
         if ($oPayGateway) {
+            $sPaymenttype = $this->oxorder__oxpaymenttype->value;
+            if ($sPaymenttype == 'fcpoamazonpay') {
+                $sMessage = $this->_fcpoGetAmazonErrorMessage($aResponse);
+            } else {
+                $sMessage = $aResponse['customermessage'];
+            }
             $oPayGateway->fcSetLastErrorNr($aResponse['errorcode']);
-            $oPayGateway->fcSetLastError($aResponse['customermessage']);
+            $oPayGateway->fcSetLastError($sMessage);
         }
+    }
+
+    /**
+     * Returns translated amazon specific error message
+     *
+     * @param $aResponse
+     * @return string
+     */
+    protected function _fcpoGetAmazonErrorMessage($aResponse) {
+        $sTranslateString = $this->_fcpoGetAmazonErrorTranslationString($aResponse);
+        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $sMessage = $oLang->translateString($sTranslateString);
+
+        return $sMessage;
+    }
+
+    /**
+     * Returns translation string matching to errorcode
+     *
+     * @param $aResponse
+     * @return string
+     */
+    protected function _fcpoGetAmazonErrorTranslationString($aResponse) {
+        $sErrorCode = $aResponse['errorcode'];
+
+        switch($sErrorCode) {
+            case '981':
+                $sReturn = 'FCPO_AMAZON_ERROR_INVALID_PAYMENT_METHOD';
+                break;
+            case '109':
+            case '982':
+                $sReturn = 'FCPO_AMAZON_ERROR_REJECTED';
+                break;
+            case '983':
+                $sReturn = 'FCPO_AMAZON_ERROR_PROCESSING_FAILURE';
+                break;
+            case '984':
+                $sReturn = 'FCPO_AMAZON_ERROR_BUYER_EQUALS_SELLER';
+                break;
+            case '985':
+                $sReturn = 'FCPO_AMAZON_ERROR_PAYMENT_NOT_ALLOWED';
+                break;
+            case '986':
+                $sReturn = 'FCPO_AMAZON_ERROR_PAYMENT_PLAN_NOT_SET';
+                break;
+            case '987':
+                $sReturn = 'FCPO_AMAZON_ERROR_SHIPPING_ADDRESS_NOT_SET';
+                break;
+            default:
+                $sReturn = 'FCPO_AMAZON_ERROR_900';
+        }
+
+        return $sReturn;
     }
 
     /**

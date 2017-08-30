@@ -31,7 +31,7 @@
         [{/block}]
 
         <div class="checkoutCollumns clear">
-            <div>
+            <div class="lineBox clear">
                 <h3 class="blockHead">
                     [{oxmultilang ident="FCPO_AMAZON_SELECT_ADDRESS"}]
                 </h3>
