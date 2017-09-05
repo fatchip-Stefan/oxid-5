@@ -1,4 +1,4 @@
-<div id="LoginWithAmazon" class="btn pull-right"></div>
+<div id="[{$_prefix}]LoginWithAmazonMiniBasket" class="btn pull-right"></div>
 <script>
     window.onAmazonLoginReady = function() {
         amazon.Login.setClientId('[{$oViewConf->fcpoGetAmazonPayClientId()}]');
@@ -8,7 +8,7 @@
     };
     window.onAmazonPaymentsReady = function(){
         var authRequest;
-        OffAmazonPayments.Button('LoginWithAmazon', '[{$oViewConf->fcpoGetAmazonPaySellerId()}]', {
+        OffAmazonPayments.Button('[{$_prefix}]LoginWithAmazonMiniBasket', '[{$oViewConf->fcpoGetAmazonPaySellerId()}]', {
             type: '[{$oViewConf->fcpoGetAmazonPayButtonType()}]',
             color: '[{$oViewConf->fcpoGetAmazonPayButtonColor()}]',
             size: 'medium',

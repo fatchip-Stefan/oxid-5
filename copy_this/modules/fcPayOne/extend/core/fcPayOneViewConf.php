@@ -207,12 +207,6 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
         $oPayment = oxNew('oxpayment');
         $oPayment->load('fcpoamazonpay');
         $blIsActive = (bool) $oPayment->oxpayments__oxactive->value;
-        $sActClassName = $this->getActiveClassName();
-        $sActUrlClass = $this->_oFcpoHelper->fcpoGetRequestParameter('cl');
-
-        if ($sActClassName == 'oxwminibasket' && $sActUrlClass == 'basket') {
-            $blIsActive = false;
-        }
 
         return $blIsActive;
     }

@@ -1,7 +1,9 @@
 [{$smarty.block.parent}]
 
-[{if $oViewConf->fcpoCanDisplayAmazonPayButton('minibasket')}]
+[{if $oViewConf->fcpoCanDisplayAmazonPayButton()}]
     <p class="functions clear text-right">
-        [{include file=$oViewConf->fcpoGetAbsModuleTemplateFrontendPath('fcpayone_amazon_paybutton.tpl')}]
+        [{assign var="sFcPoTemplatePath" value=$oViewConf->fcpoGetActiveThemePath()}]
+        [{assign var="sFcPoTemplatePath" value=$sFcPoTemplatePath|cat:'/fcpayone_amazon_paybutton_minibasket.tpl'}]
+        [{include file=$oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePath)}]
     </p>
 [{/if}]

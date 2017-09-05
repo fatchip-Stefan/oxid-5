@@ -2405,8 +2405,10 @@ class fcpoRequest extends oxSuperCfg {
     protected function _addUserDataParameters($oOrder, $oUser, $blIsUpdateUser = false) {
         $oCountry = oxNew('oxcountry');
         $oCountry->load($oOrder->oxorder__oxbillcountryid->value);
+        $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
 
-        if ($blIsUpdateUser === false) {
+
+        if ($blIsUpdateUser === false && $sPaymentId != 'fcpoamazonpay') {
             $this->addParameter('customerid', $oUser->oxuser__oxcustnr->value);
         }
         $this->addParameter('salutation', ($oOrder->oxorder__oxbillsal->value == 'MR' ? 'Herr' : 'Frau'), $blIsUpdateUser);

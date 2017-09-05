@@ -1,9 +1,9 @@
-<div id="LoginWithAmazon" class="btn pull-right"></div>
+<div id="LoginWithAmazon" class="nextStep"></div>
 <script>
     window.onAmazonLoginReady = function() {
         amazon.Login.setClientId('[{$oViewConf->fcpoGetAmazonPayClientId()}]');
         [{if !$oViewConf->fcpoAmazonLoginSessionActive()}]
-            amazon.Login.logout();
+        amazon.Login.logout();
         [{/if}]
     };
     window.onAmazonPaymentsReady = function(){

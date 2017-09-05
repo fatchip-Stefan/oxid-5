@@ -3,7 +3,7 @@
     window.onAmazonLoginReady = function() {
         amazon.Login.setClientId('[{$oViewConf->fcpoGetAmazonPayClientId()}]');
         [{if !$oViewConf->fcpoAmazonLoginSessionActive()}]
-            amazon.Login.logout();
+        amazon.Login.logout();
         [{/if}]
     };
     window.onAmazonPaymentsReady = function(){

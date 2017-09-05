@@ -8,5 +8,7 @@
     </form>
 [{/if}]
 [{if $oViewConf->fcpoCanDisplayAmazonPayButton()}]
-    [{include file=$oViewConf->fcpoGetAbsModuleTemplateFrontendPath('fcpayone_amazon_paybutton.tpl')}]
+    [{assign var="sFcPoTemplatePath" value=$oViewConf->fcpoGetActiveThemePath()}]
+    [{assign var="sFcPoTemplatePath" value=$sFcPoTemplatePath|cat:'/fcpayone_amazon_paybutton.tpl'}]
+    [{include file=$oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePath)}]
 [{/if}]
