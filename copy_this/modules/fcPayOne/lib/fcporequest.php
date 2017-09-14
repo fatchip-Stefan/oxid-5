@@ -1452,12 +1452,16 @@ class fcpoRequest extends oxSuperCfg {
      */
     public function sendRequestGetAmazonOrderReferenceDetails($sAmazonReferenceId, $sAmazonAddressToken) {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oSession = $this->getSession();
+        $oBasket = $oSession->getBasket();
+        $oPrice = $oBasket->getPrice();
 
         $this->addParameter('request', 'genericpayment'); //Request method
         $this->addParameter('mode', $this->getOperationMode('fcpoamazonpay')); //PayOne Portal Operation Mode (live or test)
         $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID')); //ID of PayOne Sub-Account
 
         $this->addParameter('clearingtype', 'wlt');
+        $this->addParameter('amount', number_format($oPrice->getBruttoPrice(), 2, '.', '') * 100);
         $this->addParameter('wallettype', 'AMZ');
 
         $this->addParameter('add_paydata[action]', 'getorderreferencedetails');

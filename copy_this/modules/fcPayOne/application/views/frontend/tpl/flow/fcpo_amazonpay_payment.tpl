@@ -49,7 +49,18 @@
                 sellerId: '[{$oViewConf->fcpoGetAmazonPaySellerId()}]',
                 scope: 'profile payments:widget payments:shipping_address payments:billing_address',
                 amazonOrderReferenceId: '[{$oViewConf->fcpoGetAmazonPayReferenceId()}]',
-                onOrderReferenceCreate: function(orderReference) {
+                onPaymentSelect: function(orderReference) {
+                    console.log('triggered onPaymentSelect');
+                    var formParams = '{"fcpoAmazonReferenceId":"[{$oViewConf->fcpoGetAmazonPayReferenceId()}]"}';
+                    $.ajax({
+                        url: 'modules/fcPayOne/application/models/fcpayone_ajax.php',
+                        method: 'POST',
+                        type: 'POST',
+                        dataType: 'text',
+                        data: { paymentid: "fcpoamazonpay", action: "get_amazon_reference_details", params: formParams },
+                        success: function(Response) {
+                        }
+                    });
                 },
                 design: {
                     designMode: 'responsive'

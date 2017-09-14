@@ -99,23 +99,26 @@ class fcPayOneUser extends fcPayOneUser_parent {
      * @return string
      */
     protected function _fcpoAddAmazonUser($aResponse) {
-        $aStreetParts = $this->_fcpoSplitStreetAndStreetNr($aResponse['add_paydata[shipping_street]']);
-        $sCountryId = $this->_fcpoGetCountryIdByIso2($aResponse['add_paydata[shipping_country]']);
+        $aStreetParts = $this->_fcpoSplitStreetAndStreetNr($aResponse['add_paydata[billing_street]']);
+        $sCountryId = $this->_fcpoGetCountryIdByIso2($aResponse['add_paydata[billing_country]']);
 
         $oUser = $this->_oFcpoHelper->getFactoryObject('oxUser');
         $sUserOxid = $oUser->getId();
         $oUser->oxuser__oxusername = new oxField($aResponse['add_paydata[email]']);
         $oUser->oxuser__oxstreet = new oxField($aStreetParts['street']);
         $oUser->oxuser__oxstreetnr = new oxField($aStreetParts['streetnr']);
-        $oUser->oxuser__oxzip = new oxField($aResponse['add_paydata[shipping_zip]']);
-        $oUser->oxuser__oxfon = new oxField($aResponse['add_paydata[shipping_telephonenumber]']);
-        $oUser->oxuser__oxfname = new oxField($aResponse['add_paydata[shipping_firstname]']);
-        $oUser->oxuser__oxlname = new oxField($aResponse['add_paydata[shipping_lastname]']);
-        $oUser->oxuser__oxcity = new oxField($aResponse['add_paydata[shipping_city]']);
+        $oUser->oxuser__oxzip = new oxField($aResponse['add_paydata[billing_zip]']);
+        $oUser->oxuser__oxfon = new oxField($aResponse['add_paydata[billing_telephonenumber]']);
+        $oUser->oxuser__oxfname = new oxField($aResponse['add_paydata[billing_firstname]']);
+        $oUser->oxuser__oxlname = new oxField($aResponse['add_paydata[billing_lastname]']);
+        $oUser->oxuser__oxcity = new oxField($aResponse['add_paydata[billing_city]']);
         $oUser->oxuser__oxcountryid = new oxField($sCountryId);
         $oUser->addToGroup('oxidnotyetordered');
 
         $oUser->save();
+
+        // add and set deliveryaddress
+        $this->_fcpoAmazonAddDeliveryAddress($aResponse, $sUserOxid);
 
         return $sUserOxid;
     }
@@ -134,23 +137,80 @@ class fcPayOneUser extends fcPayOneUser_parent {
         $oUser = $this->_oFcpoHelper->getFactoryObject('oxUser');
         $oUser->load($sUserOxid);
 
-        $aStreetParts = $this->_fcpoSplitStreetAndStreetNr($aResponse['add_paydata[shipping_street]']);
-        $sCountryId = $this->_fcpoGetCountryIdByIso2($aResponse['add_paydata[shipping_country]']);
+        $aStreetParts = $this->_fcpoSplitStreetAndStreetNr($aResponse['add_paydata[billing_street]']);
+        $sCountryId = $this->_fcpoGetCountryIdByIso2($aResponse['add_paydata[billing_country]']);
 
         $oUser->oxuser__oxusername = new oxField($aResponse['add_paydata[email]']);
         $oUser->oxuser__oxstreet = new oxField($aStreetParts['street']);
         $oUser->oxuser__oxstreetnr = new oxField($aStreetParts['streetnr']);
-        $oUser->oxuser__oxzip = new oxField($aResponse['add_paydata[shipping_zip]']);
-        $oUser->oxuser__oxfon = new oxField($aResponse['add_paydata[shipping_telephonenumber]']);
-        $oUser->oxuser__oxfname = new oxField(trim($aResponse['add_paydata[shipping_firstname]']));
-        $oUser->oxuser__oxlname = new oxField(trim($aResponse['add_paydata[shipping_lastname]']));
-        $oUser->oxuser__oxcity = new oxField($aResponse['add_paydata[shipping_city]']);
+        $oUser->oxuser__oxzip = new oxField($aResponse['add_paydata[billing_zip]']);
+        $oUser->oxuser__oxfon = new oxField($aResponse['add_paydata[billing_telephonenumber]']);
+        $oUser->oxuser__oxfname = new oxField(trim($aResponse['add_paydata[billing_firstname]']));
+        $oUser->oxuser__oxlname = new oxField(trim($aResponse['add_paydata[billing_lastname]']));
+        $oUser->oxuser__oxcity = new oxField($aResponse['add_paydata[billing_city]']);
         $oUser->oxuser__oxcountryid = new oxField($sCountryId);
         $oUser->addToGroup('oxidnotyetordered');
 
         $oUser->save();
 
+        // add and set deliveryaddress
+        $this->_fcpoAmazonAddDeliveryAddress($aResponse, $sUserOxid);
+
         return $sUserOxid;
+    }
+
+    /**
+     * Method adds a delivery address to user and directly set the deladrid session variable
+     *
+     * @param array $aResponse
+     * @param string $sUserOxid
+     * @return void
+     */
+    protected function _fcpoAmazonAddDeliveryAddress($aResponse, $sUserOxid) {
+        $aStreetParts = $this->_fcpoSplitStreetAndStreetNr($aResponse['add_paydata[shipping_street]']);
+        $sCountryId = $this->_fcpoGetCountryIdByIso2($aResponse['add_paydata[shipping_country]']);
+
+        $oAddress = oxNew('oxaddress');
+        $oAddress->oxaddress__oxuserid = new oxField($sUserOxid);
+        $oAddress->oxaddress__oxaddressuserid = new oxField($sUserOxid);
+        $oAddress->oxaddress__oxfname = new oxField(trim($aResponse['add_paydata[shipping_firstname]']));
+        $oAddress->oxaddress__oxlname = new oxField(trim($aResponse['add_paydata[shipping_lastname]']));
+        $oAddress->oxaddress__oxstreet = new oxField($aStreetParts['street']);
+        $oAddress->oxaddress__oxstreetnr = new oxField($aStreetParts['streetnr']);
+        $oAddress->oxaddress__oxfon = new oxField($aResponse['add_paydata[shipping_telephonenumber]']);
+        $oAddress->oxaddress__oxcity = new oxField($aResponse['add_paydata[shipping_city]']);
+        $oAddress->oxaddress__oxcountry = new oxField($aResponse['add_paydata[shipping_country]']);
+        $oAddress->oxaddress__oxcountryid = new oxField($sCountryId);
+        $oAddress->oxaddress__oxzip = new oxField($aResponse['add_paydata[shipping_zip]']);
+
+        // check if address exists
+        $sEncodedDeliveryAddress = $oAddress->getEncodedDeliveryAddress();
+
+        $blExists = $this->_fcpoCheckAddressExists($sEncodedDeliveryAddress);
+        if ($blExists) {
+            $oAddress->load($sEncodedDeliveryAddress);
+        } else {
+            $oAddress->setId($sEncodedDeliveryAddress);
+            $oAddress->save();
+        }
+
+        $this->_oFcpoHelper->fcpoSetSessionVariable('deladrid', $sEncodedDeliveryAddress);
+    }
+
+    /**
+     * Checks if address is already existing
+     *
+     * @param $sEncodedDeliveryAddress
+     * @return bool
+     */
+    protected function _fcpoCheckAddressExists($sEncodedDeliveryAddress) {
+        $oAddress = oxNew('oxaddress');
+        $blReturn = false;
+        if ($oAddress->load($sEncodedDeliveryAddress)) {
+            $blReturn = true;
+        }
+
+        return $blReturn;
     }
 
     /**

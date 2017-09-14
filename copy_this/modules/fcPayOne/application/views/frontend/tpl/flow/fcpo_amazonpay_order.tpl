@@ -43,7 +43,12 @@
                     </h3>
                 </div>
                 <div class="panel-body">
-                    [{include file=$oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePath)}]
+                    [{assign var="oDelAdress" value=$oView->getDelAddress()}]
+                    [{if $oDelAdress}]
+                        [{include file="widget/address/shipping_address.tpl" delivadr=$oDelAdress}]
+                    [{else}]
+                        [{include file=$oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePath)}]
+                    [{/if}]
                 </div>
             </div>
         </form>

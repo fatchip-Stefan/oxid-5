@@ -53,6 +53,7 @@
                         orderReferenceId = orderReference.getAmazonOrderReferenceId();
                     },
                     onAddressSelect: function(orderReference) {
+                        console.log('triggered onAddressSelect');
                         var formParams = "{";
                                 formParams += '"fcpoAmazonReferenceId":"' + orderReferenceId + '"';
                                 formParams += "}";
