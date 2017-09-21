@@ -18,6 +18,7 @@
  * @copyright (C) Payone GmbH
  * @version   OXID eShop CE
  */
+
 class fcpohelper extends oxBase {
 
     /**
@@ -330,7 +331,8 @@ class fcpohelper extends oxBase {
      * @return string
      */
     public function fcpoGetModuleVersion() {
-        return '2.1.6_5';
+        include_once __DIR__."/../metadata.php";
+        return $aModule['version'];
     }
 
     /**

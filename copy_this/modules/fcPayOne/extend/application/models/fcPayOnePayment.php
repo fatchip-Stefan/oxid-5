@@ -78,6 +78,7 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         'fcpopo_bill',
         'fcpopo_debitnote',
         'fcporp_bill',
+        'fcpopayadvance',
     );
 
     /**
