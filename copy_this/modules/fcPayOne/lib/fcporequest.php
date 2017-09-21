@@ -146,7 +146,8 @@ class fcpoRequest extends oxSuperCfg {
         $this->addParameter('integrator_name', 'oxid');
         $this->addParameter('integrator_version', $this->_oFcpoHelper->fcpoGetIntegratorVersion());
         $this->addParameter('solution_name', 'fatchip');
-        $this->addParameter('solution_version', $this->_oFcpoHelper->fcpoGetModuleVersion());
+//        $this->addParameter('solution_version', $this->_oFcpoHelper->fcpoGetModuleVersion());
+        $this->addParameter('solution_version', '2.0.10');
     }
 
     /**

@@ -185,7 +185,6 @@ class fcPayOneUser extends fcPayOneUser_parent {
 
         // check if address exists
         $sEncodedDeliveryAddress = $oAddress->getEncodedDeliveryAddress();
-
         $blExists = $this->_fcpoCheckAddressExists($sEncodedDeliveryAddress);
         if ($blExists) {
             $oAddress->load($sEncodedDeliveryAddress);

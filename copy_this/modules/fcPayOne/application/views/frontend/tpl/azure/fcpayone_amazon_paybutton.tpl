@@ -1,4 +1,4 @@
-<div id="LoginWithAmazon" class="nextStep"></div>
+<div id="LoginWithAmazon" class="btn pull-right"></div>
 <script>
     window.onAmazonLoginReady = function() {
         amazon.Login.setClientId('[{$oViewConf->fcpoGetAmazonPayClientId()}]');

@@ -379,7 +379,6 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
             case self::FCPO_AMAZON_ERROR_PAYMENT_PLAN_NOT_SET:
                 $mReturn = 'payment';
                 break;
-            case '109':
             case self::FCPO_AMAZON_ERROR_REJECTED:
             case self::FCPO_AMAZON_ERROR_PROCESSING_FAILURE:
             case self::FCPO_AMAZON_ERROR_BUYER_EQUALS_SELLER:
