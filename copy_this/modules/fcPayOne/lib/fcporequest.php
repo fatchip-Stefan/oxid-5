@@ -118,6 +118,12 @@ class fcpoRequest extends oxSuperCfg {
         'va',
         'key'
     );
+
+    /**
+     * Used api version
+     * @var string
+     */
+    protected $_sApiVersion = '3.10';
     
     /**
      * List of RatePay related payment Ids
@@ -443,7 +449,7 @@ class fcpoRequest extends oxSuperCfg {
             case 'fcpobarzahlen':
                 $this->addParameter('clearingtype', 'csh'); //Payment method
                 $this->addParameter('cashtype', 'BZN');
-                $this->addParameter('api_version', '3.10');
+                $this->addParameter('api_version', $this->_sApiVersion);
                 break;
             case 'fcpopaydirekt':
                 $this->addParameter('clearingtype', 'wlt'); //Payment method
@@ -463,6 +469,7 @@ class fcpoRequest extends oxSuperCfg {
                 break;
             case 'fcpoamazonpay':
                 $blAddRedirectUrls = $this->_fcpoAddAmazonPayParameters($oOrder);
+                $this->addParameter('api_version', $this->_sApiVersion);
                 break;
             default:
                 return false;
@@ -1467,6 +1474,12 @@ class fcpoRequest extends oxSuperCfg {
         $this->addParameter('add_paydata[action]', 'getorderreferencedetails');
         $this->addParameter('add_paydata[amazon_reference_id]', $sAmazonReferenceId);
         $this->addParameter('add_paydata[amazon_address_token]', $sAmazonAddressToken);
+
+        // check for existing workorderid due to situation could be a re-round-trip with another payment
+        $sWorkorderId = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonWorkorderId');
+        if ($sWorkorderId) {
+            $this->addParameter('workorderid', $sWorkorderId);
+        }
 
         $oCurr = $oConfig->getActShopCurrencyObject();
         $this->addParameter('currency', $oCurr->name);
