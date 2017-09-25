@@ -142,6 +142,20 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     }
 
     /**
+     * Returning error-text AND delete it from session
+     *
+     * @param void
+     * @return string
+     */
+    public function getPaymentErrorText() {
+        $sPaymentErrorText = parent::getPaymentErrorText();
+        $this->_oFcpoHelper->fcpoDeleteSessionVariable('payerrortext');
+        $this->_oFcpoHelper->fcpoDeleteSessionVariable('payerror');
+
+        return $sPaymentErrorText;
+    }
+
+    /**
      * Method checks if user should log into shop for merging
      *
      * @param void

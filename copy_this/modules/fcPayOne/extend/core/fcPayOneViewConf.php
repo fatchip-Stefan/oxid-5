@@ -389,4 +389,21 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
         return $sOriginEmail;
     }
 
+    /**
+     * Returns if amazon runs in async mode
+     *
+     * @param void
+     * @return bool
+     */
+    public function fcpoIsAmazonAsyncMode() {
+        $oConfig = $this->getConfig();
+        $sFCPOAmazonMode = $oConfig->getConfigParam('sFCPOAmazonMode');
+        $blReturn = false;
+        if ($sFCPOAmazonMode == 'alwaysasync') {
+            $blReturn = true;
+        }
+
+        return $blReturn;
+    }
+
 }

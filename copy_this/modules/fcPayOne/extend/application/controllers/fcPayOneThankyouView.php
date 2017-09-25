@@ -205,5 +205,4 @@ class fcPayOneThankyouView extends fcPayOneThankyouView_parent {
         
         return $this->_sBarzahlenHtml;
     }
-    
 }

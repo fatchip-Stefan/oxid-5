@@ -798,13 +798,13 @@ class fcpoRequest extends oxSuperCfg {
      * @param null $sCustomMessage
      * @return void
      */
-    protected function _fcpoReturnToBasket($sCustomMessage = null) {
+    protected function _fcpoReturnToBasket($blLogout=true) {
         $oConfig = $this->getConfig();
 
         // @todo: Redirect to basket with message, currently redirect without comment
         $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
         $sShopUrl = $oConfig->getShopUrl();
-        $oUtils->redirect($sShopUrl."index.php?cl=basket");
+        $oUtils->redirect($sShopUrl."index.php?cl=basket?");
     }
 
     protected function _getFrontendHash($aHashParams) {
