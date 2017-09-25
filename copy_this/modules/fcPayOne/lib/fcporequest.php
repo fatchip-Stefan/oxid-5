@@ -2061,7 +2061,6 @@ class fcpoRequest extends oxSuperCfg {
      */
     protected function _addMappedErrorIfAvailable($aInput) {
         $aOutput = $aInput;
-
         if ($aInput['status'] == 'ERROR') {
             $sErrorCode = $aInput['errorcode'];
             $oErrorMapping = oxNew('fcpoerrormapping');
