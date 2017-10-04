@@ -1458,6 +1458,9 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
             case self::FCPO_AMAZON_ERROR_SHIPPING_ADDRESS_NOT_SET:
                 $sReturn = 'FCPO_AMAZON_ERROR_SHIPPING_ADDRESS_NOT_SET';
                 break;
+            case self::FCPO_AMAZON_ERROR_TRANSACTION_TIMED_OUT:
+                $sReturn = 'FCPO_AMAZON_ERROR_TRANSACTION_TIMED_OUT';
+                break;
             default:
                 $sReturn = 'FCPO_AMAZON_ERROR_900';
         }
