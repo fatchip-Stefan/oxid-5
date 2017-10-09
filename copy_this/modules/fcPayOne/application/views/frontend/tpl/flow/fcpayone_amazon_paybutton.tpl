@@ -25,7 +25,7 @@
 
     if (typeof window.onAmazonPaymentsReady !== 'function') {
         window.onAmazonPaymentsReady = function () {
-            window.onAmazonPaymentsReadyArray.each(function (callback) {
+            window.onAmazonPaymentsReadyArray.forEach(function (callback) {
                 callback();
             });
         };
