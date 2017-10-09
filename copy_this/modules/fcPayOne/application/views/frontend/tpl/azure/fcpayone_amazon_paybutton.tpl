@@ -1,14 +1,19 @@
-<div id="LoginWithAmazon" class="btn pull-right"></div>
+[{if !$sAmazonButtonId}]
+    [{assign var="sAmazonButtonId" value='LoginWithAmazon'}]
+[{/if}]
+
+
+<div id="[{$sAmazonButtonId}]" class="btn pull-right"></div>
 <script>
     window.onAmazonLoginReady = function() {
         amazon.Login.setClientId('[{$oViewConf->fcpoGetAmazonPayClientId()}]');
         [{if !$oViewConf->fcpoAmazonLoginSessionActive()}]
-        amazon.Login.logout();
+            amazon.Login.logout();
         [{/if}]
     };
     window.onAmazonPaymentsReady = function(){
         var authRequest;
-        OffAmazonPayments.Button('LoginWithAmazon', '[{$oViewConf->fcpoGetAmazonPaySellerId()}]', {
+        OffAmazonPayments.Button('[{$sAmazonButtonId}]', '[{$oViewConf->fcpoGetAmazonPaySellerId()}]', {
             type: '[{$oViewConf->fcpoGetAmazonPayButtonType()}]',
             color: '[{$oViewConf->fcpoGetAmazonPayButtonColor()}]',
             size: 'medium',
@@ -20,4 +25,6 @@
         });
     }
 </script>
-<script async="async" src='[{$oViewConf->fcpoGetAmazonWidgetsUrl()}]'></script>
+[{if $sAmazonButtonId != 'LoginWithAmazonButtonBottom'}]
+    <script async="async" src='[{$oViewConf->fcpoGetAmazonWidgetsUrl()}]'></script>
+[{/if}]

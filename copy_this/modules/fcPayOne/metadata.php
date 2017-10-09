@@ -235,7 +235,7 @@ $aModule = array(
         array(
             'template' => 'page/checkout/basket.tpl',
             'block' => 'basket_btn_next_bottom',
-            'file' => 'fcpo_basket_btn_next',
+            'file' => 'fcpo_basket_btn_next_bottom',
         ),
         array(
             'template' => 'page/checkout/basket.tpl',

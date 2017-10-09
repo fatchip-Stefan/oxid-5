@@ -10,5 +10,5 @@
 [{if $oViewConf->fcpoCanDisplayAmazonPayButton()}]
     [{assign var="sFcPoTemplatePath" value=$oViewConf->fcpoGetActiveThemePath()}]
     [{assign var="sFcPoTemplatePath" value=$sFcPoTemplatePath|cat:'/fcpayone_amazon_paybutton.tpl'}]
-    [{include file=$oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePath)}]
+    [{include file=$oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePath) sAmazonButtonId='LoginWithAmazonUp'}]
 [{/if}]
