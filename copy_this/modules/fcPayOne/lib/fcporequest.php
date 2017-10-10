@@ -71,6 +71,7 @@ class fcpoRequest extends oxSuperCfg {
         'ID',
         'TH',
         'IN',
+        'AU',
     );
 
     /*
@@ -2143,6 +2144,9 @@ class fcpoRequest extends oxSuperCfg {
         if (!$sOrderId) {
             $sPayOneUserId = $this->_getPayoneUserIdByCustNr($oUser->oxuser__oxcustnr->value);
             if ($sPayOneUserId) {
+				/**
+                 * @var self $oPORequest
+                 */
                 $oPORequest = oxNew('fcporequest');
                 $oResponse = $oPORequest->sendRequestUpdateuser($oOrder, $oUser);
             }
@@ -2177,6 +2181,9 @@ class fcpoRequest extends oxSuperCfg {
         $oCountry->load($oOrder->oxorder__oxbillcountryid->value);
 
         if ($blIsUpdateUser === false) {
+			/**
+             * TODO: check if that if condition is correctly as request updateuser doesn't have a customerid which is invalid, as said by Payone Technical Support
+             */
             $this->addParameter('customerid', $oUser->oxuser__oxcustnr->value);
         }
         $this->addParameter('salutation', ($oOrder->oxorder__oxbillsal->value == 'MR' ? 'Herr' : 'Frau'), $blIsUpdateUser);
