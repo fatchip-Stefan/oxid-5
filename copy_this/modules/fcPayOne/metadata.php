@@ -252,6 +252,12 @@ $aModule = array(
             'block' => 'checkout_payment_errors',
             'file' => 'fcpo_payment_errors',
         ),
+        array(
+            'template' => 'form/login.tpl',
+            'block' => 'checkout_options_login_text',
+            'file' => 'fcpo_checkout_options_login_text',
+        ),
+
     ),
 );
 

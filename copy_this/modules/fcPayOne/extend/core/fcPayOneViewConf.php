@@ -310,7 +310,11 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
      */
     public function fcpoGetAmazonRedirectUrl() {
         $oConfig = oxRegistry::getConfig();
-        $sShopUrl = $oConfig->getShopUrl();
+        $sShopUrl = $oConfig->getSslShopUrl();
+        // force protocol to be 100% ssl
+        if (strpos($sShopUrl, 'http://') !== false) {
+            $sShopUrl = str_replace('http://', 'https://', $sShopUrl);
+        }
         $sRedirectUrl = $sShopUrl."index.php?cl=user&fnc=fcpoamazonloginreturn";
 
         return $sRedirectUrl;

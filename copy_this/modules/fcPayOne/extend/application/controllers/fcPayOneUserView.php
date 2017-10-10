@@ -42,23 +42,21 @@ class fcPayOneUserView extends fcPayOneUserView_parent {
     public function fcpoAmazonLoginReturn() {
         $oConfig = $this->getConfig();
         $oSession = $this->getSession();
+        $sPaymentId = 'fcpoamazonpay';
 
         // delete possible old data
         $oSession->deleteVariable('sAmazonLoginAccessToken');
-        $oSession->deleteVariable('sAmazonLoginScope');
 
-        $sAmazonLoginAccessToken = $oConfig->getRequestParameter('access_token');
-        $sAmazonLoginScope = $oConfig->getRequestParameter('scope');
+        $sAmazonLoginAccessToken = urldecode($oConfig->getRequestParameter('access_token'));
 
-        $blNeededDataAvailable = ($sAmazonLoginAccessToken && $sAmazonLoginScope);
-        $sPaymentId = 'fcpoamazonpay';
+        $blNeededDataAvailable = (bool) $sAmazonLoginAccessToken;
+
         if ($blNeededDataAvailable) {
             $oSession->setVariable('sAmazonLoginAccessToken', $sAmazonLoginAccessToken);
-            $oSession->setVariable('sAmazonLoginScope', $sAmazonLoginScope);
             $oSession->setVariable('paymentid', $sPaymentId);
             $oSession->setVariable('_selected_paymentid', $sPaymentId);
             $oBasket = $oSession->getBasket();
-            $oBasket->setPayment('fcpoamazonpay');
+            $oBasket->setPayment($sPaymentId);
         } else {
             // @todo: Redirect to basket with message, currently redirect without comment
             $oUtils = oxRegistry::getUtils();
