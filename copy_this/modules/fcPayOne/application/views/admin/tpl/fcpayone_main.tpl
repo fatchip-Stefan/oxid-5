@@ -938,6 +938,19 @@
                 </dd>
                 <div class="spacer"></div>
             </dl>
+            <dl>
+                <dt>
+                    <select name="confstrs[sFCPOAmazonLoginMode]">
+                        <option value="auto" [{if $confstrs.sFCPOAmazonLoginMode == "auto"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_LOGINMODE_AUTO"}]</option>
+                        <option value="popup" [{if $confstrs.sFCPOAmazonLoginMode == "popup"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_LOGINMODE_POPUP"}]</option>
+                        <option value="redirect" [{if $confstrs.sFCPOAmazonLoginMode == "redirect"}]selected[{/if}]>[{oxmultilang ident="FCPO_AMAZONPAY_LOGINMODE_REDIRECT"}]</option>
+                    </select>
+                </dt>
+                <dd>
+                    [{oxmultilang ident="FCPO_AMAZONPAY_LOGINMODE"}]
+                </dd>
+                <div class="spacer"></div>
+            </dl>
         </div>
     </div>
 

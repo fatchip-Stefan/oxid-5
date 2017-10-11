@@ -410,4 +410,32 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
         return $blReturn;
     }
 
+    /**
+     * Checks if popup method should be used. Depends on setting and/or
+     * ssl state
+     *
+     * @param void
+     * @return string
+     */
+    public function fcpoGetAmzPopup() {
+        $oConfig = $this->getConfig();
+        $sFCPOAmazonLoginMode = $oConfig->getConfigParam('sFCPOAmazonLoginMode');
+        switch ($sFCPOAmazonLoginMode) {
+            case 'popup':
+                $sReturn = 'true';
+                break;
+            case 'redirect':
+                $sReturn = 'false';
+                break;
+            default:
+                if ($this->isSsl()) {
+                    $sReturn = 'true';
+                } else {
+                    $sReturn = 'false';
+                }
+        }
+
+        return $sReturn;
+    }
+
 }

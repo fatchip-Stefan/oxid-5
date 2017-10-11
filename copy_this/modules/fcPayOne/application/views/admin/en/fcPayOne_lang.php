@@ -376,6 +376,10 @@ $aLang = array(
     'FCPO_AMAZONPAY_MODE_ALWAYSSYNC'            => 'Always synchronous',
     'FCPO_AMAZONPAY_MODE_ALWAYSASYNC'           => 'Always asynchronous',
     'FCPO_AMAZONPAY_MODE_FIRSTSYNCTHENSYNC'     => 'First synchronous, then try asynchronous',
+    'FCPO_AMAZONPAY_LOGINMODE'                  => 'Login-Method',
+    'FCPO_AMAZONPAY_LOGINMODE_AUTO'             => 'Automatic ("Popup" on SSL connection, "Redirect" without)',
+    'FCPO_AMAZONPAY_LOGINMODE_POPUP'            => 'Popup (Only works with SSL)',
+    'FCPO_AMAZONPAY_LOGINMODE_REDIRECT'         => 'Redirect',
 );
 
 /*

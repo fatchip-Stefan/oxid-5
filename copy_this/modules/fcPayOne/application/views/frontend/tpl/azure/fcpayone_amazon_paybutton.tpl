@@ -12,18 +12,6 @@
 
 <div id="[{$sAmazonButtonId}]" class="payone_basket_amazon_btn_flow pull-right"></div>
 <script>
-    function getURLParameter(name, source) {
-        return decodeURIComponent((new RegExp('[?|&|#]' + name + '=' +
-            '([^&]+?)(&|#|;|$)').exec(source) || [,""])[1].replace(/\+/g,
-            '%20')) || null;
-    }
-
-    var accessToken = getURLParameter("access_token", location.hash);
-
-    if (typeof accessToken === 'string' && accessToken.match(/^Atza/)) {
-        location.href = location.href + "&access_token=" + accessToken;
-    }
-
     if (typeof window.onAmazonLoginReady !== 'function') {
         window.onAmazonLoginReady = function() {
             amazon.Login.setClientId('[{$oViewConf->fcpoGetAmazonPayClientId()}]');

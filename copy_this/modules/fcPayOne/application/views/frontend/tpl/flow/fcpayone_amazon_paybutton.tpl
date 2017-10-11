@@ -12,19 +12,6 @@
 
 <div id="[{$sAmazonButtonId}][{$iAmzButtonIncluded}]" class="[{$sAmazonButtonClass}]"></div>
 <script>
-    function getURLParameter(name, source) {
-        return decodeURIComponent((new RegExp('[?|&|#]' + name + '=' +
-            '([^&]+?)(&|#|;|$)').exec(source) || [,""])[1].replace(/\+/g,
-            '%20')) || null;
-    }
-
-    var accessToken = getURLParameter("access_token", location.hash);
-
-    if (typeof accessToken === 'string' && accessToken.match(/^Atza/)) {
-        var newLocation = "[{$oViewConf->fcpoGetAmazonRedirectUrl()}]" + "&access_token=" + encodeURI(accessToken);
-        document.location.href = newLocation;
-    }
-
     // initialize client
     if (typeof window.onAmazonLoginReady !== 'function') {
         window.onAmazonLoginReady = function() {
@@ -60,11 +47,7 @@
             authorization: function () {
                 loginOptions = {
                     scope: 'payments:billing_address payments:shipping_address payments:widget profile',
-                    [{if $oViewConf->isSsl()}]
-                        popup: true
-                    [{else}]
-                        popup: false
-                    [{/if}]
+                    popup: [{$oViewConf->fcpoGetAmzPopup()}]
                 };
                 authRequest = amazon.Login.authorize(loginOptions, '[{$oViewConf->fcpoGetAmazonRedirectUrl()}]');
             }

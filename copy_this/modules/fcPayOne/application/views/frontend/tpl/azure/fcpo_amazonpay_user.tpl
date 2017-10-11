@@ -45,7 +45,23 @@
         </div>
 
         <script>
-            window.onAmazonLoginReady = function() {amazon.Login.setClientId('[{$oViewConf->fcpoGetAmazonPayClientId()}]'); };
+            function getURLParameter(name, source) {
+                return decodeURIComponent((new RegExp('[?|&|#]' + name + '=' +
+                    '([^&]+?)(&|#|;|$)').exec(source) || [,""])[1].replace(/\+/g,
+                    '%20')) || null;
+            }
+
+            var accessToken = getURLParameter("access_token", location.hash);
+
+            if (typeof accessToken === 'string' && accessToken.match(/^Atza/)) {
+                document.cookie = "amazon_Login_accessToken=" + accessToken +
+                    ";secure";
+            }
+
+            window.onAmazonLoginReady = function() {
+                amazon.Login.setClientId('[{$oViewConf->fcpoGetAmazonPayClientId()}]');
+                amazon.Login.setUseCookie(true);
+            };
             window.onAmazonPaymentsReady = function() {
                 new OffAmazonPayments.Widgets.AddressBook({
                     sellerId: '[{$oViewConf->fcpoGetAmazonPaySellerId()}]',
