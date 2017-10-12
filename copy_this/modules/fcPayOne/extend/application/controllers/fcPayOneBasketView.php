@@ -71,6 +71,8 @@ class fcPayOneBasketView extends fcPayOneBasketView_parent {
         if ($sMessage) {
             $sMessage = urldecode($sMessage);
             $mReturn = $sMessage;
+            $this->_oFcpoHelper->fcpoDeleteSessionVariable('payerrortext');
+            $this->_oFcpoHelper->fcpoDeleteSessionVariable('payerror');
         }
 
         return $mReturn;

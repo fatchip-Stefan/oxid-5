@@ -342,11 +342,7 @@ class fcpayone_order extends fcpayone_admindetails {
      */
     protected function _fcpoCheckOrderSetPaid() {
         if ($this->_sResponsePrefix == 'FCPO_CAPTURE_') {
-            $oOrder = $this->_fcpoGetOrder();
-            if ($oOrder) {
-                $oOrder->oxorder__oxpaid == new oxField(date('Y-m-d H:i:s'));
-                $oOrder->save();
-            }
+            $this->_fcpoSetOrderPaid();
         }
     }
 
@@ -356,7 +352,7 @@ class fcpayone_order extends fcpayone_admindetails {
      * @param void
      * @return mixed object|bool
      */
-    protected function _fcpoGetOrder() {#
+    protected function _fcpoGetOrder() {
         $soxId = $this->getEditObjectId();
         $mReturn = false;
 
@@ -366,6 +362,19 @@ class fcpayone_order extends fcpayone_admindetails {
         }
 
         return $mReturn;
+    }
+
+    /**
+     * Sets order paid
+     *
+     */
+    protected function _fcpoSetOrderPaid() {
+        $soxId = $this->getEditObjectId();
+        $sNowDate = date('Y-m-d H:i:s');
+        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+        $sQuery = "UPDATE oxorder SET oxpaid=".$oDb->quote($sNowDate)." WHERE OXID=".$oDb->quote($soxId);
+        $oDb->Execute($sQuery);
+        $this->_aViewData["updatelist"] =  "1";
     }
 
 }
