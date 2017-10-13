@@ -2599,20 +2599,25 @@ class fcpoRequest extends oxSuperCfg {
     public function getRefNr($oOrder = false) {
         $oDb = oxDb::getDb();
         $sRawPrefix = (string) $this->getConfig()->getConfigParam('sFCPORefPrefix');
+        $sRefNrInSession = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoRefNr');
         $sPrefix = $oDb->quote($sRawPrefix);
 
-        if ($oOrder && !empty($oOrder->oxorder__oxordernr->value)) {
-            $sRefNr = $oOrder->oxorder__oxordernr->value;
+        if ($sRefNrInSession) {
+            // there is a reference nr in the air, which indicates there have been
+            // former fails on order submission. We gonna use it again
+            $sRefNr = $sRefNrInSession;
+        } elseif ($oOrder && !empty($oOrder->oxorder__oxordernr->value)) {
+            $sRefNr = $sRawPrefix . $oOrder->oxorder__oxordernr->value;
         } else {
             $sQuery = "SELECT MAX(fcpo_refnr) FROM fcporefnr WHERE fcpo_refprefix = {$sPrefix}";
             $iMaxRefNr = $oDb->GetOne($sQuery);
-            $sRefNr = (int) $iMaxRefNr + 1;
+            $sRefNr = $sRawPrefix . (int) $iMaxRefNr + 1;
             $sQuery = "INSERT INTO fcporefnr (fcpo_refnr, fcpo_txid, fcpo_refprefix)  VALUES ('{$sRefNr}', '', {$sPrefix})";
-
             $oDb->Execute($sQuery);
+
         }
 
-        return $sRawPrefix . $sRefNr;
+        return $sRefNr;
     }
 
 }

@@ -142,10 +142,21 @@ class fcPayOneThankyouView extends fcPayOneThankyouView_parent {
         }
 
         $this->_fcpoHandleAmazonThankyou();
+        $this->_fcpoDeleteSessionVariablesOnOrderFinish();
         
         $sReturn = parent::render();
         
         return $sReturn;
+    }
+
+    /**
+     * Deletes session variables that should not last after finishing order
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoDeleteSessionVariablesOnOrderFinish() {
+        $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoRefNr');
     }
 
     /**
