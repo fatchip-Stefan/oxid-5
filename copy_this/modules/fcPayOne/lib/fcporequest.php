@@ -2611,10 +2611,10 @@ class fcpoRequest extends oxSuperCfg {
         } else {
             $sQuery = "SELECT MAX(fcpo_refnr) FROM fcporefnr WHERE fcpo_refprefix = {$sPrefix}";
             $iMaxRefNr = $oDb->GetOne($sQuery);
-            $sRefNr = $sRawPrefix . (int) $iMaxRefNr + 1;
+            $sRefNr = (int) $iMaxRefNr + 1;
+            $sRefNr = (string) $sRawPrefix . $sRefNr;
             $sQuery = "INSERT INTO fcporefnr (fcpo_refnr, fcpo_txid, fcpo_refprefix)  VALUES ('{$sRefNr}', '', {$sPrefix})";
             $oDb->Execute($sQuery);
-
         }
 
         return $sRefNr;
