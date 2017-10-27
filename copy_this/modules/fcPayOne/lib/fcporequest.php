@@ -1302,14 +1302,16 @@ class fcpoRequest extends oxSuperCfg {
         $oCurr = $oConfig->getActShopCurrencyObject();
         $this->addParameter('currency', $oCurr->name);
 
-        $this->addParameter('narrative_text', 'Test');
-
         if ($sWorkorderId !== false) {
             $this->addParameter('workorderid', $sWorkorderId);
             $this->addParameter('add_paydata[action]', 'getexpresscheckoutdetails');
         } else {
             $this->addParameter('add_paydata[action]', 'setexpresscheckout');
         }
+
+        $sCurrentWorkOrderId = ($sWorkorderId) ? $sWorkorderId : 'No ID at this point';
+        $sNarrativeText = "Performing generic request with WorkOrderID: ".$sCurrentWorkOrderId;
+        $this->addParameter('narrative_text', $sNarrativeText);
 
         $this->_addRedirectUrls('basket', false, true);
 
