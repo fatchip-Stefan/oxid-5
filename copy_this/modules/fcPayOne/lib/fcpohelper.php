@@ -495,9 +495,10 @@ class fcpohelper extends oxBase {
     protected function _fcUseDeprecatedInstantiation() {
         $oConfig = $this->getConfig();
         if (
-                ( version_compare($oConfig->getVersion(), "4.8.0") < 1 && $oConfig->getEdition() == "CE" ) ||
-                ( version_compare($oConfig->getVersion(), "4.8.0") < 1 && $oConfig->getEdition() == "PE" ) ||
-                ( version_compare($oConfig->getVersion(), "5.1.0") < 1 && $oConfig->getEdition() == "EE" )
+                ( version_compare($oConfig->getVersion(), "4.8.0",'<') && $oConfig->getEdition() == "CE" ) ||
+                ( version_compare($oConfig->getVersion(), "4.8.0", '<') < 1 && $oConfig->getEdition() == "PE" ) ||
+                ( version_compare($oConfig->getVersion(), "5.1.0", '<') && $oConfig->getEdition() == "EE" ) ||
+                ( version_compare($oConfig->getVersion(), "1.1.1", '<') && $oConfig->getEdition() == "EE" )
         ) {
             return true;
         } else {
