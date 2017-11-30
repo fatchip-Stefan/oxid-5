@@ -315,7 +315,7 @@ class fcPayOneTransactionStatusHandler extends oxBase {
 
         switch ($sNotificationType) {
             case 'email_amazonpay_failed':
-                $this->_fcpoSendProblemEmail($oOrder);
+                $this->_fcpoSendProblemMail($oOrder);
                 break;
         }
     }
