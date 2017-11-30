@@ -451,6 +451,7 @@ $aLang = array(
     'FCPO_MAIL_BODY_FAILED'                     => "%s %s,\n\nbei der Bearbeitung Ihrer Bestellung %s ist ein Fehler aufgetreten. Bitte kontaktieren Sie unseren Kundensupport unter der E-Mail-Adresse: %s",
     'FCPO_MAIL_SALUTATION_MALE'                 => "Sehr geehrter Herr",
     'FCPO_MAIL_SALUTATION_FEMALE'               => "Sehr geehrte Frau",
+    'FCPO_MAIL_SALUTATION_INFORMAL'             => "Hallo",
 );
 
 /*

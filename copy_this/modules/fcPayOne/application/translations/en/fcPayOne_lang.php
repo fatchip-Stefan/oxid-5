@@ -179,6 +179,11 @@ $aLang = array(
     'FCPO_AMAZON_ERROR_PAYMENT_PLAN_NOT_SET'        => 'Please choose payment method.',
     'FCPO_AMAZON_ERROR_SHIPPING_ADDRESS_NOT_SET'    => 'Please choose an address',
     'FCPO_AMAZON_ERROR_900'                         => 'Please choose another payment method.',
+    'FCPO_MAIL_SUBJECT_FAILED'                      => 'Problem with your order %s',
+    'FCPO_MAIL_BODY_FAILED'                         => "%s %s,\n\nyour order %s has an error. Please contact our customer support: %s",
+    'FCPO_MAIL_SALUTATION_MALE'                     => "Dear Mr",
+    'FCPO_MAIL_SALUTATION_FEMALE'                   => "Dear Mrs",
+    'FCPO_MAIL_SALUTATION_INFORMAL'                 => "Hello",
 );
 
 /*

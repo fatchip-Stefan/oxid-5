@@ -385,6 +385,7 @@ $aLang = array(
     'FCPO_MAIL_BODY_FAILED'                     => "%s %s,\n\nyour order %s has an error. Please contact our customer support: %s",
     'FCPO_MAIL_SALUTATION_MALE'                 => "Dear Mr",
     'FCPO_MAIL_SALUTATION_FEMALE'               => "Dear Mrs",
+    'FCPO_MAIL_SALUTATION_INFORMAL'             => "Hello",
 );
 
 /*

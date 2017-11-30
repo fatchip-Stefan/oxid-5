@@ -325,7 +325,6 @@ class fcPayOneTransactionStatusHandler extends oxBase {
         $sCustomerEmail = $oOrder->oxorder__oxbillemail->value;
         $sSubject = $this->_fcpoGetSubjectByNotificationType($oOrder);
         $sBody = $this->_fcpoGetBodyByNotificationType($oOrder);
-
         $oEmail->sendEmail($sCustomerEmail, $sSubject, $sBody);
     }
 
@@ -340,29 +339,38 @@ class fcPayOneTransactionStatusHandler extends oxBase {
 
     protected function _fcpoGetBodyByNotificationType($oOrder) {
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
-        $sBodyRaw = $oLang->translateString('FCPO_MAIL_SUBJECT_FAILED');
+        $sBodyRaw = $oLang->translateString('FCPO_MAIL_BODY_FAILED');
         $blIsMale = $this->_fcIsMale($oOrder);
 
         // salutation
-        $sSalutation = $oLang->translateString('FCPO_MAIL_SALUTATION_FEMALE');
-        if ($blIsMale) {
+        $sSalutation = $oLang->translateString('FCPO_MAIL_SALUTATION_INFORMAL');
+        if ($blIsMale === true) {
             $sSalutation = $oLang->translateString('FCPO_MAIL_SALUTATION_MALE');
+        } else if ($blIsMale === false) {
+            $sSalutation = $oLang->translateString('FCPO_MAIL_SALUTATION_FEMALE');
         }
-        $sLName = $oOrder->oxorder__oxbilllname->value;
+
+        $sCustomerName = $oOrder->oxorder__oxbilllname->value;
+        if ($blIsMale === null) {
+            $sCustomerName = $oOrder->oxorder__oxbillfname->value." ".$oOrder->oxorder__oxbilllname->value;
+        }
+
         $sOrderNr = $oOrder->oxorder__oxordernr->value;
         $oShop = oxNew('oxShop');
         $oShop->load($oOrder->oxorder__oxshopid->value);
         $sResponseEmail = $oShop->oxshops__oxorderemail->value;
 
-        $sBody = sprintf($sBodyRaw, $sSalutation, $sLName, $sOrderNr, $sResponseEmail);
+        $sBody = sprintf($sBodyRaw, $sSalutation, $sCustomerName, $sOrderNr, $sResponseEmail);
 
         return $sBody;
     }
 
     protected function _fcIsMale($oOrder) {
         $sBillSalutation = $oOrder->oxorder__oxbillsal->value;
-        $blReturn = false;
+        $blReturn = null;
         if ($sBillSalutation == 'MR') {
+            $blReturn = true;
+        } elseif ($sBillSalutation == 'MRS') {
             $blReturn = true;
         }
 

@@ -1,5 +1,5 @@
 <?php
-/**
+/** 
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -17,7 +17,7 @@
  * @copyright (C) Payone GmbH
  * @version   OXID eShop CE
  */
-
+ 
 
 $sLangName  = "English";
 // -------------------------------
@@ -99,7 +99,7 @@ $aLang = array(
     'FCPO_HELP_MERCHANTID'                      => 'You will find your PAYONE Merchant-ID on each invoice of PAYONE as well as on the right upper corner of the PAYONE Merchant Interface (PMI).',
     'FCPO_HELP_PORTALID'                        => 'Please enter PAYONE Portal-ID which is used to complete payments.<br>You will find your Portal-ID at <a href="http://www.payone.de" target="_blank">http://www.payone.de</a> > Merchant-Login at menu entry Configuration > Payment Portals<br><br>You will get all relevant configuration parameters [edit] under tab [API-Parameter]',
     'FCPO_HELP_PORTALKEY'                       => 'Please enter the Key that is used for secure transaction . This can be freely configured by you in PAYONE Portal interface.<br>You can find this configuration at <a href="http://www.payone.de" target="_blank">http://www.payone.de</a> > Merchant-Login at menu entry Configuration > Payment Portals > [editieren] > Reiter [Erweitert] > Key<br><br>You will get all relevant configuration parameters under tab [API-Parameter]',
-    'FCPO_HELP_OPERATIONMODE'                   => 'Hier können Sie für diese Zahlungsart festlegen ob die Zahlungen im Testmodus abgewickelt werden, oder ob diese Live ausgeführt werden. Bitte beachten Sie, dass für den Testmodus die definierten Testdaten verwendet werden müssen.',
+    'FCPO_HELP_OPERATIONMODE'                   => 'Hier k�nnen Sie f�r diese Zahlungsart festlegen ob die Zahlungen im Testmodus abgewickelt werden, oder ob diese Live ausgef�hrt werden. Bitte beachten Sie, dass f�r den Testmodus die definierten Testdaten verwendet werden m�ssen.',
     'FCPO_HELP_OPERATIONMODE'					=> 'Here you can configure if the payments are processed in test mode, or whether they are performed live. Please note that for using the test mode, usage of defined test data si required.',
     'FCPO_HELP_SUBACCOUNTID'                    => 'Please enter the ID of the Sub-Account, which will be processed through the payments and allocated. <br> The ID can be found at <a href = "http://www.payone.de" target = "_blank" > http://www.payone.de </ a>> Merchant Login in the menu Settings> Accounts <br> All relevant parameters for configuration, please visit <a href = "http://www.payone . de [edit] "target =" _blank "> http://www.payone.de </ a>> Merchant Login in the menu configuration> Payment portals>> tab [API parameters]',
     'FCPO_HELP_POSCHECK'                        => 'Here you can define whether a check should be carried out by the bank against the POS-lock file. Please note that is done the module "Protect" must have been commissioned and the trial only for the direct debit payment Germany.',
@@ -199,7 +199,7 @@ $aLang = array(
     'FCPO_HELP_SETTLE_ACCOUNT'                  => 'Disable checkbox for partial "Perform settlement" . Be activated during the last partial delivery has this option to perform a balancing accounts. Please note that this function only for ELV, in advance, online payment and billing is available. Also this feature for credit card prior to activation of PAYONE is available.',
     'FCPO_PRESAVE_ORDER'                        => 'Save order before authorization',
     'FCPO_REDUCE_STOCK'                         => 'Reduce stock',
-    'FCPO_HELP_REDUCE_STOCK'                    => 'This configuration only has effect when "Save order before authorization" is activated and the customer is redirected to an external paymentservice ( i.e. Sofortüberweisung, PayPal or creditcard with 3D Secure ). This configuration defines if the stock for the articles is reduced before or after the redirect to the external paymentservice.',
+    'FCPO_HELP_REDUCE_STOCK'                    => 'This configuration only has effect when "Save order before authorization" is activated and the customer is redirected to an external paymentservice ( i.e. Sofort�berweisung, PayPal or creditcard with 3D Secure ). This configuration defines if the stock for the articles is reduced before or after the redirect to the external paymentservice.',
     'FCPO_REDUCE_STOCK_BEFORE'                  => 'before authorization',
     'FCPO_REDUCE_STOCK_AFTER'                   => 'after authorization',
     'FCPO_HELP_PRESAVE_ORDER'                   => 'The order is saved before the authorization als incomplete Order, so that there is a order-number which can be sent to Payone.',
@@ -249,6 +249,7 @@ $aLang = array(
     'fcpo_status_vsettlement'                   => "vsettlement",
     'fcpo_status_transfer'                      => "transfer",
     'fcpo_status_invoice'                       => "invoice",
+    'fcpo_status_failed'                        => "failed",
 
     'FCPO_KLARNA_STORE_ID_ADMIN'                => "Klarna StoreIDs",
     'FCPO_KLARNA_ADD_STORE_ID'                  => "add StoreID",
@@ -376,6 +377,15 @@ $aLang = array(
     'FCPO_AMAZONPAY_MODE_ALWAYSSYNC'            => 'Always synchronous',
     'FCPO_AMAZONPAY_MODE_ALWAYSASYNC'           => 'Always asynchronous',
     'FCPO_AMAZONPAY_MODE_FIRSTSYNCTHENSYNC'     => 'First synchronous, then try asynchronous',
+    'FCPO_AMAZONPAY_LOGINMODE'                  => 'Login-Method',
+    'FCPO_AMAZONPAY_LOGINMODE_AUTO'             => 'Automatic ("Popup" on SSL connection, "Redirect" without)',
+    'FCPO_AMAZONPAY_LOGINMODE_POPUP'            => 'Popup (Only works with SSL)',
+    'FCPO_AMAZONPAY_LOGINMODE_REDIRECT'         => 'Redirect',
+    'FCPO_MAIL_SUBJECT_FAILED'                  => 'Problem with your order %s',
+    'FCPO_MAIL_BODY_FAILED'                     => "%s %s,\n\nyour order %s has an error. Please contact our customer support: %s",
+    'FCPO_MAIL_SALUTATION_MALE'                 => "Dear Mr",
+    'FCPO_MAIL_SALUTATION_FEMALE'               => "Dear Mrs",
+    'FCPO_MAIL_SALUTATION_INFORMAL'             => "Hello",
 );
 
 /*

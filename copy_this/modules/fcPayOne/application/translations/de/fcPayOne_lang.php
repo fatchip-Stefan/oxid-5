@@ -188,6 +188,11 @@ $aLang = array(
     'FCPO_AMAZON_ERROR_900'                         => 'Entschuldigung, die Transaktion mit Amazon Pay war nicht erfolgreich. Bitte wählen Sie eine andere Zahlart.',
     'FCPO_AMAZON_LOGIN'                             => 'Mit Amazon einloggen.',
     'FCPO_OR'                                       => 'oder',
+    'FCPO_MAIL_SUBJECT_FAILED'                      => 'Problem mit Ihrer Bestellung %s',
+    'FCPO_MAIL_BODY_FAILED'                         => "%s %s,\n\nbei der Bearbeitung Ihrer Bestellung %s ist ein Fehler aufgetreten. Bitte kontaktieren Sie unseren Kundensupport unter der E-Mail-Adresse: %s",
+    'FCPO_MAIL_SALUTATION_MALE'                     => "Sehr geehrter Herr",
+    'FCPO_MAIL_SALUTATION_FEMALE'                   => "Sehr geehrte Frau",
+    'FCPO_MAIL_SALUTATION_INFORMAL'                 => "Hallo",
 );
 
 /*
