@@ -258,6 +258,7 @@ $aLang = array(
     'fcpo_status_vsettlement'                   => "Abrechnung eines Abrechnungskontos (VSETTLEMENT)",
     'fcpo_status_transfer'                      => "Umbuchung (TRANSFER)",
     'fcpo_status_invoice'                       => "Erzeugung eines Belegs (INVOICE)",
+    'fcpo_status_failed'                        => "Fehlgeschlagen (failed)",
 
     'FCPO_KLARNA_STORE_ID_ADMIN'                => "StoreIDs",
     'FCPO_KLARNA_ADD_STORE_ID'                  => "weitere StoreID hinzufügen",
@@ -446,6 +447,10 @@ $aLang = array(
     'FCPO_AMAZONPAY_LOGINMODE_AUTO'             => 'Automatisch (Bei SSL "Popup" und ohne "Redirect")',
     'FCPO_AMAZONPAY_LOGINMODE_POPUP'            => 'Popup (Funktioniert nur mit SSL)',
     'FCPO_AMAZONPAY_LOGINMODE_REDIRECT'         => 'Redirect',
+    'FCPO_MAIL_SUBJECT_FAILED'                  => 'Problem mit Ihrer Bestellung %s',
+    'FCPO_MAIL_BODY_FAILED'                     => "%s %s,\n\nbei der Bearbeitung Ihrer Bestellung %s ist ein Fehler aufgetreten. Bitte kontaktieren Sie unseren Kundensupport unter der E-Mail-Adresse: %s",
+    'FCPO_MAIL_SALUTATION_MALE'                 => "Sehr geehrter Herr",
+    'FCPO_MAIL_SALUTATION_FEMALE'               => "Sehr geehrte Frau",
 );
 
 /*

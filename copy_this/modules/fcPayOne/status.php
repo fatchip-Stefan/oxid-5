@@ -103,7 +103,15 @@ if(file_exists(dirname(__FILE__)."/../../bootstrap.php")) {
 class fcPayOneTransactionStatusHandler extends oxBase {
 
     protected $_aShopList = null;
-    
+
+
+    protected $_oFcpoHelper = null;
+
+    public function __construct() {
+        parent::__construct();
+        $this->_oFcpoHelper = oxNew('fcpohelper');
+    }
+
     /**
      * Check and return post parameter
      * 
@@ -289,6 +297,7 @@ class fcPayOneTransactionStatusHandler extends oxBase {
                 }
 
                 $this->_handleMapping($oOrder);
+                $this->_handleNotification($oOrder);
             }
             $this->_handleForwarding();
 
@@ -296,6 +305,82 @@ class fcPayOneTransactionStatusHandler extends oxBase {
         } else {
             echo 'Key wrong or missing!';
         }
+    }
+
+    protected function _handleNotification($oOrder) {
+        $sPayoneStatus = $this->fcGetPostParam('txaction');
+        $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
+
+        $sNotificationType = $this->_fcpoDetermineNotificationType($sPayoneStatus, $sPaymentId);
+
+        switch ($sNotificationType) {
+            case 'email_amazonpay_failed':
+                $this->_fcpoSendProblemEmail($oOrder);
+                break;
+        }
+    }
+
+    protected function _fcpoSendProblemMail($oOrder) {
+        $oEmail = oxNew('oxemail');
+        $sCustomerEmail = $oOrder->oxorder__oxbillemail->value;
+        $sSubject = $this->_fcpoGetSubjectByNotificationType($oOrder);
+        $sBody = $this->_fcpoGetBodyByNotificationType($oOrder);
+
+        $oEmail->sendEmail($sCustomerEmail, $sSubject, $sBody);
+    }
+
+    protected function _fcpoGetSubjectByNotificationType($oOrder) {
+        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $sSubjectRaw = $oLang->translateString('FCPO_MAIL_SUBJECT_FAILED');
+        $sOrderNr = $oOrder->oxorder__oxordernr->value;
+        $sSubject = sprintf($sSubjectRaw, $sOrderNr);
+
+        return $sSubject;
+     }
+
+    protected function _fcpoGetBodyByNotificationType($oOrder) {
+        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $sBodyRaw = $oLang->translateString('FCPO_MAIL_SUBJECT_FAILED');
+        $blIsMale = $this->_fcIsMale($oOrder);
+
+        // salutation
+        $sSalutation = $oLang->translateString('FCPO_MAIL_SALUTATION_FEMALE');
+        if ($blIsMale) {
+            $sSalutation = $oLang->translateString('FCPO_MAIL_SALUTATION_MALE');
+        }
+        $sLName = $oOrder->oxorder__oxbilllname->value;
+        $sOrderNr = $oOrder->oxorder__oxordernr->value;
+        $oShop = oxNew('oxShop');
+        $oShop->load($oOrder->oxorder__oxshopid->value);
+        $sResponseEmail = $oShop->oxshops__oxorderemail->value;
+
+        $sBody = sprintf($sBodyRaw, $sSalutation, $sLName, $sOrderNr, $sResponseEmail);
+
+        return $sBody;
+    }
+
+    protected function _fcIsMale($oOrder) {
+        $sBillSalutation = $oOrder->oxorder__oxbillsal->value;
+        $blReturn = false;
+        if ($sBillSalutation == 'MR') {
+            $blReturn = true;
+        }
+
+        return $blReturn;
+    }
+
+    protected function _fcpoDetermineNotificationType($sPayoneStatus, $sPaymentId) {
+        switch($sPaymentId) {
+            case 'fcpoamazonpay':
+                if ($sPayoneStatus == 'failed') {
+                    $sReturn = 'email_amazonpay_failed';
+                }
+                break;
+            default:
+                $sReturn = 'none';
+        }
+
+        return $sReturn;
     }
     
     /**

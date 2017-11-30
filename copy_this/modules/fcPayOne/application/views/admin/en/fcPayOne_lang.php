@@ -249,6 +249,7 @@ $aLang = array(
     'fcpo_status_vsettlement'                   => "vsettlement",
     'fcpo_status_transfer'                      => "transfer",
     'fcpo_status_invoice'                       => "invoice",
+    'fcpo_status_failed'                        => "failed",
 
     'FCPO_KLARNA_STORE_ID_ADMIN'                => "Klarna StoreIDs",
     'FCPO_KLARNA_ADD_STORE_ID'                  => "add StoreID",
@@ -380,6 +381,10 @@ $aLang = array(
     'FCPO_AMAZONPAY_LOGINMODE_AUTO'             => 'Automatic ("Popup" on SSL connection, "Redirect" without)',
     'FCPO_AMAZONPAY_LOGINMODE_POPUP'            => 'Popup (Only works with SSL)',
     'FCPO_AMAZONPAY_LOGINMODE_REDIRECT'         => 'Redirect',
+    'FCPO_MAIL_SUBJECT_FAILED'                  => 'Problem with your order %s',
+    'FCPO_MAIL_BODY_FAILED'                     => "%s %s,\n\nyour order %s has an error. Please contact our customer support: %s",
+    'FCPO_MAIL_SALUTATION_MALE'                 => "Dear Mr",
+    'FCPO_MAIL_SALUTATION_FEMALE'               => "Dear Mrs",
 );
 
 /*
