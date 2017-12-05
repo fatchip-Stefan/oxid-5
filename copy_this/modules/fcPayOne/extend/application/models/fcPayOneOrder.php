@@ -406,6 +406,21 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
     }
 
     /**
+     * Set folder to amazon pending if state has been triggered
+     *
+     * @param void
+     * @return void
+     */
+    protected function _setFolder() {
+        $blIsAmazonPending = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonPayOrderIsPending');
+        if ($blIsAmazonPending) {
+            $this->oxorder__oxfolder = new oxField('ORDERFOLDER_PROBLEMS', oxField::T_RAW);
+        } else {
+            parent::_setFolder();
+        }
+    }
+
+    /**
      * Overriding _setUser for correcting email-address
      *
      * @param void
@@ -597,9 +612,13 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * @return void
      */
     protected function _fcpoSetOrderStatus() {
+        $blIsAmazonPending = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonPayOrderIsPending');
+
         if ($this->_fcpoGetAppointedError() === false) {
             // updating order trans status (success status)
             $this->_setOrderStatus('OK');
+        } elseif ($blIsAmazonPending) {
+            $this->_setOrderStatus('PENDING');
         } else {
             $this->_setOrderStatus('ERROR');
         }
@@ -791,7 +810,9 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      */
     public function allowCapture() {
         $blReturn = true;
-        if ($this->oxorder__fcpoauthmode->value == 'authorization') {
+        $blIsAmazonPending = ($this->oxorder__oxtransstatus->value == 'PENDING');
+
+        if ($this->oxorder__fcpoauthmode->value == 'authorization' || $blIsAmazonPending) {
             $blReturn = false;
         }
 

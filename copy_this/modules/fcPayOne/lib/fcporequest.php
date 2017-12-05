@@ -742,8 +742,27 @@ class fcpoRequest extends oxSuperCfg {
             return $mOutput;
         }
 
+        $mOutput = $this->_fcpoAmazonPayCheckPending($mOutput);
         $mOutput = $this->_fcpoAmazonPayCheckTransactionTimedOut($mOutput);
         $mOutput = $this->_fcpoAmazonPayCheckInvalidPaymentMethod($mOutput);
+
+        return $mOutput;
+    }
+
+    /**
+     * Check if order has state pending. If this is the case set a session variable for later actions
+     *
+     * @param $mOutput
+     * @return mixed
+     */
+    protected function _fcpoAmazonPayCheckPending($mOutput) {
+        $blIsPending = (
+            $mOutput['status'] == 'PENDING'
+        );
+
+        if ($blIsPending) {
+            $this->_oFcpoHelper->fcpoSetSessionVariable('fcpoAmazonPayOrderIsPending', true);
+        }
 
         return $mOutput;
     }
