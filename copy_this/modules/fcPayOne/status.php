@@ -298,6 +298,7 @@ class fcPayOneTransactionStatusHandler extends oxBase {
 
                 $this->_handleMapping($oOrder);
                 $this->_handleNotification($oOrder);
+                $this->_handleOrderPostTrigger($oOrder);
             }
             $this->_handleForwarding();
 
@@ -307,20 +308,55 @@ class fcPayOneTransactionStatusHandler extends oxBase {
         }
     }
 
+    protected function _handleOrderPostTrigger($oOrder) {
+        $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
+        $sTxAction = $this->fcGetPostParam('txaction');
+        $sTxStatus = $this->fcGetPostParam('transaction_status');
+
+        $blIsAmazonRecover = (
+            $sPaymentId == 'fcpoamazonpay' &&
+            $sTxAction == 'appointed' &&
+            $sTxStatus == 'completed'
+        );
+
+        $blIsAmazonOrderFailed = (
+            $sPaymentId == 'fcpoamazonpay' &&
+            $sTxAction == 'failed' &&
+            $sTxStatus == 'pending'
+        );
+
+        if ($blIsAmazonRecover) {
+            $this->_fcpoRecoverOrder($oOrder);
+        }
+
+        if ($blIsAmazonOrderFailed) {
+            $this->_fcpoCancelOrder($oOrder);
+        }
+    }
+
+    protected function _fcpoRecoverOrder($oOrder) {
+        $oOrder->oxorder__oxfolder = new oxField('ORDERFOLDER_NEW');
+        $oOrder->oxorder__oxtransstatus = new oxField('OK');
+        $oOrder->save();
+    }
+
+    protected function _fcpoCancelOrder($oOrder) {
+        $oOrder->cancelOrder();
+    }
+
     protected function _handleNotification($oOrder) {
-        $sPayoneStatus = $this->fcGetPostParam('txaction');
         $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
 
-        $sNotificationType = $this->_fcpoDetermineNotificationType($sPayoneStatus, $sPaymentId);
+        $sNotificationType = $this->_fcpoDetermineNotificationType($sPaymentId);
 
         switch ($sNotificationType) {
             case 'email_amazonpay_failed':
-                $this->_fcpoSendProblemMail($oOrder);
+                $this->_fcpoSendGenericProblemMail($oOrder);
                 break;
         }
     }
 
-    protected function _fcpoSendProblemMail($oOrder) {
+    protected function _fcpoSendGenericProblemMail($oOrder) {
         $oEmail = oxNew('oxemail');
         $sCustomerEmail = $oOrder->oxorder__oxbillemail->value;
         $sSubject = $this->_fcpoGetSubjectByNotificationType($oOrder);
@@ -371,16 +407,27 @@ class fcPayOneTransactionStatusHandler extends oxBase {
         if ($sBillSalutation == 'MR') {
             $blReturn = true;
         } elseif ($sBillSalutation == 'MRS') {
-            $blReturn = true;
+            $blReturn = false;
         }
 
         return $blReturn;
     }
 
-    protected function _fcpoDetermineNotificationType($sPayoneStatus, $sPaymentId) {
+    protected function _fcpoDetermineNotificationType($sPaymentId) {
+        $sTxAction = $this->fcGetPostParam('txaction');
+        $sTxStatus = $this->fcGetPostParam('transaction_status');
+        $sFailedCause = $this->fcGetPostParam('failedcause');
+
+
         switch($sPaymentId) {
             case 'fcpoamazonpay':
-                if ($sPayoneStatus == 'failed') {
+                $blSendAmazonProblemMail = (
+                    $sTxAction == 'appointed' &&
+                    $sTxStatus == 'pending' &&
+                    $sFailedCause == '-981'
+                );
+
+                if ($blSendAmazonProblemMail) {
                     $sReturn = 'email_amazonpay_failed';
                 }
                 break;
