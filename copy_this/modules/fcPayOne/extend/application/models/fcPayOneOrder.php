@@ -405,20 +405,6 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         return $iRet;
     }
 
-    /**
-     * Set folder to amazon pending if state has been triggered
-     *
-     * @param void
-     * @return void
-     */
-    protected function _setFolder() {
-        $blIsAmazonPending = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonPayOrderIsPending');
-        if ($blIsAmazonPending) {
-            $this->oxorder__oxfolder = new oxField('ORDERFOLDER_PROBLEMS', oxField::T_RAW);
-        } else {
-            parent::_setFolder();
-        }
-    }
 
     /**
      * Overriding _setUser for correcting email-address
@@ -614,11 +600,13 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
     protected function _fcpoSetOrderStatus() {
         $blIsAmazonPending = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonPayOrderIsPending');
 
-        if ($this->_fcpoGetAppointedError() === false) {
+        if ($blIsAmazonPending) {
+            $this->_setOrderStatus('PENDING');
+            $this->oxorder__oxfolder = new oxField('ORDERFOLDER_PROBLEMS', oxField::T_RAW);
+            $this->save();
+        } elseif ($this->_fcpoGetAppointedError() === false) {
             // updating order trans status (success status)
             $this->_setOrderStatus('OK');
-        } elseif ($blIsAmazonPending) {
-            $this->_setOrderStatus('PENDING');
         } else {
             $this->_setOrderStatus('ERROR');
         }
@@ -1231,13 +1219,14 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      */
     protected function _fcpoHandleAuthorizationResponse($aResponse, $oPayGateway, $sRefNr, $sMode, $sAuthorizationType, $blReturnRedirectUrl) {
         $mReturn = false;
+        $sResponseStatus = $aResponse['status'];
 
-        if ($aResponse['status'] == 'ERROR') {
+        if ($sResponseStatus == 'ERROR') {
             $mReturn = $this->_fcpoHandleAuthorizationError($aResponse, $oPayGateway);
-        } elseif ($aResponse['status'] == 'APPROVED') {
+        } elseif (in_array($sResponseStatus,array('APPROVED','PENDING'))) {
             $this->_fcpoHandleAuthorizationApproved($aResponse, $sRefNr, $sAuthorizationType, $sMode);
             $mReturn = true;
-        } elseif ($aResponse['status'] == 'REDIRECT') {
+        } elseif ($sResponseStatus == 'REDIRECT') {
             $mReturn = $this->_fcpoHandleAuthorizationRedirect($aResponse, $sRefNr, $sAuthorizationType, $sMode, $blReturnRedirectUrl);
         }
 
