@@ -184,6 +184,9 @@ $aLang = array(
     'FCPO_MAIL_SALUTATION_MALE'                     => "Dear Mr",
     'FCPO_MAIL_SALUTATION_FEMALE'                   => "Dear Mrs",
     'FCPO_MAIL_SALUTATION_INFORMAL'                 => "Hello",
+    'FCPO_MAIL_AMZ_DECLINED_SUBJECT'                => "Please update your payment information",
+    'FCPO_MAIL_AMZ_DECLINED_BODY'                   => "Valued customer,\n\nThank you very much for your order at %s.\nAmazon Pay was not able to process your payment.\nPlease go to https://pay.amazon.com/uk/ and update the payment information for your order. Afterwards we will automatically request payment again from Amazon Pay and you will receive a confirmation email.\n\nKind regards,\n\n%s",
+
 );
 
 /*

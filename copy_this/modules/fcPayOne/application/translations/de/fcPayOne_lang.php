@@ -193,6 +193,8 @@ $aLang = array(
     'FCPO_MAIL_SALUTATION_MALE'                     => "Sehr geehrter Herr",
     'FCPO_MAIL_SALUTATION_FEMALE'                   => "Sehr geehrte Frau",
     'FCPO_MAIL_SALUTATION_INFORMAL'                 => "Hallo",
+    'FCPO_MAIL_AMZ_DECLINED_SUBJECT'                => "Bitte aktualisieren Sie Ihre Zahlungsinformationen",
+    'FCPO_MAIL_AMZ_DECLINED_BODY'                   => "Sehr geehrter Kunde,\n\nVielen Dank für Ihre Bestellung bei %s.\n\nLeider wurde Ihre Bezahlung von Amazon Pay abgelehnt. SIe können unter https://pay.amazon.com/de/ die Zahlungsinformationen für Ihre Bestellung aktualisieren, indem Sie eine andere Zahlungsweise auswählen oder eine neue Zahlungsweise angeben. Mit der neuen Zahlungsweise wird dann ein erneuter Zahlungsversuch vorgenommen, und Sie erhalten eine Bestätigungsemail.\n\nMit freundlichen Grüßen\n\n%s",
 );
 
 /*

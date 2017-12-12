@@ -351,29 +351,59 @@ class fcPayOneTransactionStatusHandler extends oxBase {
 
         switch ($sNotificationType) {
             case 'email_amazonpay_failed':
-                $this->_fcpoSendGenericProblemMail($oOrder);
+                $this->_fcpoSendAmazonDeclinedProblemMail($oOrder);
                 break;
         }
+    }
+
+    protected function _fcpoSendAmazonDeclinedProblemMail($oOrder) {
+        $oEmail = oxNew('oxemail');
+        $sCustomerEmail = $oOrder->oxorder__oxbillemail->value;
+        $sSubject = $this->_fcpoGetAmazonDeclinedSubject($oOrder);
+        $sBody = $this->_fcpoGetAmazonDeclinedBody($oOrder);
+        $oEmail->sendEmail($sCustomerEmail, $sSubject, $sBody);
+    }
+
+
+    protected function _fcpoGetAmazonDeclinedSubject($oOrder) {
+        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $sSubjectRaw = $oLang->translateString('FCPO_MAIL_AMZ_DECLINED_SUBJECT');
+        $sOrderNr = $oOrder->oxorder__oxordernr->value;
+        $sSubject = sprintf($sSubjectRaw, $sOrderNr);
+
+        return $sSubject;
+    }
+
+    protected function _fcpoGetAmazonDeclinedBody($oOrder) {
+        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $sBodyRaw = $oLang->translateString('FCPO_MAIL_AMZ_DECLINED_BODY');
+        $oShop = oxNew('oxShop');
+        $oShop->load($oOrder->oxorder__oxshopid->value);
+        $sShopname = $oShop->oxshops__oxname->value;
+
+        $sBody = sprintf($sBodyRaw, $sShopname, $sShopname);
+
+        return $sBody;
     }
 
     protected function _fcpoSendGenericProblemMail($oOrder) {
         $oEmail = oxNew('oxemail');
         $sCustomerEmail = $oOrder->oxorder__oxbillemail->value;
-        $sSubject = $this->_fcpoGetSubjectByNotificationType($oOrder);
-        $sBody = $this->_fcpoGetBodyByNotificationType($oOrder);
+        $sSubject = $this->_fcpoGetGenericProblemMailSubject($oOrder);
+        $sBody = $this->_fcpoGetGenericProblemMailBody($oOrder);
         $oEmail->sendEmail($sCustomerEmail, $sSubject, $sBody);
     }
 
-    protected function _fcpoGetSubjectByNotificationType($oOrder) {
+    protected function _fcpoGetGenericProblemMailSubject($oOrder) {
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
         $sSubjectRaw = $oLang->translateString('FCPO_MAIL_SUBJECT_FAILED');
         $sOrderNr = $oOrder->oxorder__oxordernr->value;
         $sSubject = sprintf($sSubjectRaw, $sOrderNr);
 
         return $sSubject;
-     }
+    }
 
-    protected function _fcpoGetBodyByNotificationType($oOrder) {
+    protected function _fcpoGetGenericProblemMailBody($oOrder) {
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
         $sBodyRaw = $oLang->translateString('FCPO_MAIL_BODY_FAILED');
         $blIsMale = $this->_fcIsMale($oOrder);
