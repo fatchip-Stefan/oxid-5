@@ -447,6 +447,7 @@ class fcPayOneTransactionStatusHandler extends oxBase {
         $sTxAction = $this->fcGetPostParam('txaction');
         $sTxStatus = $this->fcGetPostParam('transaction_status');
         $sFailedCause = $this->fcGetPostParam('failedcause');
+        $sReasonCode = $this->fcGetPostParam('reasoncode');
 
 
         switch($sPaymentId) {
@@ -454,7 +455,7 @@ class fcPayOneTransactionStatusHandler extends oxBase {
                 $blSendAmazonProblemMail = (
                     $sTxAction == 'appointed' &&
                     $sTxStatus == 'pending' &&
-                    $sFailedCause == '-981'
+                    $sReasonCode == '-981'
                 );
 
                 if ($blSendAmazonProblemMail) {
