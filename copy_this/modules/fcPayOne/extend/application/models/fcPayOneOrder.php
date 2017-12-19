@@ -269,18 +269,19 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
             $sPaymentId = $oBasket->getPaymentId();
 
             $blUseRedirectAfterSave = (
-                    $this->_oFcpoHelper->fcpoGetRequestParameter('fcposuccess') &&
-                    $this->_oFcpoHelper->fcpoGetRequestParameter('refnr') &&
-                    (
+                $this->_oFcpoHelper->fcpoGetRequestParameter('fcposuccess') &&
+                $this->_oFcpoHelper->fcpoGetRequestParameter('refnr') &&
+                (
                     $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoTxid') ||
                     $sPaymentId == 'fcpocreditcard_iframe'
-                    )
-                    );
+                )
+            );
 
             if ($blUseRedirectAfterSave) {
                 $this->_blIsRedirectAfterSave = true;
             }
         }
+
         return $this->_blIsRedirectAfterSave;
     }
 
@@ -445,7 +446,9 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
     protected function _fcpoEarlyValidation($blSaveAfterRedirect, $oBasket, $oUser, $blRecalculatingOrder) {
         // check if this order is already stored
         $sGetChallenge = $this->_oFcpoHelper->fcpoGetSessionVariable('sess_challenge');
-        if ($blSaveAfterRedirect === false && $this->_checkOrderExist($sGetChallenge)) {
+        $blReturnOrderExists = $this->_fcpoCheckReturnOrderExists($blSaveAfterRedirect);
+
+        if ($blReturnOrderExists) {
             $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
             $oUtils->logger('BLOCKER');
             // we might use this later, this means that somebody klicked like mad on order button
@@ -464,6 +467,26 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         }
 
         return null;
+    }
+
+    /**
+     * Determine if finalizing order will be done by exiting with orderexists statement
+     *
+     * @param bool $blSaveAfterRedirect
+     * @return void
+     */
+    protected function _fcpoCheckReturnOrderExists($blSaveAfterRedirect) {
+        $oConfig = $this->getConfig();
+        $sGetChallenge = $this->_oFcpoHelper->fcpoGetSessionVariable('sess_challenge');
+        $blFCPOPresaveOrder = $oConfig->getConfigParam('blFCPOPresaveOrder');
+
+        $blReturnOrderExists = (
+            $blSaveAfterRedirect === false &&
+            $this->_checkOrderExist($sGetChallenge) &&
+            $blFCPOPresaveOrder === false
+        );
+
+        return $blReturnOrderExists;
     }
 
     /**
