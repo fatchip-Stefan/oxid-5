@@ -455,7 +455,7 @@ class fcPayOneTransactionStatusHandler extends oxBase {
                 $blSendAmazonProblemMail = (
                     $sTxAction == 'appointed' &&
                     $sTxStatus == 'pending' &&
-                    $sReasonCode == '-981'
+                    $sReasonCode == '981'
                 );
 
                 if ($blSendAmazonProblemMail) {
