@@ -155,7 +155,7 @@
 
                     [{/if}]
 
-                    [{ if $edit->allowCapture() }]
+                    [{if $edit->allowCapture()}]
                         [{assign var="blShowCapture" value=true}]
                         [{if $edit->isDetailedProductInfoNeeded()}]
                             [{assign var="blShowCapture" value=false}]
@@ -255,7 +255,7 @@
                         </tr>
                     [{/if}]
 
-                   [{if $edit->allowDebit() }]
+                    [{if $edit->allowDebit() }]
                         [{assign var="blShowDebit" value=true}]
                         [{capture name=debit_block}]
                             <tr><td colspan="2" style="border-bottom: 1px solid black;"></td></tr>
@@ -465,6 +465,49 @@
                             [{$smarty.capture.debit_block}]
                         [{/if}]
                     [{/if}]
+
+                    [{if $oShadowBasket}]
+                        <tr>
+                            <td class="edittext" colspan="2">
+                                <strong>[{oxmultilang ident="FCPO_SHADOW_BASKET"}]</strong><br>
+                                <p>
+                                    [{oxmultilang ident="FCPO_POSSIBLE_FRAUD_DETECTED"}]
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="edittext">
+                                <strong>[{oxmultilang ident="GENERAL_BRUTTO"}]</strong>
+                            </td>
+                            <td class="edittext">
+                                <strong>[{$oShadowBasket->getPrice()->getBruttoPrice()}]</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="edittext">
+                                <strong>[{oxmultilang ident="GENERAL_NETTO"}]</strong>
+                            </td>
+                            <td class="edittext">
+                                <strong>[{$oShadowBasket->getPrice()->getNettoPrice()}]</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="edittext" colspan="2">
+                                <table>
+                                    [{foreach from=$oShadowBasket->getContents() item=$oBasketItem}]
+                                        <tr>
+                                            <td>
+                                                [{oxmultilang ident="FCPO_PRODUCT_TITLE"}]: [{$oBasketItem->getTitle()}]<br>
+                                                [{oxmultilang ident="FCPO_PRODUCT_AMOUNT"}]: [{$oBasketItem->getAmount()}]<br>
+                                                [{oxmultilang ident="FCPO_PRODUCT_PRICE"}]: [{$oBasketItem->getPrice()->getBruttoPrice()}]
+                                            </td>
+                                        </tr>
+                                    [{/foreach}]
+                                </table>
+                            </td>
+                        </tr>
+                    [{/if}]
+
                     [{if $status_oxid != '-1' && $currStatus}]
                         <tr>
                             <td colspan="2" style="border-bottom: 1px solid black;"></td>

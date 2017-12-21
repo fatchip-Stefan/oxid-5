@@ -77,6 +77,12 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
     protected $_aPaymentsProfileIdentSave = array('fcporp_bill');
 
     /**
+     * Flag for marking order as generally problematic
+     * @var bool
+     */
+    protected $_blOrderHasProblems = false;
+
+    /**
      * init object construction
      * 
      * @return null
@@ -365,6 +371,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
 
         // store orderid
         $oBasket->setOrderId($this->getId());
+        $this->_fcpoAddShadowBasketOrderId();
 
         // updating wish lists
         $this->_updateWishlist($oBasket->getContents(), $oUser);
@@ -452,6 +459,11 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
             return self::ORDER_STATE_ORDEREXISTS;
         }
 
+        // check if basket is still the same as it was before
+        if ($blSaveAfterRedirect) {
+            $this->_fcCompareBasketAgainstShadowBasket($oBasket);
+        }
+
         // if not recalculating order, use sess_challenge id, else leave old order id
         if (!$blRecalculatingOrder) {
             // use this ID
@@ -464,6 +476,164 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         }
 
         return null;
+    }
+
+    /**
+     * Checks if previously saved basket is still the same (valid) as it is now
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcCompareBasketAgainstShadowBasket($oBasket) {
+        $oShadowBasket = $this->fcpoGetShadowBasket();
+        $blIsValid = $this->_fcpoCompareBaskets($oBasket, $oShadowBasket);
+        if ($blIsValid === false) {
+            $this->_fcpoMarkOrderAsProblematic();
+            $this->_oFcpoHelper->fcpoSetSessionVariable('blBasketsDifferent', true);
+            $this->_fcpoAddShadowBasketCheckDate();
+        } else {
+            $this->_fcpoDeleteShadowBasket();
+        }
+    }
+
+    /**
+     * Adding checkdate to basket, so we can see how much time has been between
+     * creating and checking the shadow basket
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoAddShadowBasketCheckDate() {
+        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+        $oSession = $this->getSession();
+        $sSessionId = $oSession->getId();
+
+        $sQuery = "
+            UPDATE            
+                fcposhadowbasket
+            SET
+              	FCPOCHECKED=NOW()
+            WHERE
+                FCPOSESSIONID=".$oDb->quote($sSessionId)."
+            LIMIT 1
+        ";
+        $oDb->Execute($sQuery);
+    }
+
+    /**
+     * Adds orderid to shadowbasket table, so it is possible to analyze
+     * differences
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoAddShadowBasketOrderId() {
+        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+        $oSession = $this->getSession();
+        $sSessionId = $oSession->getId();
+
+        $sQuery = "
+            UPDATE            
+                fcposhadowbasket
+            SET
+              	OXORDERID=".$oDb->quote($this->getId())."
+            WHERE
+                FCPOSESSIONID=".$oDb->quote($sSessionId)."
+            LIMIT 1
+        ";
+        $oDb->Execute($sQuery);
+    }
+
+    /**
+     * Deleting Shadow-Basket
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoDeleteShadowBasket() {
+        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+        $oSession = $this->getSession();
+        $sSessionId = $oSession->getId();
+
+        $sQuery = "
+            DELETE FROM            
+                fcposhadowbasket
+            WHERE
+                FCPOSESSIONID=".$oDb->quote($sSessionId)."
+            LIMIT 1
+        ";
+        $oDb->Execute($sQuery);
+    }
+
+    /**
+     * Compares current basket with prior saved basket for avoiding fraud
+     *
+     * @param $oBasket
+     * @param $oShadowBasket
+     * @return bool
+     */
+    protected function _fcpoCompareBaskets($oBasket, $oShadowBasket) {
+        $blGeneralCheck = (
+            $oShadowBasket instanceof oxBasket &&
+            $oBasket instanceof oxBasket
+        );
+
+        if ($blGeneralCheck == false) {
+            $blReturn = false;
+        } else {
+            // compare brut sums
+            $dBruttoSumBasket = $oBasket->getBruttoSum();
+            $dBruttoSumShadowBasket = $oShadowBasket->getBruttoSum();
+
+            $blReturn = ($dBruttoSumBasket == $dBruttoSumShadowBasket);
+        }
+
+        return $blReturn;
+    }
+
+    /**
+     * Returns shadow Basket matching to sessionid
+     *
+     * @param $blByOrderId
+     * @return object
+     */
+     public function fcpoGetShadowBasket($blByOrderId=false) {
+        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+        $oSession = $this->getSession();
+        $sSessionId = $oSession->getId();
+
+        $sWhere = "FCPOSESSIONID=".$oDb->quote($sSessionId);
+        if ($blByOrderId){
+            $sWhere = "OXORDERID=".$oDb->quote($this->getId());
+        }
+
+        $sQuery = "
+            SELECT
+                FCPOBASKET
+            FROM 
+                fcposhadowbasket
+            WHERE
+                ".$sWhere."
+            LIMIT 1
+        ";
+        $sSerializedShadowBasket = $oDb->GetOne($sQuery);
+
+        $oShadowBasket = $this->_oFcpoHelper->getFactoryObject('oxBasket');
+        if ($sSerializedShadowBasket) {
+            $oShadowBasket = unserialize($sSerializedShadowBasket);
+        }
+
+        return $oShadowBasket;
+    }
+
+    /**
+     * Mark order as problematic
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoMarkOrderAsProblematic() {
+        $this->_blOrderHasProblems = true;
     }
 
     /**
@@ -492,6 +662,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * @param oxUser $oUser
      * @param oxBasket $oBasket
      * @param oxUserPayment $oUserPayment
+     * @return int
      */
     protected function _fcpoFinishOrder($blRecalculatingOrder, $oUser, $oBasket, $oUserPayment) {
         if (!$blRecalculatingOrder) {
@@ -518,16 +689,33 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
 
     /**
      * Sets order status depending on having an appointed error
-     * 
+     *
+     * @return void
      * @return void
      */
     protected function _fcpoSetOrderStatus() {
-        if ($this->_fcpoGetAppointedError() === false) {
+        $blOrderOk = $this->_fcpoValidateOrderAgainstProblems();
+        if ($blOrderOk === true) {
             // updating order trans status (success status)
             $this->_setOrderStatus('OK');
         } else {
             $this->_setOrderStatus('ERROR');
         }
+    }
+
+    /**
+     * Validates order for checking if there were any occuring problems
+     *
+     * @param void
+     * @return bool
+     */
+    protected function _fcpoValidateOrderAgainstProblems() {
+        $blOrderOk = (
+           $this->_fcpoGetAppointedError() === false &&
+           $this->_blOrderHasProblems === false
+        );
+
+        return $blOrderOk;
     }
 
     /**
@@ -1084,6 +1272,40 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         $mResult = $this->_fcpoHandleAuthorizationResponse($aResponse, $oPayGateway, $sRefNr, $sMode, $sAuthorizationType, $blReturnRedirectUrl);
 
         return $mResult;
+    }
+
+    /**
+     * Creates a copy of basket in shadow table
+     *
+     * @param void
+     * @return void
+     */
+    public function fcpoCreateShadowBasket() {
+        $oSession = $this->getSession();
+        $oBasket = $oSession->getBasket();
+        $sSessionId = $oSession->getId();
+        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+
+        $sQuery = "
+            REPLACE INTO fcposhadowbasket
+            (
+              	FCPOSESSIONID,
+              	OXORDERID,
+              	FCPOBASKET,
+              	FCPOCREATED,
+              	FCPOCHECKED
+            )
+            VALUES
+            (
+              ".$oDb->quote($sSessionId).",
+              NULL,
+              '".serialize($oBasket)."',
+              NOW(),
+              NULL
+            )
+        ";
+
+        $oDb->Execute($sQuery);
     }
 
     /**

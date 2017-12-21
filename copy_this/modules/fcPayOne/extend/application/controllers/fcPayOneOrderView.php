@@ -68,14 +68,23 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
      */
     public function execute() {
         $sFcpoMandateCheckbox = $this->_oFcpoHelper->fcpoGetRequestParameter('fcpoMandateCheckbox');
+        $sPaymentId = $this->_oFcpoHelper->fcpoGetSessionVariable('paymentid');
+        $blIsRedirectPayment = fcPayOnePayment::fcIsPayOneRedirectType($sPaymentId);
+
+        $blConfirmMandateError = (
+            (!$sFcpoMandateCheckbox || $sFcpoMandateCheckbox == 'false') &&
+            $this->_fcpoMandateAcceptanceNeeded()
+        );
         
-        $blConfirmMandateError = ((!$sFcpoMandateCheckbox || $sFcpoMandateCheckbox == 'false') && $this->_fcpoMandateAcceptanceNeeded());
-        
+        if ($blIsRedirectPayment) {
+            $this->_fcpoCreateShadowBasket();
+        }
+
         if ($blConfirmMandateError) {
             $this->_blFcpoConfirmMandateError = 1;
             return;
         }
-        
+
         return parent::execute();
     }
     
@@ -95,6 +104,17 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
             $oUtilsView->addErrorToDisplay($oExcp);
             return "basket";
         }
+    }
+
+    /**
+     * Creates a copy of current basket for later checks
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoCreateShadowBasket() {
+        $oOrder = $this->_oFcpoHelper->getFactoryObject('oxOrder');
+        $oOrder->fcpoCreateShadowBasket();
     }
     
     

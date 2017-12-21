@@ -70,6 +70,7 @@ class fcpayone_order extends fcpayone_admindetails {
             // load object
             $oOrder->load($sOxid);
             $this->_aViewData["edit"] = $oOrder;
+            $this->_aViewData["oShadowBasket"] = $oOrder->fcpoGetShadowBasket(true);
         }
 
         $this->_aViewData['sHelpURL'] = $this->_oFcpoHelper->fcpoGetHelpUrl();
