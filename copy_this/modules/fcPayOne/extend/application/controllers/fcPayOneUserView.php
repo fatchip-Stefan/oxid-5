@@ -50,7 +50,6 @@ class fcPayOneUserView extends fcPayOneUserView_parent {
 
         $sAmazonLoginAccessTokenParam = urldecode($oConfig->getRequestParameter('access_token'));
         $sAmazonLoginAccessTokenCookie = $oUtilsServer->getOxCookie('amazon_Login_accessToken');
-
         $blNeededDataAvailable = (bool) ($sAmazonLoginAccessTokenParam || $sAmazonLoginAccessTokenCookie);
 
         if ($blNeededDataAvailable) {
@@ -61,14 +60,35 @@ class fcPayOneUserView extends fcPayOneUserView_parent {
             $oBasket = $oSession->getBasket();
             $oBasket->setPayment($sPaymentId);
         } else {
+            $this->_fcpoHandleAmazonNoTokenFound();
+        }
+
+        // go ahead with rendering
+        $this->render();
+    }
+
+    /**
+     * Handles the case that there is no access token that is there or can be accessed
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoHandleAmazonNoTokenFound() {
+        $oConfig = $this->getConfig();
+
+        $sFCPOAmazonLoginMode = $oConfig->getConfigParam('sFCPOAmazonLoginMode');
+        $blAmazonRedirectLogin = ($sFCPOAmazonLoginMode == 'redirect') ? true : false;
+
+        if ($blAmazonRedirectLogin) {
+            // we need to fetch the token from location hash (via js) and put it into a cookie first
+            $this->_aViewData['blFCPOAmazonCatchHash'] = true;
+            $this->render();
+        } else {
             // @todo: Redirect to basket with message, currently redirect without comment
             $oUtils = oxRegistry::getUtils();
             $sShopUrl = $oConfig->getShopUrl();
             $oUtils->redirect($sShopUrl."index.php?cl=basket");
         }
-
-        // go ahead with rendering
-        $this->render();
     }
 
     /**
