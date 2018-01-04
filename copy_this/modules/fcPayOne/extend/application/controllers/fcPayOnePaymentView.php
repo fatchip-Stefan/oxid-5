@@ -1903,6 +1903,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      */
     protected function _fcpoPerformPayolutionPreCheck($sPaymentId, $sWorkOrderId = null) {
         $blPreCheckNeeded = $this->_fcpoCheckIfPrecheckNeeded($sPaymentId);
+        $aBankData = $this->_fcpoGetPayolutionBankData($sPaymentId);
         if ($blPreCheckNeeded) {
             $oUser = $this->getUser();
             if (!$oUser) {
@@ -1934,6 +1935,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
                 $sSelectedIndex = $this->_fcpoGetPayolutionSelectedInstallmentIndex();
                 $sDuration = $this->_fcpoPayolutionFetchDuration($sSelectedIndex);
                 $this->_oFcpoHelper->fcpoSetSessionVariable('payolution_installment_duration', $sDuration);
+                $this->_oFcpoHelper->fcpoSetSessionVariable('payolution_bankdata', $aBankData);
                 $blReturn = true;
             }
         }
