@@ -1061,13 +1061,13 @@ class fcpoRequest extends oxSuperCfg {
         $this->addParameter('language', $this->_oFcpoHelper->fcpoGetLang()->getLanguageAbbr());
 
         $blValidBankData = (
-                isset($aBankData) &&
-                is_array($aBankData) &&
-                count($aBankData) == 3 &&
-                $aBankData['fcpo_payolution_installment_accountholder'] &&
-                $aBankData['fcpo_payolution_installment_iban'] &&
-                $aBankData['fcpo_payolution_installment_bic']
-                );
+            isset($aBankData) &&
+            is_array($aBankData) &&
+            count($aBankData) == 3 &&
+            $aBankData['fcpo_payolution_installment_accountholder'] &&
+            $aBankData['fcpo_payolution_installment_iban'] &&
+            $aBankData['fcpo_payolution_installment_bic']
+        );
 
         if ($blValidBankData) {
             $this->addParameter('iban', $aBankData['fcpo_payolution_installment_iban']);
