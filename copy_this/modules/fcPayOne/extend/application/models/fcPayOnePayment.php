@@ -55,6 +55,7 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         'fcpopo_debitnote',
         'fcpopo_installment',
         'fcporp_bill',
+        'fcpo_secinvoice'
     );
     
     protected static $_aRedirectPayments = array(

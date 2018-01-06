@@ -461,6 +461,10 @@ class fcpoRequest extends oxSuperCfg {
             case 'fcporp_bill':
                 $blAddRedirectUrls = $this->_fcpoAddRatePayParameters($oOrder);
                 break;
+            case 'fcpo_secinvoice':
+                $this->addParameter('clearingtype', 'rec');
+                $this->addParameter('clearingsubtype', 'POV');
+                break;
             default:
                 return false;
         }

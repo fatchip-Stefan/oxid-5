@@ -308,6 +308,7 @@ class fcpayone_events
         'fcpopo_debitnote' => 'Payolution Lastschrift',
         'fcpopo_installment' => 'Payolution Ratenkauf',
         'fcporp_bill' => 'Ratepay Rechnungskauf',
+        'fcpo_secinvoice' => 'Gesicherter Rechnungskauf',
     );
 
     /**

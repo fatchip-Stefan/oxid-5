@@ -130,7 +130,6 @@ $aLang = array(
 'FCPO_PAYOLUTION_BIRTHDATE'                     => 'Geburtsdatum',
 'FCPO_PAYOLUTION_PRECHECK_FAILED'               => 'Die Transaktion wurde vom Finanzierungs-Dienstleister abgelehnt. Bitte wählen Sie eine andere Zahlart',
 'FCPO_PAYOLUTION_PLEASE SELECT'                 => 'Bitte wählen...',
-'FCPO_PAYOLUTION_BIRTHDATE_INVALID'             => 'Ihr Geburtsdatum wurde nicht korrekt eingegeben',
 'FCPO_PAYOLUTION_YEAR'                          => 'Jahr',
 'FCPO_PAYOLUTION_MONTH'                         => 'Monat',
 'FCPO_PAYOLUTION_DAY'                           => 'Tag',
@@ -171,6 +170,9 @@ $aLang = array(
 'FCPO_RATEPAY_USTID'                            => 'Umsatzsteueridentifiationsnummer (USt-IdNr.)',
 'FCPO_RATEPAY_NO_USTID'                         => 'Bei Firmenbestellungen ist die Angabe der Umsatzsteueridentifiationsnummer (USt-IdNr.) notwendig',
 'FCPO_RATEPAY_NO_SUFFICIENT_DATA'               => 'Es fehlen einige persönliche Angaben zu Ihrer Person. Bitte füllen Sie die eingeblendeten Felder aus.',
+'FCPO_SECINVOICE_BIRTHDATE'                     => 'Bitte geben Sie ihr Geburtsdatum an',
+'FCPO_NOT_ADULT'                                => 'Sie sind aufgrund Ihres Alters leider nicht berechtigt die gewählte Zahlart zu verwenden. Bitte wählen Sie eine andere Zahlart.',
+'FCPO_BIRTHDATE_INVALID'                        => 'Ihr Geburtsdatum wurde nicht korrekt eingegeben',
 );
 
 /*
