@@ -279,6 +279,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
                 $this->getPostFinanceCard(),
                 $this->getIdeal(),
                 $this->getP24(),
+                $this->getBancontact(),
             ),
         );
 
@@ -446,12 +447,21 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     }
 
     /**
-     * Check if sub payment method Ideal is available to the user
+     * Check if sub payment method Przelewy24 is available to the user
      *
      * @return bool
      */
     public function getP24() {
         return ($this->getConfigParam('blFCPOP24Activated') && $this->isPaymentMethodAvailableToUser('P24', 'sb'));
+    }
+
+    /**
+     * Check if sub payment method Bancontact is available to the user
+     *
+     * @return bool
+     */
+    public function getBancontact() {
+        return ($this->getConfigParam('blFCPOBCTActivated') && $this->isPaymentMethodAvailableToUser('BCT', 'sb'));
     }
 
     /**
@@ -581,6 +591,9 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         }
         if ($this->getP24()) {
             $aPaymentMetaData[] = $this->_fcpoGetOnlinePaymentData('P24');
+        }
+        if ($this->getBancontact()) {
+            $aPaymentMetaData[] = $this->_fcpoGetOnlinePaymentData('BCT');
         }
 
         return $aPaymentMetaData;
@@ -1025,6 +1038,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
             'PFC' => 'PostFinance Card',
             'IDL' => 'iDeal',
             'P24' => 'P24',
+            'BCT' => 'Bancontact',
         );
 
         $sCaption = ($aCaptions[$sIdent]) ? $aCaptions[$sIdent] : '';

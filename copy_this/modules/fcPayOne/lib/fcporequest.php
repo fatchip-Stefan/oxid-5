@@ -569,6 +569,12 @@ class fcpoRequest extends oxSuperCfg {
                 break;
             case 'P24':
                 $this->addParameter('bankcountry', 'PL');
+                break;
+            case 'BCT':
+                $oBillCountry = oxNew('oxcountry');
+                $oBillCountry->load($oOrder->oxorder__oxbillcountryid->value);
+                $this->addParameter('bankcountry', $oBillCountry->oxcountry__oxisoalpha2->value);
+                break;
             default:
                 break;
         }
