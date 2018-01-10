@@ -54,27 +54,27 @@ class fcPayOneOrderarticle extends fcPayOneOrderarticle_parent {
     public function save($oOrder = false, $blFinishingSave = true) {
         $oSession = $this->_oFcpoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
-        $sPaymentId = $oBasket->getPaymentId();
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $blPresaveOrder = $oConfig->getConfigParam('blFCPOPresaveOrder');
 
         $blUseParentOrderMethod = (
-                $oOrder === false ||
-                $blPresaveOrder === false ||
-                $oOrder->isPayOnePaymentType() === false
-                );
+            $oOrder === false ||
+            $blPresaveOrder === false ||
+            $oOrder->isPayOnePaymentType() === false
+        );
 
         if ($blUseParentOrderMethod) {
             return parent::save();
         }
 
-        $blBefore = $this->_fcpoGetBefore($blFinishingSave);
         $blReduceStockAfterRedirect = $this->_fcCheckReduceStockAfterRedirect($blFinishingSave, $oOrder);
         if ($blReduceStockAfterRedirect) {
-            $this->updateArticleStock($this->oxorderarticles__oxamount->value * (-1), $oConfig->getConfigParam('blAllowNegativeStock'));
+            $iReduceAmount = $this->oxorderarticles__oxamount->value * (-1);
+            $this->updateArticleStock($iReduceAmount, $oConfig->getConfigParam('blAllowNegativeStock'));
         }
 
         // ordered articles
+        $blBefore = $this->_fcpoGetBefore($blFinishingSave);
         if (( $blSave = oxBase::save() ) && $this->isNewOrderItem() || $blBefore === false) {
             if ($oConfig->getConfigParam('blUseStock')) {
                 if ($oConfig->getConfigParam('blPsBasketReservationEnabled')) {
@@ -111,7 +111,6 @@ class fcPayOneOrderarticle extends fcPayOneOrderarticle_parent {
         $sPaymentId = $oBasket->getPaymentId();
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
 
-        $blPresaveOrder = (bool) $oConfig->getConfigParam('blFCPOPresaveOrder');
         $blIsRedirectPayment = fcPayOnePayment::fcIsPayOneRedirectType($sPaymentId);
         $blIsRedirectAfterSave = $this->_isRedirectAfterSave($oOrder);
         $blReduceStockBefore = !(bool) $oConfig->getConfigParam('blFCPOReduceStock');
