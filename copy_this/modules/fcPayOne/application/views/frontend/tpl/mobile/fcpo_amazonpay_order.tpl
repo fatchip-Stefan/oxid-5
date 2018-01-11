@@ -43,7 +43,8 @@
                     </h3>
                 </div>
                 <div class="panel-body">
-                    [{include file=$oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePath)}]
+                    [{assign var="oDelAdress" value=$oView->getDelAddress()}]
+                    [{include file=$oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePath) delivadr=$oDelAdress}]
                 </div>
             </div>
         </form>
