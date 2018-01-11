@@ -11,7 +11,8 @@
             document.cookie = "amazon_Login_accessToken=" + accessToken +
                 ";secure";
             // and do it again
-            document.location.href = '[{$oViewConf->fcpoGetAmazonRedirectUrl()}]';
+            var addRedirectParameters = '&token_type=bearer&expires_in=3600&scope=payments%3Abilling_address payments%3Ashipping_address payments%3Awidget profile';
+            document.location.href = '[{$oViewConf->fcpoGetAmazonRedirectUrl()}]&access_token=' + accessToken + addRedirectParameters;
         }
     </script>
 [{/if}]

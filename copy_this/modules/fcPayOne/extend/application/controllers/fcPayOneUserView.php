@@ -75,9 +75,11 @@ class fcPayOneUserView extends fcPayOneUserView_parent {
      */
     protected function _fcpoHandleAmazonNoTokenFound() {
         $oConfig = $this->getConfig();
+        $aAllowedDoubleRedirectModes = array('redirect','auto');
 
         $sFCPOAmazonLoginMode = $oConfig->getConfigParam('sFCPOAmazonLoginMode');
-        $blAmazonRedirectLogin = ($sFCPOAmazonLoginMode == 'redirect') ? true : false;
+        $blAllowedForDoubleRedirect = (in_array($sFCPOAmazonLoginMode, $aAllowedDoubleRedirectModes));
+        $blAmazonRedirectLogin = $blAllowedForDoubleRedirect ? true : false;
 
         if ($blAmazonRedirectLogin) {
             // we need to fetch the token from location hash (via js) and put it into a cookie first
