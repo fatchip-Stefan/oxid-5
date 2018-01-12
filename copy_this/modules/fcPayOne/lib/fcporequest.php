@@ -400,6 +400,7 @@ class fcpoRequest extends oxSuperCfg {
      */
     protected function setPaymentParameters($oOrder, $aDynvalue, $sRefNr) {
         $blAddRedirectUrls = false;
+        $oConfig = $this->getConfig();
 
         switch ($oOrder->oxorder__oxpaymenttype->value) {
             case 'fcpocreditcard':
@@ -450,6 +451,10 @@ class fcpoRequest extends oxSuperCfg {
                 $this->addParameter('wallettype', 'PDT');
                 if (strlen($sRefNr) <= 37) {// 37 is the max in this parameter for paydirekt - otherwise the request will fail
                     $this->addParameter('narrative_text', $sRefNr);
+                }
+                $blAllowOvercapture = $oConfig->getConfigParam('blFCPOAllowOvercapture');
+                if ($blAllowOvercapture) {
+                    $this->addParameter('add_paydata[over_capture]','yes');
                 }
                 $blAddRedirectUrls = true;
                 break;
@@ -2036,6 +2041,7 @@ class fcpoRequest extends oxSuperCfg {
             return $aOutput;
         }
 
+        $sRequestUrl = '';
         foreach ($this->_aParameters as $sKey => $sValue) {
             if (is_array($sValue)) {
                 foreach ($sValue as $i => $val1) {

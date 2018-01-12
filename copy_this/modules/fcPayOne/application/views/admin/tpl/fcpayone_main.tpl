@@ -882,7 +882,24 @@
             </dl>      
         </div>
     </div>
-                
+
+    <div class="groupExp">
+        <div>
+            <a href="#" onclick="_groupExp(this);return false;" class="rc"><b>[{oxmultilang ident="FCPO_CONFIG_GROUP_PAYDIREKT"}]</b></a>
+            <dl>
+                <dt>
+                    <input type="hidden" name="confbools[blFCPOAllowOvercapture]" value="false">
+                    <input type="checkbox" class="txt" name="confbools[blFCPOAllowOvercapture]" value="true" [{if $confbools.blFCPOAllowOvercapture}]checked[{/if}] [{$readonly}]>
+                    [{oxinputhelp ident="FCPO_HELP_PAYDIREKT_OVERCAPTURE"}]
+                </dt>
+                <dd>
+                    [{oxmultilang ident="FCPO_PAYDIREKT_OVERCAPTURE"}]
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+        </div>
+    </div>
+
     <br>
     <input type="submit" class="edittext" name="save" value="[{oxmultilang ident="GENERAL_SAVE"}]" onClick="Javascript:document.myedit.fnc.value='save'" [{$readonly}]>
     <input type="submit" class="edittext" name="export" value="[{oxmultilang ident="FCPO_EXPORT_CONFIG"}]" target="_blank" onClick="Javascript:document.myedit.fnc.value='export'" [{$readonly}]>

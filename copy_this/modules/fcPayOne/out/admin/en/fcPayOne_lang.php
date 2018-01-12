@@ -382,7 +382,9 @@ $aLang = array(
     'ORDER_OVERVIEW_FCPO_ELV_KTONR' => 'Account No.',
     'sFCPOApprovalText_default' => 'I agree that a credit check is being done.',
     'sFCPODenialText_default' => 'Unfortunately, due to the credit check, we can\'t offer you the selected payment method. Please choose another payment method.',
-
+    'FCPO_CONFIG_GROUP_PAYDIREKT'               => 'Paydirekt',
+    'FCPO_PAYDIREKT_OVERCAPTURE'                => 'Allow overcapture?',
+    'FCPO_HELP_PAYDIREKT_OVERCAPTURE'           => 'Let you capture a 10% higher amount based on the sum that has been preauthorized.<br><b>Please ONLY activate this option in confirmation with Paydirekt!</b>',
 );
 
 /*
