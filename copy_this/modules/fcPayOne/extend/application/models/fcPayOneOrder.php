@@ -489,7 +489,6 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         $blIsValid = $this->_fcpoCompareBaskets($oBasket, $oShadowBasket);
         if ($blIsValid === false) {
             $this->_fcpoMarkOrderAsProblematic();
-            $this->_oFcpoHelper->fcpoSetSessionVariable('blBasketsDifferent', true);
             $this->_fcpoAddShadowBasketCheckDate();
         } else {
             $this->_fcpoDeleteShadowBasket();
@@ -577,7 +576,6 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
             $oShadowBasket instanceof oxBasket &&
             $oBasket instanceof oxBasket
         );
-
         if ($blGeneralCheck == false) {
             $blReturn = false;
         } else {
@@ -595,12 +593,13 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * Returns shadow Basket matching to sessionid
      *
      * @param $blByOrderId
-     * @return object
+     * @return mixed object | bool
      */
      public function fcpoGetShadowBasket($blByOrderId=false) {
         $oDb = $this->_oFcpoHelper->fcpoGetDb();
         $oSession = $this->getSession();
         $sSessionId = $oSession->getId();
+        $oShadowBasket = false;
 
         $sWhere = "FCPOSESSIONID=".$oDb->quote($sSessionId);
         if ($blByOrderId){
@@ -616,11 +615,11 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
                 ".$sWhere."
             LIMIT 1
         ";
+
         $sSerializedShadowBasket = $oDb->GetOne($sQuery);
 
-        $oShadowBasket = $this->_oFcpoHelper->getFactoryObject('oxBasket');
         if ($sSerializedShadowBasket) {
-            $oShadowBasket = unserialize($sSerializedShadowBasket);
+            $oShadowBasket = unserialize(base64_decode($sSerializedShadowBasket));
         }
 
         return $oShadowBasket;
@@ -1299,11 +1298,12 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
             (
               ".$oDb->quote($sSessionId).",
               NULL,
-              '".serialize($oBasket)."',
+              '".base64_encode(serialize($oBasket))."',
               NOW(),
               NULL
             )
         ";
+oxRegistry::getUtils()->writeToLog('['.date('Y-m-d H:i:s')."] "."Replacing Shadow-Basket"."\n", 'oxid115.log');
 
         $oDb->Execute($sQuery);
     }
@@ -1385,6 +1385,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
         $iOrderNotChecked = $this->_fcpoGetOrderNotChecked();
+        $this->fcpoCreateShadowBasket();
 
         $blPresaveOrder = (bool) $oConfig->getConfigParam('blFCPOPresaveOrder');
         if ($blPresaveOrder === true) {

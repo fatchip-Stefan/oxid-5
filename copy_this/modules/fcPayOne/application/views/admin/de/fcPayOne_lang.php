@@ -419,9 +419,11 @@ $aLang = array(
     'FCPO_BONI_ERROR_SET_TO_BONIVERSUM_PERSON'  => '<b>Bitte beachten Sie:</b><br>Der Adresschecktyp wurde auf "Boniversum Adresscheck Person" gesetzt, da ihre Bonitätsprüfung auf "Boniversum VERITA Score" gestellt ist.',
     'FCPO_SHADOW_BASKET'                        => 'Schatten-Warenkorb',
     'FCPO_POSSIBLE_FRAUD_DETECTED'              => 'Ein möglicher Betrugsversuch wurde entdeckt. Bitte prüfen Sie diesen Warenkorb gegen die Bestellung.',
-    'FCPO_PRODUCT_TITLE'                        => 'Name:',
-    'FCPO_PRODUCT_AMOUNT'                       => 'Anzahl:',
-    'FCPO_PRODUCT_PRICE'                        => 'Preis:',
+    'FCPO_PRODUCT_TITLE'                        => 'Name',
+    'FCPO_PRODUCT_AMOUNT'                       => 'Anzahl',
+    'FCPO_PRODUCT_PRICE'                        => 'Preis',
+    'FCPO_GENERAL_SHADOWBASKET_BRUTTO'          => 'Bruttosumme des Prüfwarenkorbs',
+    'FCPO_GENERAL_SHADOWBASKET_NETTO'           => 'Nettosumme des Prüfwarenkorbs',
 );
 
 /*

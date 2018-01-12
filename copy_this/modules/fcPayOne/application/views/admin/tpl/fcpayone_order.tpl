@@ -467,39 +467,41 @@
                     [{/if}]
 
                     [{if $oShadowBasket}]
+                        [{assign var='oShadowBasketPrice' value=$oShadowBasket->getPrice()}]
                         <tr>
-                            <td class="edittext" colspan="2">
-                                <strong>[{oxmultilang ident="FCPO_SHADOW_BASKET"}]</strong><br>
-                                <p>
+                            <td class="edittext" colspan="2" style="padding-top:20px;">
+                                <h3>[{oxmultilang ident="FCPO_SHADOW_BASKET"}]</h3><br>
+                                <span style="color:red;font-weight: bold;">
                                     [{oxmultilang ident="FCPO_POSSIBLE_FRAUD_DETECTED"}]
-                                </p>
+                                </span>
                             </td>
                         </tr>
                         <tr>
                             <td class="edittext">
-                                <strong>[{oxmultilang ident="GENERAL_BRUTTO"}]</strong>
+                                <strong>[{oxmultilang ident="FCPO_GENERAL_SHADOWBASKET_BRUTTO"}]</strong>
                             </td>
                             <td class="edittext">
-                                <strong>[{$oShadowBasket->getPrice()->getBruttoPrice()}]</strong>
+                                <strong>[{$oShadowBasket->getFProductsPrice()}]&nbsp;[{$currency->sign}]</strong>
                             </td>
                         </tr>
                         <tr>
                             <td class="edittext">
-                                <strong>[{oxmultilang ident="GENERAL_NETTO"}]</strong>
+                                <strong>[{oxmultilang ident="FCPO_GENERAL_SHADOWBASKET_NETTO"}]</strong>
                             </td>
                             <td class="edittext">
-                                <strong>[{$oShadowBasket->getPrice()->getNettoPrice()}]</strong>
+                                <strong>[{$oShadowBasket->getProductsNetPrice()}]&nbsp;[{$currency->sign}]</strong>
                             </td>
                         </tr>
                         <tr>
                             <td class="edittext" colspan="2">
                                 <table>
-                                    [{foreach from=$oShadowBasket->getContents() item=$oBasketItem}]
+                                    [{foreach from=$oShadowBasket->getContents() item='oBasketItem'}]
+                                        [{assign var='oBasketItemPrice' value=$oBasketItem->getPrice()}]
                                         <tr>
                                             <td>
                                                 [{oxmultilang ident="FCPO_PRODUCT_TITLE"}]: [{$oBasketItem->getTitle()}]<br>
                                                 [{oxmultilang ident="FCPO_PRODUCT_AMOUNT"}]: [{$oBasketItem->getAmount()}]<br>
-                                                [{oxmultilang ident="FCPO_PRODUCT_PRICE"}]: [{$oBasketItem->getPrice()->getBruttoPrice()}]
+                                                [{oxmultilang ident="FCPO_PRODUCT_PRICE"}]: [{$oBasketItem->getFTotalPrice()}]&nbsp;[{$currency->sign}]
                                             </td>
                                         </tr>
                                     [{/foreach}]

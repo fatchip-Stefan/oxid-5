@@ -109,7 +109,7 @@ class fcPayOneThankyouView extends fcPayOneThankyouView_parent {
      * @param void
      * @return bool
      */
-    public function fcpoIsAppointedError() {
+    public function fcpoOrderHasProblems() {
         $blReturn   = false;
         $oOrder     = $this->getOrder();
         

@@ -382,7 +382,13 @@ $aLang = array(
     'ORDER_OVERVIEW_FCPO_ELV_KTONR' => 'Account No.',
     'sFCPOApprovalText_default' => 'I agree that a credit check is being done.',
     'sFCPODenialText_default' => 'Unfortunately, due to the credit check, we can\'t offer you the selected payment method. Please choose another payment method.',
-
+    'FCPO_SHADOW_BASKET'                        => 'Shadow-Basket',
+    'FCPO_POSSIBLE_FRAUD_DETECTED'              => 'A possible fraud has been detected. Please compare this previously saved basket with order.',
+    'FCPO_PRODUCT_TITLE'                        => 'Name',
+    'FCPO_PRODUCT_AMOUNT'                       => 'Amount',
+    'FCPO_PRODUCT_PRICE'                        => 'Price',
+    'FCPO_GENERAL_SHADOWBASKET_BRUTTO'          => 'Brutsum of Shadowbasket',
+    'FCPO_GENERAL_SHADOWBASKET_NETTO'           => 'Netsum of Shadowbasket',
 );
 
 /*

@@ -76,10 +76,6 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
             $this->_fcpoMandateAcceptanceNeeded()
         );
         
-        if ($blIsRedirectPayment) {
-            $this->_fcpoCreateShadowBasket();
-        }
-
         if ($blConfirmMandateError) {
             $this->_blFcpoConfirmMandateError = 1;
             return;
@@ -106,18 +102,6 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
         }
     }
 
-    /**
-     * Creates a copy of current basket for later checks
-     *
-     * @param void
-     * @return void
-     */
-    protected function _fcpoCreateShadowBasket() {
-        $oOrder = $this->_oFcpoHelper->getFactoryObject('oxOrder');
-        $oOrder->fcpoCreateShadowBasket();
-    }
-    
-    
     /**
      * Checks if user already exists
      * 
