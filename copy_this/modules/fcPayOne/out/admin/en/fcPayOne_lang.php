@@ -389,6 +389,9 @@ $aLang = array(
     'FCPO_PRODUCT_PRICE'                        => 'Price',
     'FCPO_GENERAL_SHADOWBASKET_BRUTTO'          => 'Brutsum of Shadowbasket',
     'FCPO_GENERAL_SHADOWBASKET_NETTO'           => 'Netsum of Shadowbasket',
+    'FCPO_CONFIG_GROUP_PAYDIREKT'               => 'Paydirekt',
+    'FCPO_PAYDIREKT_OVERCAPTURE'                => 'Allow overcapture?',
+    'FCPO_HELP_PAYDIREKT_OVERCAPTURE'           => 'Let you capture a 10% higher amount based on the sum that has been preauthorized.<br><b>Please ONLY activate this option in confirmation with Paydirekt!</b>',
 );
 
 /*

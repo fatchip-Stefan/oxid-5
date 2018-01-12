@@ -32,9 +32,8 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
      */
     protected $_oFcpoDb = null;
 
-    /*
+    /**
      * Array of all payment method IDs belonging to PAYONE
-     *
      * @var array
      */
     protected static $_aPaymentTypes = array(
@@ -55,8 +54,13 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         'fcpopo_debitnote',
         'fcpopo_installment',
         'fcporp_bill',
+        'fcpo_secinvoice'
     );
-    
+
+    /**
+     * List of payments that are always of type redirect
+     * @var array
+     */
     protected static $_aRedirectPayments = array(
         'fcpoonlineueberweisung',
         'fcpopaypal',
@@ -64,14 +68,27 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         'fcpoklarna',
         'fcpopaydirekt',
     );
-    
+
+    /**
+     * List of payment ids which are iframe payments
+     * @var array
+     */
     protected static $_aIframePaymentTypes = array(
         'fcpocreditcard_iframe',
     );
+
+    /**
+     * List of frontend API payment types
+     * @var array
+     */
     protected static $_aFrontendApiPaymentTypes = array(
         'fcpocreditcard_iframe',
     );
-    
+
+    /**
+     * List of payments which are not allowed for authorization calls (preauth only)
+     * @var array
+     */
     protected $_aPaymentsNoAuthorize = array(
         'fcpobarzahlen',
         'fcpopo_bill',
@@ -79,6 +96,12 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         'fcporp_bill',
         'fcpopayadvance',
     );
+
+    /**
+     * Flag that indicates that current used payment is of type redirect
+     * @var bool
+     */
+    protected static $_blDynFlaggedAsRedirectPayment = null;
 
     /**
      * init object construction
@@ -91,21 +114,53 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         $this->_oFcpoDb = oxDb::getDb();
     }
 
+    /**
+     * Returns if given payment is a payone payment type
+     *
+     * @param $sPaymentId
+     * @return bool
+     */
     public static function fcIsPayOnePaymentType($sPaymentId) {
         $blReturn = (array_search($sPaymentId, self::$_aPaymentTypes) !== false) ? true : false;
         return $blReturn;
     }
-    
+
+    /**
+     * Returns if given paymentid is payone payment of type redirect
+     * Will also check from session if payment has been flagged as redirect
+     *
+     * @param $sPaymentId
+     * @return bool
+     */
     public static function fcIsPayOneRedirectType($sPaymentId) {
         $blReturn = (in_array($sPaymentId, self::$_aRedirectPayments) !== false) ? true : false;
+        $oHelper = oxNew('fcpohelper');
+        $blDynFlaggedAsRedirectPayment = (bool)$oHelper->fcpoGetSessionVariable('blDynFlaggedAsRedirectPayment');
+        $blUseDynamicFlag = (!$blReturn && $blDynFlaggedAsRedirectPayment === true);
+        if ($blUseDynamicFlag) {
+            // overwrite static value
+            $blReturn = $blDynFlaggedAsRedirectPayment;
+        }
         return $blReturn;
     }
 
+    /**
+     * Returns if given paymentid is an iframe payent
+     *
+     * @param $sPaymentId
+     * @return bool
+     */
     public static function fcIsPayOneIframePaymentType($sPaymentId) {
         $blReturn = (array_search($sPaymentId, self::$_aIframePaymentTypes) !== false) ? true : false;
         return $blReturn;
     }
 
+    /**
+     * Returns if given paymentid is of type frontend api
+     *
+     * @param $sPaymentId
+     * @return bool
+     */
     public static function fcIsPayOneFrontendApiPaymentType($sPaymentId) {
         $blReturn = (array_search($sPaymentId, self::$_aFrontendApiPaymentTypes) !== false) ? true : false;
         return $blReturn;
@@ -115,7 +170,6 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
      * Determines the operation mode ( live or test ) used in this order based on the payment (sub) method
      *
      * @param string $sType payment subtype ( Visa, MC, etc.). Default is ''
-     * 
      * @return bool
      */
     public function fcpoGetOperationMode($sType = '') {
@@ -144,7 +198,6 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
      * Adds dynvalues to the payone payment type
      * 
      * @extend getDynValues
-     * 
      * @return array dyn values
      */
     public function getDynValues() {

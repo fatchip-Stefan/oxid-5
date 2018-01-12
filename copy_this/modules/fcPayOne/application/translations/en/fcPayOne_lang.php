@@ -164,6 +164,8 @@ $aLang = array(
     'FCPO_PAYOLUTION_NO_INSTALLMENT_SELECTED' => 'You did not choose an installment.',
     'FCPO_PAYOLUTION_BIRTHDATE_INVALID' => 'Your date of birth was not entered correctly',
     'FCPO_RATEPAY_BIRTHDATE' => 'Date of birth',
+    'FCPO_SECINVOICE_BIRTHDATE' => 'Please enter your birthday',
+    'FCPO_NOT_ADULT' => 'Due to your age you are not allowed to use this payment. Please select another payment method',
 );
 
 /*

@@ -400,6 +400,7 @@ class fcpoRequest extends oxSuperCfg {
      */
     protected function setPaymentParameters($oOrder, $aDynvalue, $sRefNr) {
         $blAddRedirectUrls = false;
+        $oConfig = $this->getConfig();
 
         switch ($oOrder->oxorder__oxpaymenttype->value) {
             case 'fcpocreditcard':
@@ -451,6 +452,10 @@ class fcpoRequest extends oxSuperCfg {
                 if (strlen($sRefNr) <= 37) {// 37 is the max in this parameter for paydirekt - otherwise the request will fail
                     $this->addParameter('narrative_text', $sRefNr);
                 }
+                $blAllowOvercapture = $oConfig->getConfigParam('blFCPOAllowOvercapture');
+                if ($blAllowOvercapture) {
+                    $this->addParameter('add_paydata[over_capture]','yes');
+                }
                 $blAddRedirectUrls = true;
                 break;
             case 'fcpopo_bill':
@@ -460,6 +465,10 @@ class fcpoRequest extends oxSuperCfg {
                 break;
             case 'fcporp_bill':
                 $blAddRedirectUrls = $this->_fcpoAddRatePayParameters($oOrder);
+                break;
+            case 'fcpo_secinvoice':
+                $this->addParameter('clearingtype', 'rec');
+                $this->addParameter('clearingsubtype', 'POV');
                 break;
             default:
                 return false;
@@ -569,6 +578,12 @@ class fcpoRequest extends oxSuperCfg {
                 break;
             case 'P24':
                 $this->addParameter('bankcountry', 'PL');
+                break;
+            case 'BCT':
+                $oBillCountry = oxNew('oxcountry');
+                $oBillCountry->load($oOrder->oxorder__oxbillcountryid->value);
+                $this->addParameter('bankcountry', $oBillCountry->oxcountry__oxisoalpha2->value);
+                break;
             default:
                 break;
         }
@@ -1061,13 +1076,13 @@ class fcpoRequest extends oxSuperCfg {
         $this->addParameter('language', $this->_oFcpoHelper->fcpoGetLang()->getLanguageAbbr());
 
         $blValidBankData = (
-                isset($aBankData) &&
-                is_array($aBankData) &&
-                count($aBankData) == 3 &&
-                $aBankData['fcpo_payolution_installment_accountholder'] &&
-                $aBankData['fcpo_payolution_installment_iban'] &&
-                $aBankData['fcpo_payolution_installment_bic']
-                );
+            isset($aBankData) &&
+            is_array($aBankData) &&
+            count($aBankData) == 3 &&
+            $aBankData['fcpo_payolution_installment_accountholder'] &&
+            $aBankData['fcpo_payolution_installment_iban'] &&
+            $aBankData['fcpo_payolution_installment_bic']
+        );
 
         if ($blValidBankData) {
             $this->addParameter('iban', $aBankData['fcpo_payolution_installment_iban']);
@@ -2026,6 +2041,7 @@ class fcpoRequest extends oxSuperCfg {
             return $aOutput;
         }
 
+        $sRequestUrl = '';
         foreach ($this->_aParameters as $sKey => $sValue) {
             if (is_array($sValue)) {
                 foreach ($sValue as $i => $val1) {
