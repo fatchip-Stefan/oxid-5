@@ -99,14 +99,22 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
     
     
     /**
-     * Checks if user already exists
+     * Checks if user of this paypal order already exists
      * 
      * @param string $sEmail
      * @return mixed
      */
-    protected function _fcpoDoesUserAlreadyExist($sEmail) {
+    protected function _fcpoDoesPaypalUserAlreadyExist($sEmail) {
+        $sPaymentId = $this->_oxorder__oxpaymentid->value;
         $oOrder = $this->_oFcpoHelper->getFactoryObject('oxOrder');
-        return $oOrder->fcpoDoesUserAlreadyExist($sEmail);
+        $blReturn = $oOrder->fcpoDoesUserAlreadyExist($sEmail);
+        $blIsPaypalExpressException = ($blReturn === true && $sPaymentId == 'fcpopaypal_express');
+        if ($blIsPaypalExpressException) {
+            // always using the address that has been sent by paypal express is mandatory
+            $blReturn = false;
+        }
+
+        return $blReturn;
     }
     
     
@@ -225,7 +233,7 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
      * @param array $aResponse
      * @return object
      */
-    protected function _fcpoHandleUser($aResponse) {
+    protected function _fcpoHandlePaypalExpressUser($aResponse) {
         $sEmail = $aResponse['add_paydata[email]'];
         
         $oCurrentUser = $this->getUser();
@@ -233,7 +241,7 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
             $sEmail = $oCurrentUser->oxuser__oxusername->value;
         }
 
-        if ($sUserId = $this->_fcpoDoesUserAlreadyExist($sEmail)) {
+        if ($sUserId = $this->_fcpoDoesPaypalUserAlreadyExist($sEmail)) {
             $oUser = $this->_oFcpoHelper->getFactoryObject("oxUser");
             $oUser->load($sUserId);
 
@@ -284,7 +292,7 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
         if($sWorkorderId) {
             $oRequest   = $this->_oFcpoHelper->getFactoryObject('fcporequest');
             $aOutput    = $oRequest->sendRequestGenericPayment($sWorkorderId);
-            $oUser = $this->_fcpoHandleUser($aOutput);
+            $oUser = $this->_fcpoHandlePaypalExpressUser($aOutput);
             if($oUser) {
                 $oSession = $this->_oFcpoHelper->fcpoGetSession();
                 $oBasket = $oSession->getBasket();
