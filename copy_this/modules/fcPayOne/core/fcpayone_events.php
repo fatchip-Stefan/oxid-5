@@ -249,6 +249,30 @@ class fcpayone_events
           PRIMARY KEY (OXID)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
     ";
+
+    public static $sQueryTableFcpoUserFlags = "
+        CREATE TABLE IF NOT EXISTS `fcpouserflags` (
+          `OXID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+          `FCPOCODE` int(11) NOT NULL,
+          `FCPOEFFECT` varchar(3) COLLATE utf8_unicode_ci NOT NULL,
+          `FCPOFLAGDURATION` int(11) NOT NULL,
+          `FCPONAME` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+          `FCPODESC` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+          PRIMARY KEY (`OXID`),
+          UNIQUE KEY `FCPOCODE` (`FCPOCODE`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+    ";
+
+    public static $sQueryTableFcpoUser2Flag = "
+        CREATE TABLE IF NOT EXISTS `fcpouser2flag` (
+          `OXID` char(32) COLLATE latin1_general_ci NOT NULL,
+          `OXUSERID` char(32) COLLATE latin1_general_ci NOT NULL,
+          `FCPOUSERFLAGID` char(32) COLLATE latin1_general_ci NOT NULL,
+          `FCPOTIMESTAMP` datetime NOT NULL,
+          PRIMARY KEY (`OXID`),
+          KEY `OXUSERID` (`OXUSERID`,`FCPOUSERFLAGID`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;    
+    ";
     
     public static $sQueryAlterOxorderTxid = "ALTER TABLE oxorder ADD COLUMN FCPOTXID VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
     public static $sQueryAlterOxorderRefNr = "ALTER TABLE oxorder ADD COLUMN FCPOREFNR INT(11) DEFAULT '0' NOT NULL;";
@@ -449,6 +473,8 @@ class fcpayone_events
         self::addTableIfNotExists('fcpopdfmandates', self::$sQueryTableFcpoPdfMandates);
         self::addTableIfNotExists('fcpopayoneexpresslogos', self::$sQueryTableFcpopaypalexpresslogos);
         self::addTableIfNotExists('fcporatepay', self::$sQueryTableRatePay);
+        self::addTableIfNotExists('fcpouserflags', self::$sQueryTableFcpoUserFlags);
+        self::addTableIfNotExists('fcpouser2flag', self::$sQueryTableFcpoUser2Flag);
 
         //ADD COLUMNS TO EXISTING TABLES
         self::addColumnIfNotExists('oxorder', 'FCPOTXID', self::$sQueryAlterOxorderTxid);

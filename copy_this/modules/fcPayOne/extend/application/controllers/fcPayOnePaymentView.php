@@ -678,7 +678,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         if ($this->_oPaymentList === null) {
             $oConfig = $this->getConfig();
             $oUser = $this->getUser();
-            $blContinue = false;
 
             if ($oUser && $oConfig->getConfigParam('sFCPOBonicheckMoment') != 'after') {
                 $blContinue = $oUser->checkAddressAndScore();
@@ -689,6 +688,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
             if ($blContinue === true) {
                 parent::getPaymentList();
                 $this->_fcpoCheckPaypalExpressRemoval();
+                $this->_fcpoRemoveForbiddenPaymentsByUser();
             } else {
                 $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
                 $oUtils->redirect($this->getConfig()->getShopHomeURL() . 'cl=user', false);
@@ -1095,9 +1095,33 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return void
      */
     protected function _fcpoCheckPaypalExpressRemoval() {
+        $this->_fcpoRemovePaymentFromFrontend('fcpopaypal_express');
         //&& !$this->_oFcpoHelper->fcpoGetSessionVariable('fcpoWorkorderId')
-        if (array_key_exists('fcpopaypal_express', $this->_oPaymentList) !== false) {
-            unset($this->_oPaymentList['fcpopaypal_express']);
+    }
+
+    /**
+     * Removes payments that are forbidden by user
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoRemoveForbiddenPaymentsByUser() {
+        $oUser = $this->getUser();
+        $aForbiddenPaymentIds = $oUser->fcpoGetForbiddenPaymentIds();
+        foreach ($aForbiddenPaymentIds as $sForbiddenPaymentId) {
+            $this->_fcpoRemovePaymentFromFrontend($sForbiddenPaymentId);
+        }
+    }
+
+    /**
+     * Removes payment from frontend
+     *
+     * @param $sPaymentId
+     * @return void
+     */
+    protected function _fcpoRemovePaymentFromFrontend($sPaymentId) {
+        if (array_key_exists($sPaymentId, $this->_oPaymentList) !== false) {
+            unset($this->_oPaymentList[$sPaymentId]);
         }
     }
 
