@@ -71,6 +71,48 @@ class fcpouserflag extends oxBase {
     }
 
     /**
+     * Loads userflag by error code
+     *
+     * @param $sErrorCode
+     * @return mixed
+     */
+    public function fcpoLoadByErrorCode($sErrorCode) {
+        $sOxid = $this->_fcpoGetIdByErrorCode($sErrorCode);
+        $mReturn = $this->load($sOxid);
+
+        return $mReturn;
+    }
+
+    /**
+     * Returns if userflag is in active use
+     *
+     * @param void
+     * @return bool
+     */
+    public function fcpoGetIsActive() {
+        $blReturn = $this->_fcpoFlagIsActive();
+
+        return $blReturn;
+    }
+
+    /**
+     * Tryes to fetch userflag by error code
+     *
+     * @param $sErrorCode
+     * @return string
+     */
+    protected function _fcpoGetIdByErrorCode($sErrorCode) {
+        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+        $sQuery = "SELECT OXID FROM "
+            .$this->_sCoreTbl
+            ." WHERE FCPOCODE=".$oDb->quote($sErrorCode);
+
+        $sOxid = (string) $oDb->GetOne($sQuery);
+
+        return $sOxid;
+    }
+
+    /**
      * Setter for timestamp of when the user received the flag
      *
      * @param string $sTimeStamp

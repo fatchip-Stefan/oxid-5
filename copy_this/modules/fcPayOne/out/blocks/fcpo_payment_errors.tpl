@@ -13,3 +13,9 @@
     [{/if}]
 [{/if}]
 
+[{foreach from=$oView->fcpoGetUserFlagMessages() item='sUserFlagMessage'}]
+    <div class="payment-row">
+        <div class="alert alert-error">[{oxmultilang ident=$sUserFlagMessage}]</div>
+    </div>
+[{/foreach}]
+

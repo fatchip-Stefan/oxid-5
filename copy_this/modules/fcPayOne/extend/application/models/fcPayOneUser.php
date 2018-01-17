@@ -107,7 +107,40 @@ class fcPayOneUser extends fcPayOneUser_parent {
     }
 
     /**
-     * Adds
+     * Adds (or refreshes) a payone user flag
+     *
+     * @param $oUserFlag
+     * @return void
+     */
+    public function fcpoAddPayoneUserFlag($oUserFlag) {
+        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+        $oUtilsObject = $this->_oFcpoHelper->getFactoryObject('oxUtilsObject');
+        $sUserFlagId = $oUserFlag->fcpouserflags__oxid->value;
+        $sUserId = $this->getId();
+        $sNewOxid = $oUtilsObject->generateUId();
+
+        $sQuery = "
+          REPLACE INTO fcpouser2flag
+          (
+            OXID,
+            OXUSERID,
+            FCPOUSERFLAGID,
+            FCPOTIMESTAMP
+          )
+          VALUES
+          (
+            ".$oDb->quote($sNewOxid).",
+            ".$oDb->quote($sUserId).",
+            ".$oDb->quote($sUserFlagId).",
+            NOW()
+          )
+        ";
+
+        $oDb->Execute($sQuery);
+    }
+
+    /**
+     * Adds assigned payone userflags to user
      *
      * @param $aForbiddenPayments
      * @return void

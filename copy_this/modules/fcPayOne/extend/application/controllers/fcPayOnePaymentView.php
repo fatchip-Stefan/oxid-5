@@ -775,6 +775,27 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     }
 
     /**
+     * Template getter for current userflag messages
+     *
+     * @param void
+     * @return array
+     */
+    public function fcpoGetUserFlagMessages() {
+        $aMessages = array();
+        $oUser = $this->getUser();
+        $aUserFlags = $oUser->fcpoGetFlagsOfUser();
+        foreach ($aUserFlags as $oUserFlag) {
+            if (!$oUserFlag->fcpoGetIsActive()) continue;
+            $sMessage = $oUserFlag->fcpouserflags__fcpodesc->value;
+            if ($sMessage) {
+                $aMessages[] = $sMessage;
+            }
+        }
+
+        return $aMessages;
+    }
+
+    /**
      * Get configured operation mode ( live or test ) for creditcard
      *
      * @param string $sType sub payment type PAYONE

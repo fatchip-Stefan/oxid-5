@@ -166,6 +166,7 @@ $aLang = array(
     'FCPO_RATEPAY_BIRTHDATE' => 'Date of birth',
     'FCPO_SECINVOICE_BIRTHDATE' => 'Please enter your birthday',
     'FCPO_NOT_ADULT' => 'Due to your age you are not allowed to use this payment. Please select another payment method',
+    'FCPO_RATEPAY_REJECTED_401' => 'Ratepay payment is faded currently. Please add text here.',
 );
 
 /*
