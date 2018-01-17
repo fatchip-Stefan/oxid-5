@@ -125,8 +125,7 @@ class fcpouserflag extends oxBase {
         $iDurationHours =  $this->fcpouserflags__fcpoflagduration->value;
         $iTimeStampActiveUntil = $this->_fcpoGetTimeStampActiveUntil();
         $iTimeStampNow = time();
-
-        $blReturn = ($iTimeStampActiveUntil <= $iTimeStampNow || $iDurationHours === 0);
+        $blReturn = ($iTimeStampActiveUntil >= $iTimeStampNow || $iDurationHours === 0);
 
         return $blReturn;
     }
@@ -165,10 +164,12 @@ class fcpouserflag extends oxBase {
      */
     protected function _fcpoSetPaymentsBlocked() {
         $sEffectCode = $this->fcpouserflags__fcpoeffect->value;
+
         switch($sEffectCode) {
-            case 'RPB':
+            case 'RPR':
                 // case ratpay payments are blocked
                 $this->_fcpoAddBlockedPayment('fcporp_bill');
+                break;
         }
     }
 

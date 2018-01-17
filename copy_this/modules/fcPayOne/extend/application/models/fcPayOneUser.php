@@ -139,8 +139,6 @@ class fcPayOneUser extends fcPayOneUser_parent {
                 $this->_aUserFlags[$sUserFlagId] = $oUserFlag;
             }
         }
-
-oxRegistry::getUtils()->writeToLog(print_r($this->_aUserFlags, true)."\n", 'oxid142.log');
     }
 
     /**
@@ -163,9 +161,7 @@ oxRegistry::getUtils()->writeToLog(print_r($this->_aUserFlags, true)."\n", 'oxid
           WHERE
             OXUSERID=".$oDb->quote($sUserId)."
         ";
-oxRegistry::getUtils()->writeToLog($sQuery."\n", 'oxid142.log');
         $aRows = $oDb->getAll($sQuery);
-oxRegistry::getUtils()->writeToLog(print_r($aRows,true)."\n", 'oxid142.log');
 
         foreach ($aRows as $aRow) {
             $oUserFlag = new stdClass();
