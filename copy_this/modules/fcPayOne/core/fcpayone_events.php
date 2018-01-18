@@ -310,6 +310,7 @@ class fcpayone_events
         'fcpopo_installment' => 'Payolution Ratenkauf',
         'fcporp_bill' => 'Ratepay Rechnungskauf',
         'fcpoamazonpay' => 'AmazonPay',
+        'fcpo_secinvoice' => 'Gesicherter Rechnungskauf',
     );
 
     /**

@@ -386,6 +386,9 @@ $aLang = array(
     'FCPO_MAIL_SALUTATION_MALE'                 => "Dear Mr",
     'FCPO_MAIL_SALUTATION_FEMALE'               => "Dear Mrs",
     'FCPO_MAIL_SALUTATION_INFORMAL'             => "Hello",
+    'FCPO_CONFIG_GROUP_PAYDIREKT'               => 'Paydirekt',
+    'FCPO_PAYDIREKT_OVERCAPTURE'                => 'Allow overcapture?',
+    'FCPO_HELP_PAYDIREKT_OVERCAPTURE'           => 'Let you capture a 10% higher amount based on the sum that has been preauthorized.<br><b>Please ONLY activate this option in confirmation with Paydirekt!</b>',
 );
 
 /*

@@ -71,6 +71,7 @@ class fcpoRequest extends oxSuperCfg {
         'ID',
         'TH',
         'IN',
+        'AU',
     );
 
     /*
@@ -406,6 +407,7 @@ class fcpoRequest extends oxSuperCfg {
      */
     protected function setPaymentParameters($oOrder, $aDynvalue, $sRefNr) {
         $blAddRedirectUrls = false;
+        $oConfig = $this->getConfig();
 
         switch ($oOrder->oxorder__oxpaymenttype->value) {
             case 'fcpocreditcard':
@@ -457,6 +459,10 @@ class fcpoRequest extends oxSuperCfg {
                 if (strlen($sRefNr) <= 37) {// 37 is the max in this parameter for paydirekt - otherwise the request will fail
                     $this->addParameter('narrative_text', $sRefNr);
                 }
+                $blAllowOvercapture = $oConfig->getConfigParam('blFCPOAllowOvercapture');
+                if ($blAllowOvercapture) {
+                    $this->addParameter('add_paydata[over_capture]','yes');
+                }
                 $blAddRedirectUrls = true;
                 break;
             case 'fcpopo_bill':
@@ -470,6 +476,10 @@ class fcpoRequest extends oxSuperCfg {
             case 'fcpoamazonpay':
                 $blAddRedirectUrls = $this->_fcpoAddAmazonPayParameters($oOrder);
                 $this->addParameter('api_version', $this->_sApiVersion);
+                break;
+            case 'fcpo_secinvoice':
+                $this->addParameter('clearingtype', 'rec');
+                $this->addParameter('clearingsubtype', 'POV');
                 break;
             default:
                 return false;
@@ -579,6 +589,12 @@ class fcpoRequest extends oxSuperCfg {
                 break;
             case 'P24':
                 $this->addParameter('bankcountry', 'PL');
+                break;
+            case 'BCT':
+                $oBillCountry = oxNew('oxcountry');
+                $oBillCountry->load($oOrder->oxorder__oxbillcountryid->value);
+                $this->addParameter('bankcountry', $oBillCountry->oxcountry__oxisoalpha2->value);
+                break;
             default:
                 break;
         }
@@ -1227,13 +1243,13 @@ class fcpoRequest extends oxSuperCfg {
         $this->addParameter('language', $this->_oFcpoHelper->fcpoGetLang()->getLanguageAbbr());
 
         $blValidBankData = (
-                isset($aBankData) &&
-                is_array($aBankData) &&
-                count($aBankData) == 3 &&
-                $aBankData['fcpo_payolution_installment_accountholder'] &&
-                $aBankData['fcpo_payolution_installment_iban'] &&
-                $aBankData['fcpo_payolution_installment_bic']
-                );
+            isset($aBankData) &&
+            is_array($aBankData) &&
+            count($aBankData) == 3 &&
+            $aBankData['fcpo_payolution_installment_accountholder'] &&
+            $aBankData['fcpo_payolution_installment_iban'] &&
+            $aBankData['fcpo_payolution_installment_bic']
+        );
 
         if ($blValidBankData) {
             $this->addParameter('iban', $aBankData['fcpo_payolution_installment_iban']);
@@ -1566,14 +1582,16 @@ class fcpoRequest extends oxSuperCfg {
         $oCurr = $oConfig->getActShopCurrencyObject();
         $this->addParameter('currency', $oCurr->name);
 
-        $this->addParameter('narrative_text', 'Test');
-
         if ($sWorkorderId !== false) {
             $this->addParameter('workorderid', $sWorkorderId);
             $this->addParameter('add_paydata[action]', 'getexpresscheckoutdetails');
         } else {
             $this->addParameter('add_paydata[action]', 'setexpresscheckout');
         }
+
+        $sCurrentWorkOrderId = ($sWorkorderId) ? $sWorkorderId : 'No ID at this point';
+        $sNarrativeText = "Performing generic request with WorkOrderID: ".$sCurrentWorkOrderId;
+        $this->addParameter('narrative_text', $sNarrativeText);
 
         $this->_addRedirectUrls('basket', false, true);
 
@@ -2288,6 +2306,7 @@ class fcpoRequest extends oxSuperCfg {
             return $aOutput;
         }
 
+        $sRequestUrl = '';
         foreach ($this->_aParameters as $sKey => $sValue) {
             if (is_array($sValue)) {
                 foreach ($sValue as $i => $val1) {
@@ -2326,7 +2345,6 @@ class fcpoRequest extends oxSuperCfg {
      */
     protected function _addMappedErrorIfAvailable($aInput) {
         $aOutput = $aInput;
-
         if ($aInput['status'] == 'ERROR') {
             $sErrorCode = $aInput['errorcode'];
             $oErrorMapping = oxNew('fcpoerrormapping');
@@ -2409,6 +2427,9 @@ class fcpoRequest extends oxSuperCfg {
         if (!$sOrderId) {
             $sPayOneUserId = $this->_getPayoneUserIdByCustNr($oUser->oxuser__oxcustnr->value);
             if ($sPayOneUserId) {
+				/**
+                 * @var self $oPORequest
+                 */
                 $oPORequest = oxNew('fcporequest');
                 $oResponse = $oPORequest->sendRequestUpdateuser($oOrder, $oUser);
             }
@@ -2443,8 +2464,10 @@ class fcpoRequest extends oxSuperCfg {
         $oCountry->load($oOrder->oxorder__oxbillcountryid->value);
         $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
 
-
         if ($blIsUpdateUser === false && $sPaymentId != 'fcpoamazonpay') {
+            /**
+             * TODO: check if that if condition is correctly as request updateuser doesn't have a customerid which is invalid, as said by Payone Technical Support
+             */
             $this->addParameter('customerid', $oUser->oxuser__oxcustnr->value);
         }
         $this->addParameter('salutation', ($oOrder->oxorder__oxbillsal->value == 'MR' ? 'Herr' : 'Frau'), $blIsUpdateUser);
