@@ -105,10 +105,10 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
      * @return mixed
      */
     protected function _fcpoDoesPaypalUserAlreadyExist($sEmail) {
-        $sPaymentId = $this->_oxorder__oxpaymentid->value;
+        $sPaymentId = $this->_oFcpoHelper->fcpoGetSessionVariable('paymentid');
         $oOrder = $this->_oFcpoHelper->getFactoryObject('oxOrder');
         $blReturn = $oOrder->fcpoDoesUserAlreadyExist($sEmail);
-        $blIsPaypalExpressException = ($blReturn === true && $sPaymentId == 'fcpopaypal_express');
+        $blIsPaypalExpressException = ($blReturn !== false && $sPaymentId == 'fcpopaypal_express');
         if ($blIsPaypalExpressException) {
             // always using the address that has been sent by paypal express is mandatory
             $blReturn = false;
@@ -292,14 +292,15 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
         if($sWorkorderId) {
             $oRequest   = $this->_oFcpoHelper->getFactoryObject('fcporequest');
             $aOutput    = $oRequest->sendRequestGenericPayment($sWorkorderId);
+            $this->_oFcpoHelper->fcpoSetSessionVariable('paymentid', "fcpopaypal_express");
             $oUser = $this->_fcpoHandlePaypalExpressUser($aOutput);
+
             if($oUser) {
                 $oSession = $this->_oFcpoHelper->fcpoGetSession();
                 $oBasket = $oSession->getBasket();
                 $oBasket->setBasketUser($oUser);
 
                 // setting PayPal as current active payment
-                $this->_oFcpoHelper->fcpoSetSessionVariable('paymentid', "fcpopaypal_express");
                 $oBasket->setPayment("fcpopaypal_express");
                 
                 $sActShipSet = $this->_oFcpoHelper->fcpoGetRequestParameter('sShipSet');

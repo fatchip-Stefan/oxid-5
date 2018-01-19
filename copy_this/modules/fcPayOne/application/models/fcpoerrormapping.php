@@ -87,7 +87,7 @@ class fcpoerrormapping extends oxBase {
     /**
      * Extracts all error codes from xml file adn returns them as array
      * 
-     * @param void
+     * @param string $sType
      * @return mixed
      */
     public function fcpoGetAvailableErrorCodes($sType='general') {
