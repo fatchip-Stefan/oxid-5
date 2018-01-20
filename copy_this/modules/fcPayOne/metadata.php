@@ -1,6 +1,5 @@
 <?php
-
-/** 
+/**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -18,10 +17,13 @@
  * @copyright (C) Payone GmbH
  * @version   OXID eShop CE
  */
- 
+
+$oViewConf = oxNew("oxViewConfig");
+$sImgUrl = $oViewConf->getModuleUrl('fcpayone', 'payone_icon.png');
+
 $aModule = array(
     'id'            => 'fcpayone',
-    'title'         => 'PAYONE Payment f&uuml;r OXID eShop',
+    'title'         => '<img src="' . $sImgUrl . '" alt="FC"> PAYONE Payment f&uuml;r OXID eShop',
     'description'   => 'Sie suchen nach der optimalen Payment-L&ouml;sung f&uuml;r Ihren Online-Shop?<br><br>
                         PAYONE bietet Unternehmensl&ouml;sungen zur automatisierten und ganzheitlichen Abwicklung aller Zahlungsprozesse im E-Commerce. 
                         Der Payment Service Provider ist ein Unternehmen der Sparkassen-Finanzgruppe und von der Bundesanstalt f&uuml;r Finanzdienstleistungsaufsicht als Zahlungsinstitut zugelassen. 
