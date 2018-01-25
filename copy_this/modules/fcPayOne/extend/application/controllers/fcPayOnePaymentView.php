@@ -786,7 +786,8 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         $aUserFlags = $oUser->fcpoGetFlagsOfUser();
         foreach ($aUserFlags as $oUserFlag) {
             if (!$oUserFlag->fcpoGetIsActive()) continue;
-            $sMessage = $oUserFlag->fcpouserflags__fcpodesc->value;
+            $sCustomerMessage = $this->getPaymentErrorText();
+            $sMessage = $oUserFlag->fcpoGetTranslatedMessage($sCustomerMessage);
             if ($sMessage) {
                 $aMessages[] = $sMessage;
             }

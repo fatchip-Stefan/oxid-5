@@ -21,12 +21,12 @@
 [{foreach from=$oView->fcpoGetUserFlagMessages() item='sUserFlagMessage'}]
     [{if $sCurrentThemeName == 'mobile'}]
         <div class="payment-row">
-            <div class="alert alert-info">[{oxmultilang ident=$sUserFlagMessage}]</div>
+            <div class="alert alert-info">[{$sUserFlagMessage}]</div>
         </div>
     [{elseif $sCurrentThemeName == 'flow'}]
-        <div class="alert alert-info">[{oxmultilang ident=$sUserFlagMessage}]</div>
+        <div class="alert alert-info">[{$sUserFlagMessage}]</div>
     [{else}]
-        <div class="status info">[{oxmultilang ident=$sUserFlagMessage}]</div>
+        <div class="status info">[{$sUserFlagMessage}]</div>
     [{/if}]
 [{/foreach}]
 

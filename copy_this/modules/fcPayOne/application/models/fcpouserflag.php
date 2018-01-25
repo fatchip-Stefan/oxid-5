@@ -96,6 +96,25 @@ class fcpouserflag extends oxBase {
     }
 
     /**
+     * Returns translated message, optional a customer message as fallback
+     *
+     * @param $sCustomMessage
+     * @return string
+     */
+    public function fcGetTranslatedMessage($sCustomMessage='') {
+        $sFlagDesc = $this->fcpouserflags__fcpodesc->value;
+        $sTranslatedMessage = $sCustomMessage;
+        if ($sFlagDesc != 'CUSTOM') {
+            // user flag has a defined translation string
+            $oLang = $this->getLanguage();
+            $sTranslatedMessage = (string) $oLang->translateString($sFlagDesc);
+        }
+
+        return $sTranslatedMessage;
+    }
+
+
+    /**
      * Tryes to fetch userflag by error code
      *
      * @param $sErrorCode
