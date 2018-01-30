@@ -163,11 +163,15 @@ class fcPayOneUser extends fcPayOneUser_parent {
         $this->_aUserFlags = array();
         $aUserFlagInfos = $this->_fcpoGetUserFlagInfos();
         foreach ($aUserFlagInfos as $oUserFlagInfo) {
+            $sOxid = $oUserFlagInfo->sOxid;
             $sUserFlagId = $oUserFlagInfo->sUserFlagId;
             $sTimeStamp = $oUserFlagInfo->sTimeStamp;
 
+
+
             $oUserFlag = oxNew('fcpouserflag');
             if ($oUserFlag->load($sUserFlagId)) {
+                $oUserFlag->fcpoSetAssignId($sOxid);
                 $oUserFlag->fcpoSetTimeStamp($sTimeStamp);
                 $this->_aUserFlags[$sUserFlagId] = $oUserFlag;
             }
@@ -186,9 +190,11 @@ class fcPayOneUser extends fcPayOneUser_parent {
         $oDb = $this->_oFcpoHelper->fcpoGetDb(true);
         $sUserId = $this->getId();
         $sQuery = "
-          SELECT 
+          SELECT
+            OXID, 
             FCPOUSERFLAGID,
-            FCPOTIMESTAMP 
+            FCPODISPLAYMESSAGE,
+            FCPOTIMESTAMP
           FROM 
             fcpouser2flag 
           WHERE
@@ -198,8 +204,10 @@ class fcPayOneUser extends fcPayOneUser_parent {
 
         foreach ($aRows as $aRow) {
             $oUserFlag = new stdClass();
+            $oUserFlag->sOxid = $aRow['OXID'];
             $oUserFlag->sUserFlagId = $aRow['FCPOUSERFLAGID'];
             $oUserFlag->sTimeStamp = $aRow['FCPOTIMESTAMP'];
+            $oUserFlag->sDisplayMessage = $aRow['FCPODISPLAYMESSAGE'];
             $aUserFlagInfos[] = $oUserFlag;
         }
 

@@ -47,6 +47,12 @@ class fcpouserflag extends oxBase {
     protected $_aBlockedPaymentIds = array();
 
     /**
+     * ID of n:m table assigned to this flag
+     * @var null
+     */
+    protected $_sAssignId = null;
+
+    /**
      * Init needed data
      */
     public function __construct() {
@@ -103,8 +109,25 @@ class fcpouserflag extends oxBase {
      */
     public function fcpoGetTranslatedMessage($sCustomMessage='') {
         $sFlagDesc = $this->fcpouserflags__fcpodesc->value;
-        $sTranslatedMessage = $sCustomMessage;
-        if ($sFlagDesc != 'CUSTOM') {
+        $blSaveMessageInDb = (
+            $sCustomMessage != '' &&
+            $sFlagDesc == 'CUSTOM'
+        );
+        $blFetchMessageFromDb = (
+            (
+                $sCustomMessage == '' &&
+                $sFlagDesc == 'CUSTOM'
+            ) || $blSaveMessageInDb
+        );
+
+        if ($blSaveMessageInDb) {
+            $this->fcpoSetDisplayMessage($sCustomMessage);
+        }
+
+        if ($blFetchMessageFromDb) {
+            $sTranslatedMessage = $this->_fcpoGetMessageFromDb();
+            $sTranslatedMessage = html_entity_decode($sTranslatedMessage);
+        } else {
             // user flag has a defined translation string
             $oLang = $this->getLanguage();
             $sTranslatedMessage = (string) $oLang->translateString($sFlagDesc);
@@ -113,6 +136,24 @@ class fcpouserflag extends oxBase {
         return $sTranslatedMessage;
     }
 
+    /**
+     * Returns saved message
+     *
+     * @param void
+     * @return string
+     */
+    protected function _fcpoGetMessageFromDb() {
+        if ($this->_sAssignId) {
+            $oDb = $this->_oFcpoHelper->fcpoGetDb();
+            $sQuery = "
+          SELECT FCPODISPLAYMESSAGE 
+          FROM fcpouser2flag 
+          WHERE OXID=".$oDb->quote($this->_sAssignId);
+        }
+
+        $sMessage = (string) $oDb->getOne($sQuery);
+        return $sMessage;
+    }
 
     /**
      * Tryes to fetch userflag by error code
@@ -142,6 +183,36 @@ class fcpouserflag extends oxBase {
     }
 
     /**
+     * Sets assign id for current flag
+     *
+     * @param $sOxid
+     * @return void
+     */
+    public function fcpoSetAssignId($sOxid) {
+        $this->_sAssignId = $sOxid;
+    }
+
+    /**
+     * Sets custom display message to assigned id
+     *
+     * @param $sMessage
+     * @return void
+     */
+    public function fcpoSetDisplayMessage($sMessage) {
+        if ($this->_sAssignId) {
+            // mandatory for persisting the message
+            $oDb = $this->_oFcpoHelper->fcpoGetDb();
+            $sQuery = "
+                UPDATE fcpouser2flag 
+                SET FCPODISPLAYMESSAGE=".$oDb->quote($sMessage)."
+                WHERE OXID=".$oDb->quote($this->_sAssignId)."
+                LIMIT 1
+            ";
+            $oDb->Execute($sQuery);
+        }
+    }
+
+    /**
      * Returns an array of paymentids which are currently
      *
      * @param void
@@ -156,23 +227,6 @@ class fcpouserflag extends oxBase {
         }
 
         return $aReturn;
-    }
-
-    /**
-     * Returns translation string for current frontend message
-     *
-     * @param void
-     * @return string
-     */
-    public function fcpoGetFrontendUserMessage() {
-        $sEffectCode = $this->fcpouserflags__fcpoeffect->value;
-        switch($sEffectCode) {
-            case 'RPB':
-                // case ratpay payments are blocked
-                $sReturn = 'FCPO_MESSAGE_RATEPAY_TEMPORARY_BLOCKED';
-        }
-
-        return $sReturn;
     }
 
     /**

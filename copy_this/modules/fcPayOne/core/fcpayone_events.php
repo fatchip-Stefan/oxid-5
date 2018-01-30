@@ -265,9 +265,10 @@ class fcpayone_events
 
     public static $sQueryTableFcpoUser2Flag = "
         CREATE TABLE IF NOT EXISTS `fcpouser2flag` (
-          `OXID` char(32) COLLATE latin1_general_ci NOT NULL,
-          `OXUSERID` char(32) COLLATE latin1_general_ci NOT NULL,
-          `FCPOUSERFLAGID` char(32) COLLATE latin1_general_ci NOT NULL,
+          `OXID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+          `OXUSERID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+          `FCPOUSERFLAGID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+          `FCPODISPLAYMESSAGE` text COLLATE utf8_unicode_ci NOT NULL,
           `FCPOTIMESTAMP` datetime NOT NULL,
           PRIMARY KEY (`OXID`),
           KEY `OXUSERID` (`OXUSERID`,`FCPOUSERFLAGID`)
