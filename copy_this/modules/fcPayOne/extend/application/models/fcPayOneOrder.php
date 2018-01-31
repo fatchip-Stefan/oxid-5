@@ -1348,10 +1348,30 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * @return void
      */
     protected function _fcpoHandleAuthorizationError($aResponse, $oPayGateway) {
+        $sResponseErrorCode = (string) trim($aResponse['errorcode']);
+        $sResponseCustomerMessage = (string) trim($aResponse['customermessage']);
+
         $this->_fcpoFlagOrderPaymentAsRedirect(null);
+        $this->_fcpoSetPayoneUserFlagsByAuthResponse($sResponseErrorCode);
         if ($oPayGateway) {
-            $oPayGateway->fcSetLastErrorNr($aResponse['errorcode']);
-            $oPayGateway->fcSetLastError($aResponse['customermessage']);
+            $oPayGateway->fcSetLastErrorNr($sResponseErrorCode);
+            $oPayGateway->fcSetLastError($sResponseCustomerMessage);
+        }
+    }
+
+    /**
+     * Adds flag to user if there is one matching
+     *
+     * @param string $sResponseErrorCode
+     * @return void
+     */
+    protected function _fcpoSetPayoneUserFlagsByAuthResponse($sResponseErrorCode) {
+        $oUserFlag = oxNew('fcpouserflag');
+        $blSuccess = $oUserFlag->fcpoLoadByErrorCode($sResponseErrorCode);
+
+        if ($blSuccess) {
+            $oUser = $this->getOrderUser();
+            $oUser->fcpoAddPayoneUserFlag($oUserFlag);
         }
     }
 
