@@ -1,6 +1,8 @@
 <link rel="stylesheet" type="text/css" href="[{$oViewConf->fcpoGetModuleCssPath('fcpoamazon.css')}]">
 
-[{if !$iAmzButtonIncluded}]
+[{if $sAmazonButtonId}]
+    [{assign var="iAmzButtonIncluded" value=$iAmzButtonIncluded+1}]
+[{elseif !$iAmzButtonIncluded}]
     [{assign var="iAmzButtonIncluded" value="0"}]
 [{else}]
     [{assign var="iAmzButtonIncluded" value=$iAmzButtonIncluded+1}]
@@ -9,6 +11,8 @@
 [{if !$sAmazonButtonId}]
     [{assign var="sAmazonButtonId" value='LoginWithAmazon'}]
 [{/if}]
+
+[{$oViewConf->fcpoSetCurrentAmazonButtonId($sAmazonButtonId)}]
 
 <div id="[{$sAmazonButtonId}][{$iAmzButtonIncluded}]" class="[{$sAmazonButtonClass}]"></div>
 <script>
@@ -55,6 +59,6 @@
     });
 
 </script>
-[{if $iAmzButtonIncluded <=1}]
+[{if $oViewConf->fcpoGetIncludeAmazonWidgetUrl()}]
     <script async="async" src='[{$oViewConf->fcpoGetAmazonWidgetsUrl()}]'></script>
 [{/if}]

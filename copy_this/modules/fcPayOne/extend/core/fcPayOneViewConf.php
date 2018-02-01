@@ -50,11 +50,24 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
     );
 
     /**
+     * Counts the amount of widgets have been included by call
+     * @var int
+     */
+    protected $_iAmzWidgetIncludeCounter = 0;
+
+    /**
+     * Determines the source of a button include
+     * @var string|null
+     */
+    protected $_sCurrentAmazonButtonId = null;
+
+    /**
      * Initializing needed things
      */
     public function __construct() {
         parent::__construct();
         $this->_oFcpoHelper = oxNew('fcpohelper');
+        $this->_iAmzWidgetIncludeCounter = 0;
     }
 
     /**
@@ -436,6 +449,52 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
         }
 
         return $sReturn;
+    }
+
+    public function fcpoGetCurrentAmzWidgetCount() {
+        return $this->_iAmzWidgetIncludeCounter;
+    }
+
+    /**
+     * References current button id set in template
+     * for determine the last amazon button on current page
+     *
+     * @param string $sButtonId
+     * @return void
+     */
+    public function fcpoSetCurrentAmazonButtonId($sButtonId) {
+        $this->_sCurrentAmazonButtonId = $sButtonId;
+    }
+
+
+    /**
+     * Decides if the JS widgets url source should be included
+     * Makes sure it will be included after the last amazon button
+     *
+     *
+     * @param void
+     * @return bool
+     */
+    public function fcpoGetIncludeAmazonWidgetUrl() {
+        $oNewItem = $this->_oFcpoHelper->fcpoGetSessionVariable('_newitem');
+        $blModalMiniBasket = ($this->_sCurrentAmazonButtonId == 'modalLoginWithAmazonMiniBasket');
+        $blMiniBasket = ($this->_sCurrentAmazonButtonId == 'LoginWithAmazonMiniBasket');
+
+        $blAddCount = ($blModalMiniBasket || $blMiniBasket);
+
+        if ($blAddCount) {
+            $this->_iAmzWidgetIncludeCounter++;
+        }
+
+        $aController2Amount = array(
+            'basket' => 3,
+            'user' => 1,
+        );
+
+        $blReturn = ($this->_iAmzWidgetIncludeCounter > 0) ? false: true;
+        $this->_iAmzWidgetIncludeCounter++;
+
+        return $blReturn;
     }
 
 }
