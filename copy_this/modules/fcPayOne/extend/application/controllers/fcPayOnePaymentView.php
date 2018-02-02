@@ -1885,7 +1885,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
             case 'fcpopo_bill':
             case 'fcpopo_debitnote':
             case 'fcpopo_installment':
-                $blB2CMode = $this->fcpoShowB2C();
+                $blB2CMode = $this->fcpoShowPayolutionB2C();
                 $blBirthdayRequired = $blB2CMode;
                 $blValidBirthdateData = $this->_fcpoValidatePayolutionBirthdayData($sPaymentId, $aRequestedValues);
                 break;
@@ -2807,18 +2807,50 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     }
 
     /**
+     * Generic method for determine if order is b2b
+     *
+     * @param void
+     * @return bool
+     */
+    public function fcpoIsB2B() {
+        $oUser = $this->getUser();
+
+        $blConditions = (
+            $oUser->oxuser__oxcompany->value ||
+            $oUser->oxuser__oxustid->value
+        );
+
+        $blReturn = ($blConditions) ? true : false;
+
+        return $blReturn;
+    }
+
+    /**
+     * Generic method for determine if order is b2c
+     *
+     * @param void
+     * @return bool
+     */
+    public function fcpoIsB2C() {
+        $blIsB2B = $this->fcpoIsB2B();
+        $blReturn = !$blIsB2B;
+
+        return $blReturn;
+    }
+
+    /**
      * Template getter for checking which kind of field should be shown
      *
      * @param void
      * @return bool
      */
-    public function fcpoShowB2B() {
+    public function fcpoShowPayolutionB2B() {
         $oConfig = $this->getConfig();
         $oUser = $this->getUser();
         $blB2BModeActive = $oConfig->getConfigParam('blFCPOPayolutionB2BMode');
 
         if ($blB2BModeActive) {
-            $blReturn = ($oUser->oxuser__oxcompany->value) ? true : false;
+            $blReturn = $this->fcpoIsB2B();
         } else {
             $blReturn = false;
         }
@@ -2832,8 +2864,8 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @param void
      * @return bool
      */
-    public function fcpoShowB2C() {
-        $blB2BIsShown = $this->fcpoShowB2B();
+    public function fcpoShowPayolutionB2C() {
+        $blB2BIsShown = $this->fcpoShowPayolutionB2B();
         $blReturn = !$blB2BIsShown;
 
         return $blReturn;
