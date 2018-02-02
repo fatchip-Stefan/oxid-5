@@ -59,6 +59,6 @@
     });
 
 </script>
-[{if $oViewConf->fcpoGetIncludeAmazonWidgetUrl()}]
+[{if $oViewConf->fcpoGetAllowIncludeAmazonWidgetUrl()}]
     <script async="async" src='[{$oViewConf->fcpoGetAmazonWidgetsUrl()}]'></script>
 [{/if}]

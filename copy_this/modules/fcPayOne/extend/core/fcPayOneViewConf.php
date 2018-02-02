@@ -475,26 +475,45 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
      * @param void
      * @return bool
      */
-    public function fcpoGetIncludeAmazonWidgetUrl() {
-        $oNewItem = $this->_oFcpoHelper->fcpoGetSessionVariable('_newitem');
-        $blModalMiniBasket = ($this->_sCurrentAmazonButtonId == 'modalLoginWithAmazonMiniBasket');
-        $blMiniBasket = ($this->_sCurrentAmazonButtonId == 'LoginWithAmazonMiniBasket');
+    public function fcpoGetAllowIncludeAmazonWidgetUrl() {
+        $iCurrentInludeCount = (int) $this->_oFcpoHelper->fcpoGetSessionVariable('iAmzWidgetsIncludeCounter');
+        $iCurrentInludeCount++;
+        $this->_oFcpoHelper->fcpoSetSessionVariable('iAmzWidgetsIncludeCounter', $iCurrentInludeCount);
 
-        $blAddCount = ($blModalMiniBasket || $blMiniBasket);
+        $iExpectedButtonAmount = $this->_fcpoGetExpectedButtonAmount();
 
-        if ($blAddCount) {
-            $this->_iAmzWidgetIncludeCounter++;
+        $blReturn = ($iCurrentInludeCount == $iExpectedButtonAmount) ? true: false;
+        if ($blReturn) {
+            // reset counter
+            $this->_oFcpoHelper->fcpoSetSessionVariable('iAmzWidgetsIncludeCounter', 0);
         }
-
-        $aController2Amount = array(
-            'basket' => 3,
-            'user' => 1,
-        );
-
-        $blReturn = ($this->_iAmzWidgetIncludeCounter > 0) ? false: true;
-        $this->_iAmzWidgetIncludeCounter++;
 
         return $blReturn;
     }
+
+    /**
+     * Returns the expected amount of amazon buttons on current page
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoGetExpectedButtonAmount() {
+        $blModalMiniBasket = ($this->_sCurrentAmazonButtonId == 'modalLoginWithAmazonMiniBasket');
+        $aController2Amount = array(
+            'basket' => 3,
+            'user'=> 2,
+        );
+
+        $sActController = $this->_oFcpoHelper->fcpoGetRequestParameter('cl');
+
+        $iAmountExpectedButtons = (isset($aController2Amount[$sActController])) ? $aController2Amount[$sActController] : 1;
+        if ($blModalMiniBasket) {
+            $iAmountExpectedButtons++;
+        }
+
+        return $iAmountExpectedButtons;
+    }
+
+
 
 }
