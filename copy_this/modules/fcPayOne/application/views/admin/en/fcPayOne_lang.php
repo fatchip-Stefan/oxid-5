@@ -24,7 +24,7 @@ $sLangName  = "English";
 // RESOURCE IDENTITFIER = STRING
 // -------------------------------
 $aLang = array(
-    'charset'                                   => 'ISO-8859-1',
+    'charset'                                   => 'UTF-8',
     'fcpo_admin_title'                          => 'PAYONE',
     'fcpo_main_title'                           => 'PAYONE Configuration',
     'fcpo_main_log'                             => 'PAYONE Transactions',
