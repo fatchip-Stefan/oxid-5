@@ -1330,7 +1330,6 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
               NULL
             )
         ";
-oxRegistry::getUtils()->writeToLog('['.date('Y-m-d H:i:s')."] "."Replacing Shadow-Basket"."\n", 'oxid115.log');
 
         $oDb->Execute($sQuery);
     }
