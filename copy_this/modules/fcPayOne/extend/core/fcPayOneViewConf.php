@@ -81,6 +81,19 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
     }
 
     /**
+     * Returns url to module img folder
+     *
+     * @param void
+     * @return string
+     */
+    public function fcpoGetModuleImgUrl() {
+        $sModuleUrl = $this->fcpoGetModuleUrl();
+        $sModuleImgUrl = $sModuleUrl . 'out/img/';
+
+        return $sModuleImgUrl;
+    }
+
+    /**
      * Returns the path to javascripts of module
      * 
      * @param string $sFile

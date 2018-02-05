@@ -867,9 +867,6 @@ $('#payolution_installment_check_availability').click(function(){
  * @param void
  * @return void
  */
-
-
-
 (function(d, t) {
     var g = d.createElement(t),
         s = d.getElementsByTagName(t)[0];
@@ -895,6 +892,9 @@ $('#payolution_installment_check_availability').click(function(){
     setTimeout(function(){
         if(document.getElementById('fcpoCreditcard') && typeof PayoneRequest == 'function') {
             document.getElementById('fcpoCreditcard').style.display = '';
+            // remove loading spinner
+            var oSpinnerNode = document.getElementById('fcpoCreditcardSpinner');
+            oSpinnerNode.parentNode.removeChild(oSpinnerNode);
         }
     }, 2000);
     
