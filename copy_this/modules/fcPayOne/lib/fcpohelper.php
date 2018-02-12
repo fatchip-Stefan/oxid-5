@@ -80,6 +80,7 @@ class fcpohelper extends oxBase {
      * @param string $sClassName
      * @param string $sIncludePath optional
      * @return object
+     * @throws exception
      */
     public function fcpoGetInstance($sClassName, $sIncludePath = "") {
         try {
@@ -148,7 +149,7 @@ class fcpohelper extends oxBase {
      * static Getter for config instance
      * 
      * @param void
-     * @param mixed
+     * @return object
      */
     public static function fcpoGetStaticConfig() {
         if (self::_useRegistry() === true) {
@@ -164,7 +165,7 @@ class fcpohelper extends oxBase {
      * Getter for config instance
      * 
      * @param void
-     * @param mixed
+     * @return object
      */
     public function fcpoGetConfig() {
         return $this->getConfig();
@@ -174,7 +175,7 @@ class fcpohelper extends oxBase {
      * Getter for session instance
      * 
      * @param void
-     * @param mixed
+     * @return object
      */
     public function fcpoGetSession() {
         return $this->getSession();
@@ -185,6 +186,7 @@ class fcpohelper extends oxBase {
      * 
      * @param $blAssoc with assoc mode
      * @param mixed
+     * @return bool
      */
     public function fcpoGetDb($blAssoc = false) {
         if ($blAssoc) {

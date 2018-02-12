@@ -104,20 +104,20 @@ class fcPayOneThankyouView extends fcPayOneThankyouView_parent {
     
     
     /**
-     * Method checks for an appointment error
+     * Method checks if any error occured (appointment-error, fraud etc.)
      * 
      * @param void
      * @return bool
      */
-    public function fcpoIsAppointedError() {
-        $blReturn   = false;
+    public function fcpoOrderHasProblems() {
         $oOrder     = $this->getOrder();
-        
-        if($oOrder->isPayOnePaymentType()) {
-            if($oOrder->oxorder__oxfolder->value == 'ORDERFOLDER_PROBLEMS' && $oOrder->oxorder__oxtransstatus->value == 'ERROR')  {
-                $blReturn = true;
-            }
-        }
+        $blIsPayone = $oOrder->isPayOnePaymentType();
+
+        $blReturn = (
+            $blIsPayone &&
+            $oOrder->oxorder__oxfolder->value == 'ORDERFOLDER_PROBLEMS' &&
+            $oOrder->oxorder__oxtransstatus->value == 'ERROR'
+        );
         
         return $blReturn;
     }

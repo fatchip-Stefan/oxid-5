@@ -68,14 +68,19 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
      */
     public function execute() {
         $sFcpoMandateCheckbox = $this->_oFcpoHelper->fcpoGetRequestParameter('fcpoMandateCheckbox');
-        
-        $blConfirmMandateError = ((!$sFcpoMandateCheckbox || $sFcpoMandateCheckbox == 'false') && $this->_fcpoMandateAcceptanceNeeded());
+        $sPaymentId = $this->_oFcpoHelper->fcpoGetSessionVariable('paymentid');
+        $blIsRedirectPayment = fcPayOnePayment::fcIsPayOneRedirectType($sPaymentId);
+
+        $blConfirmMandateError = (
+            (!$sFcpoMandateCheckbox || $sFcpoMandateCheckbox == 'false') &&
+            $this->_fcpoMandateAcceptanceNeeded()
+        );
         
         if ($blConfirmMandateError) {
             $this->_blFcpoConfirmMandateError = 1;
             return;
         }
-        
+
         return parent::execute();
     }
     
@@ -96,8 +101,7 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
             return "basket";
         }
     }
-    
-    
+
     /**
      * Checks if user of this paypal order already exists
      * 
