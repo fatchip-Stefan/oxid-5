@@ -962,12 +962,13 @@
                     [{oxmultilang ident="FCPO_AMAZONPAY_LOGINMODE"}]
                 </dd>    
                 <div class="spacer"></div>
-            </dl>            <a href="#" onclick="_groupExp(this);return false;" class="rc"><b>[{oxmultilang ident="FCPO_CONFIG_GROUP_PAYDIREKT"}]</b></a>
+            </dl>
         </div>
     </div>
     
     <div class="groupExp">
         <div>
+            <a href="#" onclick="_groupExp(this);return false;" class="rc"><b>[{oxmultilang ident="FCPO_CONFIG_GROUP_PAYDIREKT"}]</b></a>
             <dl>
                 <dt>
                     <input type="hidden" name="confbools[blFCPOAllowOvercapture]" value="false">

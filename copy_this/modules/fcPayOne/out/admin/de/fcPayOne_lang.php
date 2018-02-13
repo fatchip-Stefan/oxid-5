@@ -24,7 +24,7 @@ $sLangName  = "Deutsch";
 // RESOURCE IDENTITFIER = STRING
 // -------------------------------
 $aLang = array(
-    'charset'                                   => 'ISO-8859-15',
+    'charset'                                   => 'UTF-8',
     'fcpo_admin_title'                          => 'PAYONE',
     'fcpo_main_title'                           => 'Konfiguration',
     'fcpo_main_log'                             => 'Transaktionen',

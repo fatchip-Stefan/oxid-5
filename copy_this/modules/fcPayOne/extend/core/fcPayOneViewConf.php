@@ -482,12 +482,11 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
 
         $iExpectedButtonAmount = $this->_fcpoGetExpectedButtonAmount();
 
-        $blReturn = ($iCurrentInludeCount == $iExpectedButtonAmount) ? true: false;
+        $blReturn = ($iCurrentInludeCount >= $iExpectedButtonAmount) ? true: false;
         if ($blReturn) {
             // reset counter
             $this->_oFcpoHelper->fcpoSetSessionVariable('iAmzWidgetsIncludeCounter', 0);
         }
-
         return $blReturn;
     }
 
