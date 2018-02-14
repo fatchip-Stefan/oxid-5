@@ -801,7 +801,7 @@ class fcpoRequest extends oxSuperCfg {
     protected function _fcpoIsOrderB2B($oOrder) {
         $blReturn = ($oOrder->oxorder__oxbillcompany->value) ? true : false;
         if ($blReturn) {
-            $blReturn = ($oOrder->oxorder__oxbillustid->value) ? false : true;
+            $blReturn = ($oOrder->oxorder__oxbillustid->value) ? true : false;
         }
 
         return $blReturn;
