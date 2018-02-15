@@ -862,6 +862,26 @@ $('#payolution_installment_check_availability').click(function(){
 });
 
 /**
+ * Checks via js if a certain payment is selected
+ *
+ * @param paymentId
+ * @return bool
+ */
+function fcpoGetIsPaymentSelected(paymentId) {
+    var blReturn = false;
+    var oForm = getPaymentForm();
+    if (oForm) {
+        var oPaymentRadioGroup = oForm['paymentid'];
+        var currentPaymentId = oPaymentRadioGroup.value;
+        if (currentPaymentId == paymentId) {
+            blReturn =  true;
+        }
+    }
+
+    return blReturn;
+}
+
+/**
  * Reaction on changes on radio interest selection
  * 
  * @param void
@@ -891,7 +911,11 @@ $('#payolution_installment_check_availability').click(function(){
     }
     setTimeout(function(){
         if(document.getElementById('fcpoCreditcard') && typeof PayoneRequest == 'function') {
-            document.getElementById('fcpoCreditcard').style.display = '';
+            var blCCSelected = fcpoGetIsPaymentSelected('fcpocreditcard');
+            var blCCIframeSelected = fcpoGetIsPaymentSelected('fcpocreditcard_iframe');
+            var blSelected = (blCCSelected || blCCIframeSelected);
+            var sDisplayType = (blSelected) ? 'block': '';
+            document.getElementById('fcpoCreditcard').style.display = sDisplayType;
             // remove loading spinner
             var oSpinnerNode = document.getElementById('fcpoCreditcardSpinner');
             oSpinnerNode.parentNode.removeChild(oSpinnerNode);
