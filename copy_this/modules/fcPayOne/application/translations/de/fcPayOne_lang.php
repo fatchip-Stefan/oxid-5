@@ -23,7 +23,7 @@ $sLangName  = "Deutsch";
 // RESOURCE IDENTITFIER = STRING
 // -------------------------------
 $aLang = array(
-    'charset'                                       => 'ISO-8859-15',
+    'charset'                                       => 'UTF-8',
     'FCPO_IBAN_INVALID'                             => 'Bitte geben Sie eine korrekte IBAN ein.',
     'FCPO_BIC_INVALID'                              => 'Bitte geben Sie eine korrekte BIC ein.',
     'FCPO_BLZ_INVALID'                              => 'Bitte geben Sie eine korrekte Bankleitzahl ein.',
