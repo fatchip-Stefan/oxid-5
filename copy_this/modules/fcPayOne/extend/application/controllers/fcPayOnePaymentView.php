@@ -1192,7 +1192,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
 
             $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
             $oPayment->load($sPaymentId);
-            $this->_fcpoSecInvoiceSaveRequestedValues($sPaymentId);
+            $mReturn = $this->_fcpoSecInvoiceSaveRequestedValues($mReturn, $sPaymentId);
             $blContinue = $this->_fcpoCheckBoniMoment($oPayment);
 
             if ($blContinue !== true) {
@@ -1291,9 +1291,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return mixed
      */
     public function fcpoPayolutionPreCheck($sPaymentId) {
-        $oSession = $this->getSession();
-        $oBasket = $oSession->getBasket();
-        $oUser = $oBasket->getBasketUser();
         $this->_blIsPayolutionInstallmentAjax = true;
 
         return $this->_fcpoPayolutionPreCheck(true, $sPaymentId);
@@ -1339,7 +1336,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return bool
      */
     public function fcpoRatePayShowBirthdate() {
-        $oConfig = $this->getConfig();
         $oUser = $this->getUser();
         $blShowUstid = $this->fcpoRatePayShowUstid();
 
@@ -1355,10 +1351,8 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return bool
      */
     public function fcpoRatePayShowFon() {
-        $oConfig = $this->getConfig();
         $oUser = $this->getUser();
         $blShowUstid = $this->fcpoRatePayShowUstid();
-        $blB2BMode = $oConfig->getConfigParam('blFCPORatePayB2BMode');
 
         $blReturn = ($oUser->oxuser__oxfon->value == '' && !$blShowUstid) ? true : false;
 
@@ -1756,15 +1750,21 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     }
 
     /**
-     * Save requested values of secure invoice
+     * Save requested values of secure invoice and checks invalidity
      *
+     * @param mixed $mReturn
      * @param string $sPaymentId
-     * @return void
+     * @return mixed
      */
-    protected function _fcpoSecInvoiceSaveRequestedValues($sPaymentId) {
+    protected function _fcpoSecInvoiceSaveRequestedValues($mReturn, $sPaymentId) {
         $aRequestedValues = $this->_oFcpoHelper->fcpoGetRequestParameter('dynvalue');
+        $blSavedBirthdateData = $this->_fcpoSaveBirthdayData($aRequestedValues, $sPaymentId);
+        if (!$blSavedBirthdateData) {
+            // could not save mandatory birthdate => invalid
+            $mReturn = null;
+        }
 
-        $this->_fcpoSaveBirthdayData($aRequestedValues, $sPaymentId);
+        return $mReturn;
     }
 
     /**
@@ -1815,7 +1815,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
                 $blSavedData = true;
             }
         } elseif($blBirthdayRequired) {
-            $sMessage = $oLang->translateString('FCPO_PAYOLUTION_BIRTHDATE_INVALID');
+            $sMessage = $oLang->translateString('FCPO_BIRTHDATE_INVALID');
             $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
             $this->_oFcpoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
         }
