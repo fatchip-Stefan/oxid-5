@@ -27,8 +27,8 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase {
      * @param object &$object    Instantiated object that we will run method on.
      * @param string $methodName Method name to call
      * @param array  $parameters Array of parameters to pass into method.
-     *
      * @return mixed Method return.
+     * @throws exception
      */
     public function invokeMethod(&$object, $methodName, array $parameters = array()) {
         $reflection = new \ReflectionClass(get_class($object));
@@ -44,8 +44,8 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase {
      * @param object &$object    Instantiated object that we will run method on.
      * @param string $propertyName property that shall be set
      * @param array  $value value to be set
-     *
      * @return mixed Method return.
+     * @throws exception
      */
     public function invokeSetAttribute(&$object, $propertyName, $value) {
         $reflection = new \ReflectionClass(get_class($object));
@@ -149,4 +149,182 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase {
         $oTestObject = oxNew('fcPayOneViewConf');
         $this->assertEquals('https://secure.pay1.de/client-api/js/v1/payone_hosted_min.js', $oTestObject->fcpoGetHostedPayoneJs());
     }
+
+
+    /**
+     * Testsing fcpoGetIframeMappings for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test_fcpoGetIframeMappings_Coverage() {
+        $oTestObject = oxNew('fcPayOneViewConf');
+        $aExistingMappings = array('mapping1', 'mapping2');
+        $oMockErrorMapping = $this->getMock('fcpoerrormapping', array('fcpoGetExistingMappings'));
+        $oMockErrorMapping->expects($this->any())->method('fcpoGetExistingMappings')->will($this->returnValue($aExistingMappings));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('getFactoryObject')->will($this->returnValue($oMockErrorMapping));
+
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals($aExistingMappings, $oTestObject->fcpoGetIframeMappings());
+    }
+
+    /**
+     * Testsing fcpoGetLangAbbrById for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test_fcpoGetLangAbbrById_Coverage() {
+        $oTestObject = oxNew('fcPayOneViewConf');
+        $oMockLang = $this->getMock('oxLang', array('getLanguageAbbr'));
+        $oMockLang->expects($this->any())->method('getLanguageAbbr')->will($this->returnValue('de'));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetLang')->will($this->returnValue($oMockLang));
+
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals('de', $oTestObject->fcpoGetLangAbbrById('someId'));
+    }
+
+
+    /**
+     * Returns if amazonpay is active and though button can be displayed
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test_fcpoCanDisplayAmazonPayButton_Coverage() {
+        $oTestObject = oxNew('fcPayOneViewConf');
+        $oMockPayment = $this->getMock('oxPayment', array('load'));
+        $oMockPayment->expects($this->any())->method('load')->will($this->returnValue(true));
+        $oMockPayment->oxpayments__oxactive = new oxField('1');
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('getFactoryObject')->will($this->returnValue($oMockPayment));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals(true, $oTestObject->fcpoCanDisplayAmazonPayButton());
+    }
+
+    /**
+     * Testing fcpoGetAmazonWidgetsUrl for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test_fcpoGetAmazonWidgetsUrl_Coverage() {
+        $oTestObject = oxNew('fcPayOneViewConf');
+        $oMockPayment = $this->getMock('oxPayment', array('load'));
+        $oMockPayment->expects($this->any())->method('load')->will($this->returnValue(true));
+        $oMockPayment->oxpayments__fcpolivemode = new oxField('1');
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('getFactoryObject')->will($this->returnValue($oMockPayment));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $sExpect = 'https://static-eu.payments-amazon.com/OffAmazonPayments/eur/lpa/js/Widgets.js';
+
+        $this->assertEquals($sExpect, $oTestObject->fcpoGetAmazonWidgetsUrl());
+    }
+
+    /**
+     * Testing fcpoGetAmazonPayClientId for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test_fcpoGetAmazonPayClientId_Coverage() {
+        $oTestObject = oxNew('fcPayOneViewConf');
+        $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
+        $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue('someClientId'));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals('someClientId', $oTestObject->fcpoGetAmazonPayClientId());
+    }
+
+    /**
+     * Testing fcpoGetAmazonPaySellerId for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test_fcpoGetAmazonPaySellerId_Coverage() {
+        $oTestObject = oxNew('fcPayOneViewConf');
+        $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
+        $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue('someSellerId'));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals('someSellerId', $oTestObject->fcpoGetAmazonPayClientId());
+    }
+
+    /**
+     * Testing fcpoGetAmazonPayReferenceId or coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test_fcpoGetAmazonPayReferenceId_Coverage() {
+        $oTestObject = oxNew('fcPayOneViewConf');
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetSessionVariable')->will($this->returnValue('someReferenceId'));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals('someReferenceId', $oTestObject->fcpoGetAmazonPayReferenceId());
+    }
+
+    /**
+     * Testing fcpoGetAmazonPayButtonType for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test_fcpoGetAmazonPayButtonType_Coverage() {
+        $oTestObject = oxNew('fcPayOneViewConf');
+        $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
+        $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue('someButtonType'));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals('someButtonType', $oTestObject->fcpoGetAmazonPayButtonType());
+    }
+
+    /**
+     * Testing fcpoGetAmazonPayButtonColor for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test_fcpoGetAmazonPayButtonColor_Coverage() {
+        $oTestObject = oxNew('fcPayOneViewConf');
+        $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
+        $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue('someButtonColor'));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals('someButtonColor', $oTestObject->fcpoGetAmazonPayButtonType());
+    }
+
 }

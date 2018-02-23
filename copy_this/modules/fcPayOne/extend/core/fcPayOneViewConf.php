@@ -193,7 +193,7 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
      * @return array
      */
     public function fcpoGetIframeMappings() {
-        $oErrorMapping = oxNew('fcpoerrormapping');
+        $oErrorMapping = $this->_oFcpoHelper->getFactoryObject('fcpoerrormapping');
         $aExistingErrorMappings = $oErrorMapping->fcpoGetExistingMappings('iframe');
 
         return $aExistingErrorMappings;
@@ -217,7 +217,7 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
      * @return bool
      */
     public function fcpoCanDisplayAmazonPayButton() {
-        $oPayment = oxNew('oxpayment');
+        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
         $oPayment->load('fcpoamazonpay');
         $blIsActive = (bool) $oPayment->oxpayments__oxactive->value;
 
@@ -229,7 +229,7 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
      * Returns amazon widgets url depending if mode is live or test
      */
     public function fcpoGetAmazonWidgetsUrl() {
-        $oPayment = oxNew('oxpayment');
+        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
         $oPayment->load('fcpoamazonpay');
         $blIsLive = $oPayment->oxpayments__fcpolivemode->value;
 
@@ -247,7 +247,7 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
      * @return string
      */
     public function fcpoGetAmazonPayClientId() {
-        $oConfig = oxRegistry::getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sClientId = $oConfig->getConfigParam('sFCPOAmazonPayClientId');
 
         return (string)$sClientId;
@@ -259,7 +259,7 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
      * @return string
      */
     public function fcpoGetAmazonPaySellerId() {
-        $oConfig = oxRegistry::getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sSellerId = $oConfig->getConfigParam('sFCPOAmazonPaySellerId');
 
         return (string)$sSellerId;
@@ -284,7 +284,7 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
      * @return string
      */
     public function fcpoGetAmazonPayButtonType() {
-        $oConfig = oxRegistry::getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sValue = $oConfig->getConfigParam('sFCPOAmazonButtonType');
 
         return (string)$sValue;
@@ -297,7 +297,7 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
      * @return string
      */
     public function fcpoGetAmazonPayButtonColor() {
-        $oConfig = oxRegistry::getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sValue = $oConfig->getConfigParam('sFCPOAmazonButtonColor');
 
         return (string)$sValue;
