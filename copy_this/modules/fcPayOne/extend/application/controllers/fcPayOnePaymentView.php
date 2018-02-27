@@ -751,8 +751,8 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         $oSession = $this->getSession();
         $oBasket = $oSession->getBasket();
 
-        $oSession->deleteVariable('paymentid');
-        $oSession->setVariable('paymentid', 'fcpoamazonpay');
+        $this->_oFcpoHelper->fcpoDeleteSessionVariable('paymentid');
+        $this->_oFcpoHelper->fcpoSetSessionVariable('paymentid', 'fcpoamazonpay');
         $oBasket->setPayment('fcpoamazonpay');
 
         return 'order';
@@ -773,8 +773,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return  mixed
      */
     public function validatePayment() {
-        $oUser = $this->getUser();
-
         $sPaymentId = $this->_fcpoGetPaymentId();
 
         $this->_fcpoCheckKlarnaUpdateUser($sPaymentId);

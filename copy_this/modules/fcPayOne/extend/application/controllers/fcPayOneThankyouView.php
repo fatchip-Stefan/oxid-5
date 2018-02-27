@@ -171,6 +171,9 @@ class fcPayOneThankyouView extends fcPayOneThankyouView_parent {
 
     /**
      * Loggs off Amazon if this is an Amazon order
+     *
+     * @param void
+     * @return void
      */
     protected function _fcpoHandleAmazonThankyou() {
         $blIsAmazonOrder = $this->_fcpoDetermineAmazonOrder();

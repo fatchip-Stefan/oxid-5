@@ -1087,6 +1087,30 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOnePaymentView extends O
     }
 
     /**
+     * Testing validateAmazonPayment for coverage
+     *
+     * @param void
+     * @return void
+     */
+    public function test_validateAmazonPayment_Coverage() {
+        $oMockBasket = $this->getMock('oxBasket', array('setPayment'));
+        $oMockBasket->expects($this->any())->method('setPayment')->will($this->returnValue(null));
+
+        $oMockSesssion = $this->getMock('oxSession', array('getBasket'));
+        $oMockSesssion->expects($this->any())->method('getBasket')->will($this->returnValue($oMockBasket));
+
+        $oTestObject = $this->getMock('fcPayOnePaymentView', array('getSession'));
+        $oTestObject->expects($this->any())->method('getSession')->will($this->returnValue($oMockSesssion));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoDeleteSessionVariable')->will($this->returnValue(null));
+        $oHelper->expects($this->any())->method('fcpoSetSessionVariable')->will($this->returnValue(null));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals('order', $oTestObject->validateAmazonPayment());
+    }
+
+    /**
      * Testing _fcpoCheckPaypalExpressRemoval for coverage
      * 
      * @param void
