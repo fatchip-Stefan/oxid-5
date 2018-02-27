@@ -462,7 +462,8 @@ class fcpayone_main extends fcpayone_admindetails {
                 $sMessage = 'FCPO_AMAZONPAY_SUCCESS_GETTING_CONFIG';
             }
             $sTranslatedMessage = $oLang->translateString($sMessage);
-            $this->_oFcpoHelper->fcpoGetUtilsView()->addErrorToDisplay($sTranslatedMessage, false, true);
+            $oUtilsView = $this->_oFcpoHelper->fcpoGetUtilsView();
+            $oUtilsView->addErrorToDisplay($sTranslatedMessage, false, true);
         }
     }
 

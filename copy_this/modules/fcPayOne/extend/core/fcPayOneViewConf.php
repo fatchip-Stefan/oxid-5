@@ -322,7 +322,7 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
      * @return string
      */
     public function fcpoGetAmazonRedirectUrl() {
-        $oConfig = oxRegistry::getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sShopUrl = $oConfig->getSslShopUrl();
         // force protocol to be 100% ssl
         if (strpos($sShopUrl, 'http://') !== false) {
@@ -340,12 +340,10 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
      * @return bool
      */
     public function fcpoAmazonLoginSessionActive() {
-        $oSession = oxRegistry::getSession();
-        $sAmazonLoginAccessToken = $oSession->getVariable('sAmazonLoginAccessToken');
-        $blLoggedIn = false;
-        if ($sAmazonLoginAccessToken) {
-            $blLoggedIn = true;
-        }
+        $sAmazonLoginAccessToken =
+            $this->_oFcpoHelper->fcpoGetSessionVariable('sAmazonLoginAccessToken');
+
+        $blLoggedIn = ($sAmazonLoginAccessToken) ? true : false;
 
         return $blLoggedIn;
     }
@@ -441,16 +439,20 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
                 $sReturn = 'false';
                 break;
             default:
+                $sReturn = 'false';
                 if ($this->isSsl()) {
                     $sReturn = 'true';
-                } else {
-                    $sReturn = 'false';
                 }
         }
 
         return $sReturn;
     }
 
+    /**
+     * Returns current widget count
+     *
+     * @return int
+     */
     public function fcpoGetCurrentAmzWidgetCount() {
         return $this->_iAmzWidgetIncludeCounter;
     }
@@ -471,7 +473,6 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
      * Decides if the JS widgets url source should be included
      * Makes sure it will be included after the last amazon button
      *
-     *
      * @param void
      * @return bool
      */
@@ -487,6 +488,7 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
             // reset counter
             $this->_oFcpoHelper->fcpoSetSessionVariable('iAmzWidgetsIncludeCounter', 0);
         }
+
         return $blReturn;
     }
 

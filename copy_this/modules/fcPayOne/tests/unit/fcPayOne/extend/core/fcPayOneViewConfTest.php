@@ -327,4 +327,233 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase {
         $this->assertEquals('someButtonColor', $oTestObject->fcpoGetAmazonPayButtonType());
     }
 
+    /**
+     * Testing fcpoGetAmazonPayAddressWidgetIsReadOnly for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test_fcpoGetAmazonPayAddressWidgetIsReadOnly_Coverage() {
+        $oTestObject = oxNew('fcPayOneViewConf');
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetSessionVariable')->will($this->returnValue(true));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals(true, $oTestObject->fcpoGetAmazonPayAddressWidgetIsReadOnly());
+    }
+
+    /**
+     * Testing fcpoGetAmazonRedirectUrl for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test_fcpoGetAmazonRedirectUrl_Coverage() {
+        $oTestObject = oxNew('fcPayOneViewConf');
+        $oMockConfig = $this->getMock('oxConfig', array('getSslShopUrl'));
+        $oMockConfig->expects($this->any())->method('getSslShopUrl')->will($this->returnValue('http://www.someshop.de/'));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $sExpect = "https://www.someshop.de/index.php?cl=user&fnc=fcpoamazonloginreturn";
+
+        $this->assertEquals($sExpect, $oTestObject->fcpoGetAmazonRedirectUrl());
+    }
+
+    /**
+     * Testing fcpoAmazonLoginSessionActive for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test_fcpoAmazonLoginSessionActive_Coverage() {
+        $oTestObject = oxNew('fcPayOneViewConf');
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetSessionVariable')->will($this->returnValue('someToken'));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals(true, $oTestObject->fcpoAmazonLoginSessionActive());
+    }
+
+    /**
+     * Testing fcpoGetActiveThemePath for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test_fcpoGetActiveThemePath_Coverage() {
+        $oTestObject = oxNew('fcPayOneViewConf');
+
+        $oMockTheme = $this->getMock('oxTheme', array('getActiveThemeId','getInfo'));
+        $oMockTheme->expects($this->any())->method('getActiveThemeId')->will($this->returnValue('someInheritedThemeId'));
+        $oMockTheme->expects($this->any())->method('getInfo')->will($this->returnValue('flow'));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('getFactoryObject')->will($this->returnValue($oMockTheme));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals('flow', $oTestObject->fcpoGetActiveThemePath());
+    }
+
+    /**
+     * Testing fcpoAmazonEmailEncode for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test_fcpoAmazonEmailEncode_Coverage() {
+        $oTestObject = oxNew('fcPayOneViewConf');
+        $sEmail = 'somedude@somemail.com';
+        $sExpect = "fcpoamz_".$sEmail;
+
+        $this->assertEquals($sExpect, $oTestObject->fcpoAmazonEmailEncode($sEmail));
+    }
+
+    /**
+     * Testing fcpoAmazonEmailDecode for coverage
+     *
+     * @param void
+     * @return void
+     * @throw exception
+     */
+    public function test_fcpoAmazonEmailDecode_Coverage() {
+        $oTestObject = oxNew('fcPayOneViewConf');
+        $sEncodedEmail = 'fcpoamz_somedude@somemail.com';
+        $sExpect  = 'somedude@somemail.com';
+
+        $this->assertEquals($sExpect, $oTestObject->fcpoAmazonEmailDecode($sEncodedEmail));
+    }
+
+    /**
+     * Testing fcpoIsAmazonAsyncMode for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test_fcpoIsAmazonAsyncMode_Coverage() {
+        $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
+        $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue('alwaysasync'));
+
+        $oTestObject = $this->getMock('fcPayOneViewConf', array('getConfig'));
+        $oTestObject->method('getConfig')->will($this->returnValue($oMockConfig));
+
+        $this->assertEquals(true, $oTestObject->fcpoIsAmazonAsyncMode());
+    }
+
+    /**
+     * Testing fcpoGetAmzPopup for setting popup
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test_fcpoGetAmzPopup_SettingPopup() {
+        $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
+        $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue('popup'));
+
+        $oTestObject = $this->getMock('fcPayOneViewConf', array('getConfig', 'isSsl'));
+        $oTestObject->method('getConfig')->will($this->returnValue($oMockConfig));
+        $oTestObject->method('isSsl')->will($this->returnValue(true));
+
+        $this->assertEquals('true', $oTestObject->fcpoGetAmzPopup());
+    }
+
+    /**
+     * Testing fcpoGetAmzPopup for setting redirect
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test_fcpoGetAmzPopup_SettingRedirect() {
+        $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
+        $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue('redirect'));
+
+        $oTestObject = $this->getMock('fcPayOneViewConf', array('getConfig','isSsl'));
+        $oTestObject->method('getConfig')->will($this->returnValue($oMockConfig));
+        $oTestObject->method('isSsl')->will($this->returnValue(true));
+
+        $this->assertEquals('false', $oTestObject->fcpoGetAmzPopup());
+    }
+
+    /**
+     * Testing fcpoGetAmzPopup for setting auto
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test_fcpoGetAmzPopup_SettingAuto() {
+        $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
+        $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue('auto'));
+
+        $oTestObject = $this->getMock('fcPayOneViewConf', array('getConfig','isSsl'));
+        $oTestObject->method('getConfig')->will($this->returnValue($oMockConfig));
+        $oTestObject->method('isSsl')->will($this->returnValue(true));
+
+        $this->assertEquals('true', $oTestObject->fcpoGetAmzPopup());
+    }
+
+    /**
+     * Testing fcpoGetCurrentAmzWidgetCount for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test_fcpoGetCurrentAmzWidgetCount_Coverage() {
+        $oTestObject = oxNew('fcPayOneViewConf');
+        $iMockCount = 3;
+        $this->invokeSetAttribute($oTestObject, '_iAmzWidgetIncludeCounter', $iMockCount);
+
+        $this->assertEquals($iMockCount, $oTestObject->fcpoGetCurrentAmzWidgetCount());
+    }
+
+    /**
+     * Testing fcpoGetAllowIncludeAmazonWidgetUrl for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test_fcpoGetAllowIncludeAmazonWidgetUrl_Coverage() {
+        $oTestObject = $this->getMock('fcPayOneViewConf', array('_fcpoGetExpectedButtonAmount'));
+        $oTestObject->method('_fcpoGetExpectedButtonAmount')->will($this->returnValue(3));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetSessionVariable')->will($this->returnValue(2));
+        $oHelper->expects($this->any())->method('fcpoSetSessionVariable')->will($this->returnValue(null));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals(true, $oTestObject->fcpoGetAllowIncludeAmazonWidgetUrl());
+    }
+
+    /**
+     * Testing _fcpoGetExpectedButtonAmount for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test__fcpoGetExpectedButtonAmount_Coverage() {
+        $oTestObject = oxNew('fcPayOneViewConf');
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetRequestParameter')->will($this->returnValue('basket'));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+        $this->invokeSetAttribute($oTestObject, '_sCurrentAmazonButtonId', 'modalLoginWithAmazonMiniBasket');
+
+        $this->assertEquals(4, $oTestObject->_fcpoGetExpectedButtonAmount());
+    }
+
 }

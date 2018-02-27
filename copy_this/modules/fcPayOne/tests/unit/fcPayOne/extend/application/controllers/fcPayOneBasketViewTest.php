@@ -55,6 +55,28 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneBasketView extends Ox
     }
 
     /**
+     * Testing _fcpoCheckForAmazonLogoff for coverage
+     *
+     * @param void
+     * @return void
+     */
+    public function test__fcpoCheckForAmazonLogoff_Coverage() {
+        $oTestObject = oxNew('fcPayOneBasketView');
+
+        $oHelper = $this->getMock('fcpohelper',
+            array(
+                'fcpoGetRequestParameter',
+                'fcpoDeleteSessionVariable'
+            )
+        );
+        $oHelper->expects($this->any())->method('fcpoGetRequestParameter')->will($this->returnValue('logoff'));
+        $oHelper->expects($this->any())->method('fcpoDeleteSessionVariable')->will($this->returnValue(null));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertNull($oTestObject->_fcpoCheckForAmazonLogoff());
+    }
+
+    /**
      * Testing _fcpoIsPayPalExpressActive for coverage
      * 
      * @param void
@@ -68,7 +90,7 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneBasketView extends Ox
 
         $oHelper = $this->getMock('fcpohelper', array('getFactoryObject'));
         $oHelper->expects($this->any())->method('getFactoryObject')->will($this->returnValue($oMockBasket));
-
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
         $this->assertEquals(true, $oTestObject->_fcpoIsPayPalExpressActive());
     }
