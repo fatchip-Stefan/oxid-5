@@ -40,23 +40,24 @@ class fcPayOneUserView extends fcPayOneUserView_parent {
      * @return void
      */
     public function fcpoAmazonLoginReturn() {
-        $oConfig = $this->getConfig();
         $oSession = $this->getSession();
         $oUtilsServer = oxRegistry::get('oxUtilsServer');
         $sPaymentId = 'fcpoamazonpay';
 
         // delete possible old data
-        $oSession->deleteVariable('sAmazonLoginAccessToken');
+        $this->_oFcpoHelper->fcpoDeleteSessionVariable('sAmazonLoginAccessToken');
 
-        $sAmazonLoginAccessTokenParam = urldecode($oConfig->getRequestParameter('access_token'));
+        $sAmazonLoginAccessTokenParam = $this->_oFcpoHelper->fcpoGetRequestParameter('access_token');
+        $sAmazonLoginAccessTokenParam = urldecode($sAmazonLoginAccessTokenParam);
         $sAmazonLoginAccessTokenCookie = $oUtilsServer->getOxCookie('amazon_Login_accessToken');
         $blNeededDataAvailable = (bool) ($sAmazonLoginAccessTokenParam || $sAmazonLoginAccessTokenCookie);
 
         if ($blNeededDataAvailable) {
-            $sAmazonLoginAccessToken = ($sAmazonLoginAccessTokenParam) ? $sAmazonLoginAccessTokenParam : $sAmazonLoginAccessTokenCookie;
-            $oSession->setVariable('sAmazonLoginAccessToken', $sAmazonLoginAccessToken);
-            $oSession->setVariable('paymentid', $sPaymentId);
-            $oSession->setVariable('_selected_paymentid', $sPaymentId);
+            $sAmazonLoginAccessToken =
+                ($sAmazonLoginAccessTokenParam) ? $sAmazonLoginAccessTokenParam : $sAmazonLoginAccessTokenCookie;
+            $this->_oFcpoHelper->fcpoSetSessionVariable('sAmazonLoginAccessToken', $sAmazonLoginAccessToken);
+            $this->_oFcpoHelper->fcpoSetSessionVariable('paymentid', $sPaymentId);
+            $this->_oFcpoHelper->fcpoSetSessionVariable('_selected_paymentid', $sPaymentId);
             $oBasket = $oSession->getBasket();
             $oBasket->setPayment($sPaymentId);
         } else {
@@ -68,7 +69,7 @@ class fcPayOneUserView extends fcPayOneUserView_parent {
     }
 
     /**
-     * Handles the case that there is no access token that is there or can be accessed
+     * Handles the case that there is no access token available/accessable
      *
      * @param void
      * @return void
@@ -76,18 +77,16 @@ class fcPayOneUserView extends fcPayOneUserView_parent {
     protected function _fcpoHandleAmazonNoTokenFound() {
         $oConfig = $this->getConfig();
         $aAllowedDoubleRedirectModes = array('redirect','auto');
-
         $sFCPOAmazonLoginMode = $oConfig->getConfigParam('sFCPOAmazonLoginMode');
         $blAllowedForDoubleRedirect = (in_array($sFCPOAmazonLoginMode, $aAllowedDoubleRedirectModes));
-        $blAmazonRedirectLogin = $blAllowedForDoubleRedirect ? true : false;
 
-        if ($blAmazonRedirectLogin) {
+        if ($blAllowedForDoubleRedirect) {
             // we need to fetch the token from location hash (via js) and put it into a cookie first
             $this->_aViewData['blFCPOAmazonCatchHash'] = true;
             $this->render();
         } else {
             // @todo: Redirect to basket with message, currently redirect without comment
-            $oUtils = oxRegistry::getUtils();
+            $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
             $sShopUrl = $oConfig->getShopUrl();
             $oUtils->redirect($sShopUrl."index.php?cl=basket");
         }

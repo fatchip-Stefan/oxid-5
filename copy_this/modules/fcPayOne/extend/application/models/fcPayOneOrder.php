@@ -1434,17 +1434,15 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         $mReturn = false;
         $this->_fcpoFlagOrderPaymentAsRedirect(null);
       
-        if ($oPayGateway) {
-            $sPaymenttype = $this->oxorder__oxpaymenttype->value;
-            if ($sPaymenttype == 'fcpoamazonpay') {
-                $sMessage = $this->fcpoGetAmazonErrorMessage($aResponse['errorcode']);
-                $mReturn = $this->_fcpoGetAmazonSuccessCode($aResponse['errorcode']);
-            } else {
-                $sMessage = $aResponse['customermessage'];
-            }
-            $oPayGateway->fcSetLastErrorNr($aResponse['errorcode']);
-            $oPayGateway->fcSetLastError($sMessage);
+        $sPaymenttype = $this->oxorder__oxpaymenttype->value;
+        if ($sPaymenttype == 'fcpoamazonpay') {
+            $sMessage = $this->fcpoGetAmazonErrorMessage($aResponse['errorcode']);
+            $mReturn = $this->_fcpoGetAmazonSuccessCode($aResponse['errorcode']);
+        } else {
+            $sMessage = $aResponse['customermessage'];
         }
+        $oPayGateway->fcSetLastErrorNr($aResponse['errorcode']);
+        $oPayGateway->fcSetLastError($sMessage);
 
         return $mReturn;
     }

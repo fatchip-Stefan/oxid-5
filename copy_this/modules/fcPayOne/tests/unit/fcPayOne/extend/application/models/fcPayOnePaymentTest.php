@@ -384,5 +384,15 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOnePaymentTest extends OxidTe
         
         $this->assertEquals('someValue', $oTestObject->fcpoGetMode($aMockDynValues));
     }
+
+    /**
+     * Testing  fcpoGetPayonePaymentTypes for coverage
+     *
+     * @param void
+     * @return void
+     */
+    public function test_fcpoGetPayonePaymentTypes_Coverage() {
+
+    }
     
 }

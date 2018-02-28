@@ -534,19 +534,17 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
      */
     public function fcpoGetPayonePaymentTypes() {
         $aPaymentTypes = array();
+        $oDb = $this->_oFcpoHelper->fcpoGetDb(true);
 
         $sQuery = "SELECT oxid, oxdesc FROM oxpayments WHERE fcpoispayone = 1";
-        $oResult = $this->_oFcpoDb->Execute($sQuery);
-        if ($oResult != false && $oResult->recordCount() > 0) {
-            while (!$oResult->EOF) {
-                $sOxid = (isset($oResult->fields['oxid'])) ? $oResult->fields['oxid'] : $oResult->fields[0];
-                $sDesc = (isset($oResult->fields['oxdesc'])) ? $oResult->fields['oxdesc'] : $oResult->fields[1];
-                $oPaymentType = new stdClass();
-                $oPaymentType->sId = $sOxid;
-                $oPaymentType->sTitle = $sDesc;
-                $aPaymentTypes[] = $oPaymentType;
-                $oResult->moveNext();
-            }
+        $aRows = $oDb->getAll($sQuery);
+
+        foreach ($aRows as $aRow) {
+            $oPaymentType = new stdClass();
+            $oPaymentType->sId = $aRow['oxid'];
+            $oPaymentType->sTitle = $aRow['oxdesc'];
+
+            $aPaymentTypes[] = $oPaymentType;
         }
 
         return $aPaymentTypes;
@@ -560,14 +558,13 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
      */
     public function fcpoGetRedPayments() {
         $sPayments = '';
+        $oDb = $this->_oFcpoHelper->fcpoGetDb(true);
+
         $sQuery = 'SELECT oxid FROM oxpayments WHERE fcpoispayone = 1 AND oxfromboni <= 100';
-        $oResult = $this->_oFcpoDb->Execute($sQuery);
-        if ($oResult != false && $oResult->recordCount() > 0) {
-            while (!$oResult->EOF) {
-                $sPayment = (isset($oResult->fields[0])) ? $oResult->fields[0] : $oResult->fields['oxid'];
-                $sPayments .= $sPayment . ',';
-                $oResult->moveNext();
-            }
+        $aRows = $oDb->getAll($sQuery);
+        foreach($aRows as $aRow) {
+            $sPayment = $aRow['oxid'];
+            $sPayments .= $sPayment . ',';
         }
         $sPayments = rtrim($sPayments, ',');
 
@@ -582,14 +579,13 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
      */
     public function fcpoGetYellowPayments() {
         $sPayments = '';
+        $oDb = $this->_oFcpoHelper->fcpoGetDb(true);
+
         $sQuery = 'SELECT oxid FROM oxpayments WHERE fcpoispayone = 1 AND oxfromboni > 100 AND oxfromboni <= 300';
-        $oResult = $this->_oFcpoDb->Execute($sQuery);
-        if ($oResult != false && $oResult->recordCount() > 0) {
-            while (!$oResult->EOF) {
-                $sPayment = (isset($oResult->fields[0])) ? $oResult->fields[0] : $oResult->fields['oxid'];
-                $sPayments .= $sPayment . ',';
-                $oResult->moveNext();
-            }
+        $aRows = $oDb->getAll($sQuery);
+        foreach($aRows as $aRow) {
+            $sPayment = $aRow['oxid'];
+            $sPayments .= $sPayment . ',';
         }
         $sPayments = rtrim($sPayments, ',');
 
