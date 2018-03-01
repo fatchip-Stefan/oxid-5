@@ -26,7 +26,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
      * @param object &$object    Instantiated object that we will run method on.
      * @param string $methodName Method name to call
      * @param array  $parameters Array of parameters to pass into method.
-     *
+     * @throws exception
      * @return mixed Method return.
      */
     public function invokeMethod(&$object, $methodName, array $parameters = array()) {
@@ -43,7 +43,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
      * @param object &$object    Instantiated object that we will run method on.
      * @param string $propertyName property that shall be set
      * @param array  $value value to be set
-     *
+     * @throws exception
      * @return mixed Method return.
      */
     public function invokeSetAttribute(&$object, $propertyName, $value) {
@@ -52,6 +52,111 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
         $property->setAccessible(true);
 
         $property->setValue($object, $value);
+    }
+
+    /**
+     * Testing fcpoSetAmazonOrderReferenceDetailsResponse for coverage
+     *
+     * @param void
+     * @return void
+     */
+    public function test_fcpoSetAmazonOrderReferenceDetailsResponse_Coverage() {
+        $oTestObject = $this->getMock('fcPayOneUser', array(
+            '_fcpoAmazonEmailEncode',
+            '_fcpoAddOrUpdateAmazonUser',
+        ));
+        $oTestObject->expects($this->any())->method()->will($this->returnValue('someEncodedEmail'));
+        $oTestObject->expects($this->any())->method()->will($this->returnValue(null));
+
+        $this->assertEquals(null, $oTestObject->fcpoSetAmazonOrderReferenceDetailsResponse());
+    }
+
+    /**
+     * Testing _fcpoAmazonEmailEncode for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test__fcpoAmazonEmailEncode_Coverage() {
+        $oTestObject = oxNew('fcPayOneUser');
+        $oMockViewConfig = $this->getMock('oxViewConfig', array('fcpoAmazonEmailEncode'));
+        $oMockViewConfig->expects($this->any())->method('fcpoAmazonEmailEncode')->will($this->returnValue('someEncodedEmail'));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('getFactoryObject')->will($this->returnValue($oMockViewConfig));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $sExpect = 'someEncodedEmail';
+        $this->assertEuals($sExpect, $oTestObject->_fcpoAmazonEmailEncode());
+    }
+
+    /**
+     * Testing _fcpoAmazonEmailDecode for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test__fcpoAmazonEmailDecode_Coverage() {
+        $oTestObject = oxNew('fcPayOneUser');
+        $oMockViewConfig = $this->getMock('oxViewConfig', array('fcpoAmazonEmailDecode'));
+        $oMockViewConfig->expects($this->any())->method('fcpoAmazonEmailDecode')->will($this->returnValue('someDecodedEmail'));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('getFactoryObject')->will($this->returnValue($oMockViewConfig));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $sExpect = 'someDecodedEmail';
+        $this->assertEuals($sExpect, $oTestObject->_fcpoAmazonEmailDecode());
+    }
+
+    /**
+     * Testing _fcpoAddOrUpdateAmazonUser for case user exists
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test__fcpoAddOrUpdateAmazonUser_UserExists() {
+        $oTestObject = $this->getMock('fcPayOneUser', array(
+            '_fcpoUserExists',
+            '_fcpoUpdateAmazonUser',
+            '_fcpoAddAmazonUser',
+        ));
+        $oTestObject->expects($this->any())->method('_fcpoUserExists')->will($this->returnValue(true));
+        $oTestObject->expects($this->any())->method('_fcpoUpdateAmazonUser')->will($this->returnValue(null));
+        $oTestObject->expects($this->any())->method('_fcpoAddAmazonUser')->will($this->returnValue(null));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoSetSessionVariable')->will($this->returnValue(null));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals(null, $oTestObject->_fcpoAddOrUpdateAmazonUser());
+    }
+
+    /**
+     * Testing _fcpoAddOrUpdateAmazonUser for case user new
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test__fcpoAddOrUpdateAmazonUser_UserNew() {
+        $oTestObject = $this->getMock('fcPayOneUser', array(
+            '_fcpoUserExists',
+            '_fcpoUpdateAmazonUser',
+            '_fcpoAddAmazonUser',
+        ));
+        $oTestObject->expects($this->any())->method('_fcpoUserExists')->will($this->returnValue(false));
+        $oTestObject->expects($this->any())->method('_fcpoUpdateAmazonUser')->will($this->returnValue(null));
+        $oTestObject->expects($this->any())->method('_fcpoAddAmazonUser')->will($this->returnValue(null));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoSetSessionVariable')->will($this->returnValue(null));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals(null, $oTestObject->_fcpoAddOrUpdateAmazonUser());
     }
 
     /**
