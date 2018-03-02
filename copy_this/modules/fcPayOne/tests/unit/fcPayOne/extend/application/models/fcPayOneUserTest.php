@@ -156,8 +156,288 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
         $oHelper->expects($this->any())->method('fcpoSetSessionVariable')->will($this->returnValue(null));
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
-        $this->assertEquals(null, $oTestObject->_fcpoAddOrUpdateAmazonUser());
+        $aMockResponse = array(
+            'add_paydata[billing_street]'=>'',
+            'add_paydata[billing_country]'=>'',
+            'add_paydata[email]'=>'',
+            'add_paydata[billing_zip]'=>'',
+            'add_paydata[billing_telephonenumber]'=>'',
+            'add_paydata[billing_firstnam'=>'',
+            'add_paydata[billing_lastname]'=>'',
+            'add_paydata[billing_city]'=>'',
+            'add_paydata[shipping_street]'=>'',
+            'add_paydata[shipping_country]'=>'',
+            'add_paydata[shipping_firstname]'=>'',
+            'add_paydata[shipping_lastname]'=>'',
+            'add_paydata[shipping_telephonenumber]'=>'',
+            'add_paydata[shipping_city]'=>'',
+            'add_paydata[shipping_country]'=>'',
+            'add_paydata[shipping_zip]'=>'',
+        );
+
+        $this->assertEquals(null, $oTestObject->_fcpoAddOrUpdateAmazonUser($aMockResponse));
     }
+
+    /**
+     * Testing _fcpoAddAmazonUser for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test__fcpoAddAmazonUser_Coverage() {
+        $oTestObject = $this->getMock('fcPayOneUser', array(
+            '_fcpoAmazonAddDeliveryAddress',
+            '_fcpoGetCountryIdByIso2',
+            '_fcpoSplitStreetAndStreetNr',
+        ));
+        $oTestObject->expects($this->any())->method('_fcpoAmazonAddDeliveryAddress')->will($this->returnValue(null));
+        $oTestObject->expects($this->any())->method('_fcpoGetCountryIdByIso2')->will($this->returnValue('DE'));
+        $oTestObject->expects($this->any())->method('_fcpoSplitStreetAndStreetNr')->will($this->returnValue(array('somestreet', '1')));
+
+        $oMockUser = $this->getMock('oxUser', array('save', 'addToGroup', 'getId'));
+        $oMockUser->expects($this->any())->method('save')->will($this->returnValue(null));
+        $oMockUser->expects($this->any())->method('addToGroup')->will($this->returnValue(null));
+        $oMockUser->expects($this->any())->method('getId')->will($this->returnValue('someUserId'));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('getFactoryObject')->will($this->returnValue($oMockUser));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $aMockResponse = array(
+            'add_paydata[billing_street]'=>'',
+            'add_paydata[billing_country]'=>'',
+            'add_paydata[email]'=>'',
+            'add_paydata[billing_zip]'=>'',
+            'add_paydata[billing_telephonenumber]'=>'',
+            'add_paydata[billing_firstnam'=>'',
+            'add_paydata[billing_lastname]'=>'',
+            'add_paydata[billing_city]'=>'',
+            'add_paydata[shipping_street]'=>'',
+            'add_paydata[shipping_country]'=>'',
+            'add_paydata[shipping_firstname]'=>'',
+            'add_paydata[shipping_lastname]'=>'',
+            'add_paydata[shipping_telephonenumber]'=>'',
+            'add_paydata[shipping_city]'=>'',
+            'add_paydata[shipping_country]'=>'',
+            'add_paydata[shipping_zip]'=>'',
+        );
+
+
+        $this->assertEquals('someUserId', $oTestObject->_fcpoAddAmazonUser($aMockResponse));
+    }
+
+    /**
+     * Testing _fcpoAddAmazonUser for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test__fcpoUpdateAmazonUser_Coverage() {
+        $oTestObject = $this->getMock('fcPayOneUser', array(
+            '_fcpoGetUserOxidByEmail',
+            '_fcpoAmazonAddDeliveryAddress',
+            '_fcpoGetCountryIdByIso2',
+            '_fcpoSplitStreetAndStreetNr',
+        ));
+        $oTestObject->expects($this->any())->method('_fcpoGetUserOxidByEmail')->will($this->returnValue('someUserId'));
+        $oTestObject->expects($this->any())->method('_fcpoAmazonAddDeliveryAddress')->will($this->returnValue(null));
+        $oTestObject->expects($this->any())->method('_fcpoGetCountryIdByIso2')->will($this->returnValue('DE'));
+        $oTestObject->expects($this->any())->method('_fcpoSplitStreetAndStreetNr')->will($this->returnValue(array('somestreet', '1')));
+
+        $oMockUser = $this->getMock('oxUser', array('save', 'addToGroup', 'getId'));
+        $oMockUser->expects($this->any())->method('save')->will($this->returnValue(null));
+        $oMockUser->expects($this->any())->method('addToGroup')->will($this->returnValue(null));
+        $oMockUser->expects($this->any())->method('getId')->will($this->returnValue('someUserId'));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('getFactoryObject')->will($this->returnValue($oMockUser));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $aMockResponse = array(
+            'add_paydata[billing_street]'=>'',
+            'add_paydata[billing_country]'=>'',
+            'add_paydata[email]'=>'',
+            'add_paydata[billing_zip]'=>'',
+            'add_paydata[billing_telephonenumber]'=>'',
+            'add_paydata[billing_firstnam'=>'',
+            'add_paydata[billing_lastname]'=>'',
+            'add_paydata[billing_city]'=>'',
+            'add_paydata[shipping_street]'=>'',
+            'add_paydata[shipping_country]'=>'',
+            'add_paydata[shipping_firstname]'=>'',
+            'add_paydata[shipping_lastname]'=>'',
+            'add_paydata[shipping_telephonenumber]'=>'',
+            'add_paydata[shipping_city]'=>'',
+            'add_paydata[shipping_country]'=>'',
+            'add_paydata[shipping_zip]'=>'',
+        );
+
+        $this->assertEquals('someUserId', $oTestObject->_fcpoAddAmazonUser($aMockResponse));
+    }
+
+    /**
+     * Testing _fcpoAmazonAddDeliveryAddress for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test__fcpoAmazonAddDeliveryAddress_Coverage() {
+        $oTestObject = $this->getMock('fcPayOneUser', array(
+            '_fcpoSplitStreetAndStreetNr',
+            '_fcpoGetCountryIdByIso2',
+            '_fcpoCheckAddressExists',
+        ));
+        $oTestObject->expects($this->any())->method('_fcpoSplitStreetAndStreetNr')->will($this->returnValue(array('somestreet', '1')));
+        $oTestObject->expects($this->any())->method('_fcpoGetCountryIdByIso2')->will($this->returnValue('DE'));
+        $oTestObject->expects($this->any())->method('_fcpoCheckAddressExists')->will($this->returnValue(array('street','parts')));
+
+        $oMockAddress = $this->getMock('oxAddress', array(
+            'load',
+            'setId',
+            'save',
+            'getEncodedDeliveryAddress',
+        ));
+        $oMockAddress->expects($this->any())->method('load')->will($this->returnValue(null));
+        $oMockAddress->expects($this->any())->method('setId')->will($this->returnValue(null));
+        $oMockAddress->expects($this->any())->method('save')->will($this->returnValue(null));
+        $oMockAddress->expects($this->any())->method('getEncodedDeliveryAddress')->will($this->returnValue('someEncodedAddress'));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('getFactoryObject')->will($this->returnValue($oMockAddress));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $aMockResponse = array(
+            'add_paydata[billing_street]'=>'',
+            'add_paydata[billing_country]'=>'',
+            'add_paydata[email]'=>'',
+            'add_paydata[billing_zip]'=>'',
+            'add_paydata[billing_telephonenumber]'=>'',
+            'add_paydata[billing_firstnam'=>'',
+            'add_paydata[billing_lastname]'=>'',
+            'add_paydata[billing_city]'=>'',
+            'add_paydata[shipping_street]'=>'',
+            'add_paydata[shipping_country]'=>'',
+            'add_paydata[shipping_firstname]'=>'',
+            'add_paydata[shipping_lastname]'=>'',
+            'add_paydata[shipping_telephonenumber]'=>'',
+            'add_paydata[shipping_city]'=>'',
+            'add_paydata[shipping_country]'=>'',
+            'add_paydata[shipping_zip]'=>'',
+        );
+
+        $this->assertEquals(null, $oTestObject->_fcpoAmazonAddDeliveryAddress($aMockResponse, 'someUserId'));
+    }
+
+    /**
+     * Testing _fcpoCheckAddressExists for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test__fcpoCheckAddressExists_Coverage() {
+        $oTestObject = oxNew('fcPayOneUser');
+        $oMockAddress = $this->getMock('oxAddress', array('load'));
+        $oMockAddress->expects($this->any())->method('load')->will($this->returnValue(true));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('getFactoryObject')->will($this->returnValue($oMockAddress));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals(true, $oTestObject->_fcpoCheckAddressExists('someEncodedAddress'));
+    }
+
+    /**
+     * Testing _fcpoSplitStreetAndStreetNr for coverage
+     *
+     * @param void
+     * @return void
+     */
+    public function test__fcpoSplitStreetAndStreetNr_Coverage() {
+        $oTestObject = oxNew('fcPayOneUser');
+        $sMockStreetAndStreetNr = "Some Street 123";
+        $aExpect = array('Some Street', '123');
+        $this->assertEquals($aExpect, $oTestObject->_fcpoSplitStreetAndStreetNr($sMockStreetAndStreetNr));
+    }
+
+    /**
+     * Testing _fcpoGetCountryIdByIso2 for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test__fcpoGetCountryIdByIso2_Coverage() {
+        $oTestObject = oxNew('fcPayOneUser');
+
+        $oMockCountry = $this->getMock('oxCountry', array('getIdByCode'));
+        $oMockCountry->expects($this->any())->method('getIdByCode')->will($this->returnValue('someCountryId'));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('getFactoryObject')->will($this->returnValue($oMockCountry));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals('someCountryId', $oTestObject->_fcpoGetCountryIdByIso2('someISOCode'));
+    }
+
+    /**
+     * Testing _fcpoUserExists with option password
+     *
+     * @param void
+     * @return void
+     */
+    public function test__fcpoUserExists_WithPassword() {
+        $oMockUser = $this->getMock('oxUser');
+        $oMockUser->oxuser__oxpassword = new oxField('somePassword');
+
+        $oTestObject = $this->getMock('fcPayOneUser', array('_fcpoGetUserOxidByEmail', 'load'));
+        $oTestObject->expects($this->any())->method('_fcpoGetUserOxidByEmail')->will($this->returnValue('someUserId'));
+        $oTestObject->expects($this->any())->method('load')->will($this->returnValue($oMockUser));
+
+        $this->assertEquals(true, $oTestObject->_fcpoUserExists('someEmailAddress', true));
+    }
+
+    /**
+     * Testing _fcpoUserExists with option no password
+     *
+     * @param void
+     * @return void
+     */
+    public function test__fcpoUserExists_NoPassword() {
+        $oMockUser = $this->getMock('oxUser');
+        $oMockUser->oxuser__oxpassword = new oxField('somePassword');
+
+        $oTestObject = $this->getMock('fcPayOneUser', array('_fcpoGetUserOxidByEmail', 'load'));
+        $oTestObject->expects($this->any())->method('_fcpoGetUserOxidByEmail')->will($this->returnValue('someUserId'));
+        $oTestObject->expects($this->any())->method('load')->will($this->returnValue($oMockUser));
+
+        $this->assertEquals(true, $oTestObject->_fcpoUserExists('someEmailAddress', false));
+    }
+
+    /**
+     * Testiong _fcpoGetUserOxidByEmail for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test__fcpoGetUserOxidByEmail_Coverage() {
+        $oTestObject = oxNew('fcPayOneUser');
+
+        $oMockDb = $this->getMock('oxDb', array('GetOne', 'quote'));
+        $oMockDb->expects($this->any())->method('GetOne')->will($this->returnValue('someUserId'));
+        $oMockDb->expects($this->any())->method('quote')->will($this->returnValue(null));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetDb')->will($this->returnValue($oMockDb));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals('someUserId', $oTestObject->_fcpoGetUserOxidByEmail('someEmailAddress'));
+    }
+
 
     /**
      * Testing fcpoSetBoni with scorevalue

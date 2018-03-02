@@ -170,7 +170,7 @@ class fcPayOneUser extends fcPayOneUser_parent {
         $aStreetParts = $this->_fcpoSplitStreetAndStreetNr($aResponse['add_paydata[shipping_street]']);
         $sCountryId = $this->_fcpoGetCountryIdByIso2($aResponse['add_paydata[shipping_country]']);
 
-        $oAddress = oxNew('oxaddress');
+        $oAddress = $this->_oFcpoHelper->getFactoryObject('oxaddress');
         $oAddress->oxaddress__oxuserid = new oxField($sUserOxid);
         $oAddress->oxaddress__oxaddressuserid = new oxField($sUserOxid);
         $oAddress->oxaddress__oxfname = new oxField(trim($aResponse['add_paydata[shipping_firstname]']));
@@ -203,7 +203,7 @@ class fcPayOneUser extends fcPayOneUser_parent {
      * @return bool
      */
     protected function _fcpoCheckAddressExists($sEncodedDeliveryAddress) {
-        $oAddress = oxNew('oxaddress');
+        $oAddress = $this->_oFcpoHelper->getFactoryObject('oxaddress');
         $blReturn = false;
         if ($oAddress->load($sEncodedDeliveryAddress)) {
             $blReturn = true;
@@ -220,7 +220,7 @@ class fcPayOneUser extends fcPayOneUser_parent {
      */
     protected function _fcpoSplitStreetAndStreetNr($sStreetAndStreetNr) {
         /**
-         * @todo currently very basic by simply splitting ot space
+         * @todo currently very basic by simply splitting of space
          */
         $aReturn = array();
         $aParts = explode(' ', $sStreetAndStreetNr);
@@ -269,7 +269,7 @@ class fcPayOneUser extends fcPayOneUser_parent {
     }
 
     /**
-     * Method delivers OXID of a user by offfering an email address or false if email does not exist
+     * Method delivers OXID of a user by offering an email address or false if email does not exist
      *
      * @param string $sAmazonEmailAddress
      * @return mixed
