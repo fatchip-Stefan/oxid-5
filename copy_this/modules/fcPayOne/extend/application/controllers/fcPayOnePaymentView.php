@@ -902,7 +902,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return bool
      */
     protected function _hasFilterDynDataMethod() {
-        $iVersion = $this->_oFcpoHelper->fcpoGetIntShopVersion();
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sVersion = $oConfig->getVersion();
         $blReturn = (version_compare($sVersion, '4.3.0', '>=')) ? true : false;

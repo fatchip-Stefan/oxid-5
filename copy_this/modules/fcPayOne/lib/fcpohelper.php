@@ -163,17 +163,18 @@ class fcpohelper extends oxBase {
      * Getter for config instance
      * 
      * @param void
-     * @param mixed
+     * @return mixed
      */
     public function fcpoGetConfig() {
-        return $this->getConfig();
+        $oConfig = $this->getConfig();
+        return $oConfig;
     }
 
     /**
      * Getter for session instance
      * 
      * @param void
-     * @param mixed
+     * @return mixed
      */
     public function fcpoGetSession() {
         return $this->getSession();
@@ -183,7 +184,7 @@ class fcpohelper extends oxBase {
      * Getter for database instance
      * 
      * @param $blAssoc with assoc mode
-     * @param mixed
+     * @return mixed
      */
     public function fcpoGetDb($blAssoc = false) {
         if ($blAssoc) {
