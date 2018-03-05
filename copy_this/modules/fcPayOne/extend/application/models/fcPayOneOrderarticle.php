@@ -52,8 +52,6 @@ class fcPayOneOrderarticle extends fcPayOneOrderarticle_parent {
      * @return bool
      */
     public function save($oOrder = false, $blFinishingSave = true) {
-        $oSession = $this->_oFcpoHelper->fcpoGetSession();
-        $oBasket = $oSession->getBasket();
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $blPresaveOrder = $oConfig->getConfigParam('blFCPOPresaveOrder');
 

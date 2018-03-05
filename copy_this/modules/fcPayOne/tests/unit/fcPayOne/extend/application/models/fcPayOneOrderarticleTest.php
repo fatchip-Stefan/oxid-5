@@ -63,9 +63,19 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrderarticleTest extends O
         $oMockOrder = $this->getMock('oxOrder', array('isPayOnePaymentType'));
         $oMockOrder->expects($this->any())->method('isPayOnePaymentType')->will($this->returnValue(false));
         
-        $oTestObject = $this->getMock('fcPayOneOrderarticle', array('_fcpoGetBefore'));
+        $oTestObject = $this->getMock('fcPayOneOrderarticle', array(
+            '_fcpoGetBefore',
+            '_fcCheckReduceStockAfterRedirect',
+            'updateArticleStock',
+            '_setOrderFiles',
+            'setIsNewOrderItem',
+        ));
         $oTestObject->expects($this->any())->method('_fcpoGetBefore')->will($this->returnValue(true));
-        
+        $oTestObject->expects($this->any())->method('_fcCheckReduceStockAfterRedirect')->will($this->returnValue(true));
+        $oTestObject->expects($this->any())->method('updateArticleStock')->will($this->returnValue(null));
+        $oTestObject->expects($this->any())->method('_setOrderFiles')->will($this->returnValue(null));
+        $oTestObject->expects($this->any())->method('setIsNewOrderItem')->will($this->returnValue(null));
+
         $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
         $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue(false));
 
@@ -86,13 +96,20 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrderarticleTest extends O
     public function test_save_Coverage_1() {
         $oMockOrder = $this->getMock('oxOrder', array('isPayOnePaymentType'));
         $oMockOrder->expects($this->any())->method('isPayOnePaymentType')->will($this->returnValue(true));
-        
-        $oTestObject = $this->getMock('fcPayOneOrderarticle', array('_fcpoGetBefore'));
+
+        $oTestObject = $this->getMock('fcPayOneOrderarticle', array(
+            '_fcpoGetBefore',
+            '_fcCheckReduceStockAfterRedirect',
+            'updateArticleStock',
+            '_setOrderFiles',
+            'setIsNewOrderItem',
+        ));
         $oTestObject->expects($this->any())->method('_fcpoGetBefore')->will($this->returnValue(false));
         $oTestObject->expects($this->any())->method('_setOrderFiles')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('updateArticleStock')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('setIsNewOrderItem')->will($this->returnValue(true));
-        
+        $oTestObject->expects($this->any())->method('_fcCheckReduceStockAfterRedirect')->will($this->returnValue(true));
+
         $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
         $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue(true));
 
@@ -112,13 +129,20 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrderarticleTest extends O
     public function test_save_Coverage_2() {
         $oMockOrder = $this->getMock('oxOrder', array('isPayOnePaymentType'));
         $oMockOrder->expects($this->any())->method('isPayOnePaymentType')->will($this->returnValue(true));
-        
-        $oTestObject = $this->getMock('fcPayOneOrderarticle', array('_fcpoGetBefore'));
+
+        $oTestObject = $this->getMock('fcPayOneOrderarticle', array(
+            '_fcpoGetBefore',
+            '_fcCheckReduceStockAfterRedirect',
+            'updateArticleStock',
+            '_setOrderFiles',
+            'setIsNewOrderItem',
+        ));
         $oTestObject->expects($this->any())->method('_fcpoGetBefore')->will($this->returnValue(false));
         $oTestObject->expects($this->any())->method('_setOrderFiles')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('updateArticleStock')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('setIsNewOrderItem')->will($this->returnValue(true));
-        
+        $oTestObject->expects($this->any())->method('_fcCheckReduceStockAfterRedirect')->will($this->returnValue(false));
+
         $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
         $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->onConsecutiveCalls(true,true,false,true,true));
         
@@ -233,5 +257,12 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrderarticleTest extends O
         $oTestObject = oxNew('fcPayOneOrderarticle');
         $this->assertEquals(false, $oTestObject->_fcpoProcessBaseDelete('someId'));
         
+    }
+
+    /**
+     * Testing _fcCheckReduceStockAfterRedirect for coverage
+     */
+    public function test__fcCheckReduceStockAfterRedirect_Coverage() {
+
     }
 }

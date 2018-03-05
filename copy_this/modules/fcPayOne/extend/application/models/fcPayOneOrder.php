@@ -807,8 +807,6 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         }
 
         if (( $blSave = oxBase::save())) {
-            $blSaveAfterRedirect = $this->_isRedirectAfterSave();
-
             // saving order articles
             $oOrderArticles = $this->getOrderArticles();
             if ($oOrderArticles && count($oOrderArticles) > 0) {

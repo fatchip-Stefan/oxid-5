@@ -26,7 +26,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
      * @param object &$object    Instantiated object that we will run method on.
      * @param string $methodName Method name to call
      * @param array  $parameters Array of parameters to pass into method.
-     *
+     * @throws exception
      * @return mixed Method return.
      */
     public function invokeMethod(&$object, $methodName, array $parameters = array()) {
@@ -43,7 +43,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
      * @param object &$object    Instantiated object that we will run method on.
      * @param string $methodName Method name to call
      * @param array  $parameters Array of parameters to pass into method.
-     *
+     * @throws exception
      * @return mixed Method return.
      */
     public function invokeSetAttribute(&$object, $propertyName, $value) {
@@ -59,6 +59,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
      * 
      * @param void
      * @return void
+     * @throws exception
      */
     public function test_Render_Coverage() {
         $oTestObject = oxNew('fcpayone_boni_main');
@@ -79,6 +80,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
      * 
      * @param void
      * @return void
+     * @throws exception
      */
     public function test_Save_Coverage() {
         $oTestObject = oxNew('fcpayone_boni_main');
@@ -98,5 +100,51 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
 
         $this->assertEquals(null, $oTestObject->save());
     }
+
+    /**
+     * Testing _fcpoValidateAddresscheckBoniversum for coverage
+     */
+    public function test__fcpoValidateAddresscheckBoniversum_Coverage() {
+        $oTestObject = oxNew('fcpayone_boni_main');
+        $oMockConfig = $this->getMock('oxConfig', array('saveShopConfVar'));
+        $oMockConfig->expects($this->any())->method('saveShopConfVar')->will($this->returnValue(null));
+
+        $aMockConfStrs = array(
+            'sFCPOBonicheck'=>'CE',
+            'sFCPOAddresscheck'=>'NOT_PB',
+        );
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));
+        $oHelper->expects($this->any())->method('fcpoGetRequestParameter')->will($this->returnValue($aMockConfStrs));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $iExpect = 1;
+
+        $this->assertEquals($iExpect, $oTestObject->_fcpoValidateAddresscheckBoniversum());
+    }
+
+    /**
+     * Testing _fcpoDisplayMessage for coverage
+     */
+    public function test__fcpoDisplayMessage_Coverage() {
+        $oTestObject = oxNew('fcpayone_boni_main');
+        $iMockValidateCode = 1;
+
+        $oMockUtilsView = $this->getMock('oxUtilsView', array('addErrorToDisplay'));
+        $oMockUtilsView->expects($this->any())->method('addErrorToDisplay')->will($this->returnValue(null));
+
+        $oMockLang = $this->getMock('oxLang', array('translateString'));
+        $oMockLang->expects($this->any())->method('translateString')->will($this->returnValue('translatedString'));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetUtilsView')->will($this->returnValue($oMockUtilsView));
+        $oHelper->expects($this->any())->method('fcpoGetLang')->will($this->returnValue($oMockLang));
+
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals(null, $oTestObject->_fcpoDisplayMessage($iMockValidateCode));
+    }
+
 
 }

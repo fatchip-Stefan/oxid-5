@@ -21,27 +21,15 @@
 /*
  * load OXID Framework
  */
-function getShopBasePath()
-{
-    return dirname(__FILE__).'/../../../../';
+
+if (!function_exists('getShopBasePath')) {
+    function getShopBasePath()
+    {
+        return dirname(__FILE__).'/../../../../';
+    }
 }
 
-if ( file_exists( getShopBasePath() . "/bootstrap.php" ) ) {
-	require_once getShopBasePath() . "/bootstrap.php";
-}
-else {
-    // global variables which are important for older OXID.
-    $_SERVER['REQUEST_METHOD'] = 'POST';
-    $_SERVER['HTTP_USER_AGENT'] = 'payone_ajax';
-    $_SERVER['HTTP_ACCEPT_LANGUAGE'] = '';
-    $_SERVER['HTTP_REFERER'] = '';
-    $_SERVER['QUERY_STRING'] = '';
-    
-    require getShopBasePath() . 'modules/functions.php';
-    require_once getShopBasePath() . 'core/oxfunctions.php';
-    require_once getShopBasePath() . 'views/oxubase.php';
-}
-
+require_once getShopBasePath() . "/bootstrap.php";
 
 // receive params
 $sPaymentId = filter_input( INPUT_POST, 'paymentid' );

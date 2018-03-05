@@ -1314,9 +1314,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return mixed
      */
     public function fcpoPayolutionPreCheck($sPaymentId) {
-        $oSession = $this->getSession();
-        $oBasket = $oSession->getBasket();
-        $oUser = $oBasket->getBasketUser();
         $this->_blIsPayolutionInstallmentAjax = true;
 
         return $this->_fcpoPayolutionPreCheck(true, $sPaymentId);
@@ -1329,11 +1326,9 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return decimal
      */
     public function fcpoGetBasketSum() {
-        $oConfig = $this->getConfig();
-        $sShopVersion = $oConfig->getVersion();
         $oSession = $this->getSession();
         $oBasket = $oSession->getBasket();
-        $dBruttoSum = (version_compare($sShopVersion, '4.7.0', '>=')) ? $oBasket->getBruttoSum() : $oBasket->getProductsPrice()->getBruttoSum();
+        $dBruttoSum = $oBasket->getBruttoSum();
         $sBruttoSum = number_format($dBruttoSum, 2, ',', '.');
 
         return $sBruttoSum;
@@ -1913,7 +1908,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
                 $blValidBirthdateData = $this->_fcpoValidatePayolutionBirthdayData($sPaymentId, $aRequestedValues);
                 break;
             case 'fcpo_secinvoice':
-                $blValidBirthdateData = $this->_fcpoValidateSecInvoiceBirthdayData($sPaymentId, $aRequestedValues);
+                $blValidBirthdateData = $this->_fcpoValidateSecInvoiceBirthdayData($aRequestedValues);
                 $blBirthdayRequired = true;
                 break;
         }
@@ -1958,11 +1953,10 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     /**
      * Validates birthday for secure invoice payment
      *
-     * @param $sPaymentId
      * @param $aRequestedValues
      * @return void
      */
-    protected function _fcpoValidateSecInvoiceBirthdayData($sPaymentId, $aRequestedValues) {
+    protected function _fcpoValidateSecInvoiceBirthdayData($aRequestedValues) {
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
         $sChooseString = $oLang->translateString('FCPO_PAYOLUTION_PLEASE SELECT');
         $sBirthdateYear = $aRequestedValues['fcpo_secinvoice_birthdate_year'];

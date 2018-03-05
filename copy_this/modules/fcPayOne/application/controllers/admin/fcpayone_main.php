@@ -224,7 +224,7 @@ class fcpayone_main extends fcpayone_admindetails {
      * @return void
      */
     public function fcpoGetCurrencyIso() {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $aCurrencyArray = $oConfig->getCurrencyArray();
         $aReturn = array();
         foreach ($aCurrencyArray as $oCur) {
@@ -328,7 +328,7 @@ class fcpayone_main extends fcpayone_admindetails {
         
         // add ratepay profiles if set
         $this->_fcpoCheckAndAddRatePayProfile();
-        $this->_fcpoInsertProfiles();
+        $this->_fcpoInsertRatePayProfiles();
 
         // request and add amazonpay configuration if triggered
         $this->_fcpoCheckRequestAmazonPayConfiguration();
@@ -410,7 +410,7 @@ class fcpayone_main extends fcpayone_admindetails {
      * @param void
      *  @return void
      */
-    protected function _fcpoInsertProfiles() {
+    protected function _fcpoInsertRatePayProfiles() {
         $aRatePayProfiles = $this->_oFcpoHelper->fcpoGetRequestParameter('aRatepayProfiles');
         if (is_array($aRatePayProfiles)) {
             foreach ($aRatePayProfiles as $sOxid=>$aRatePayData) {

@@ -88,7 +88,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
         $sExpect = 'someEncodedEmail';
-        $this->assertEuals($sExpect, $oTestObject->_fcpoAmazonEmailEncode());
+        $this->assertEquals($sExpect, $oTestObject->_fcpoAmazonEmailEncode());
     }
 
     /**
@@ -108,7 +108,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
         $sExpect = 'someDecodedEmail';
-        $this->assertEuals($sExpect, $oTestObject->_fcpoAmazonEmailDecode());
+        $this->assertEquals($sExpect, $oTestObject->_fcpoAmazonEmailDecode());
     }
 
     /**
@@ -390,7 +390,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
      * @return void
      */
     public function test__fcpoUserExists_WithPassword() {
-        $oMockUser = $this->getMock('oxUser');
+        $oMockUser = oxNew('oxUser');
         $oMockUser->oxuser__oxpassword = new oxField('somePassword');
 
         $oTestObject = $this->getMock('fcPayOneUser', array('_fcpoGetUserOxidByEmail', 'load'));
@@ -407,7 +407,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
      * @return void
      */
     public function test__fcpoUserExists_NoPassword() {
-        $oMockUser = $this->getMock('oxUser');
+        $oMockUser = oxNew('oxUser');
         $oMockUser->oxuser__oxpassword = new oxField('somePassword');
 
         $oTestObject = $this->getMock('fcPayOneUser', array('_fcpoGetUserOxidByEmail', 'load'));
