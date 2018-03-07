@@ -204,6 +204,10 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneThankyouView extends 
         $oTestObject->expects($this->any())->method('_fcpoHandleAmazonThankyou')->will($this->returnValue(null));
         $oTestObject->expects($this->any())->method('_fcpoDeleteSessionVariablesOnOrderFinish')->will($this->returnValue(null));
 
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoSetSessionVariable')->will($this->returnValue(null));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
         $this->assertEquals('page/checkout/thankyou.tpl', $oTestObject->render());
     }
 

@@ -118,7 +118,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_error_mapping extends
     /**
      * Testiong fcpoAddNewMapping for coverage
      */
-    public function test_fcpoAddNewMapping_Coverage() {
+    public function test__fcpoAddNewMapping_Coverage() {
         $oTestObject = oxNew('fcpayone_error_mapping');
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
@@ -134,7 +134,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_error_mapping extends
 
         $aMockExistingMappings = array();
 
-        $this->assertEquals($aExpect, $oTestObject->fcpoAddNewMapping($aMockExistingMappings));
+        $this->assertEquals($aExpect, $oTestObject->_fcpoAddNewMapping($aMockExistingMappings));
     }
 
     /**

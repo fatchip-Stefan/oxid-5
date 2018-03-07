@@ -65,8 +65,14 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
             '_fcpoAmazonEmailEncode',
             '_fcpoAddOrUpdateAmazonUser',
         ));
-        $oTestObject->expects($this->any())->method()->will($this->returnValue('someEncodedEmail'));
-        $oTestObject->expects($this->any())->method()->will($this->returnValue(null));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_fcpoAmazonEmailEncode')
+            ->will($this->returnValue('someEncodedEmail'));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_fcpoAddOrUpdateAmazonUser')
+            ->will($this->returnValue(null));
 
         $this->assertEquals(null, $oTestObject->fcpoSetAmazonOrderReferenceDetailsResponse());
     }
@@ -88,7 +94,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
         $sExpect = 'someEncodedEmail';
-        $this->assertEquals($sExpect, $oTestObject->_fcpoAmazonEmailEncode());
+        $this->assertEquals($sExpect, $oTestObject->_fcpoAmazonEmailEncode('someEmail'));
     }
 
     /**
@@ -108,7 +114,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
         $sExpect = 'someDecodedEmail';
-        $this->assertEquals($sExpect, $oTestObject->_fcpoAmazonEmailDecode());
+        $this->assertEquals($sExpect, $oTestObject->_fcpoAmazonEmailDecode('someEmail'));
     }
 
     /**
@@ -132,7 +138,9 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
         $oHelper->expects($this->any())->method('fcpoSetSessionVariable')->will($this->returnValue(null));
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
-        $this->assertEquals(null, $oTestObject->_fcpoAddOrUpdateAmazonUser());
+        $aMockResponse['add_paydata[email]'] = 'someEmailAddress';
+
+        $this->assertEquals(null, $oTestObject->_fcpoAddOrUpdateAmazonUser($aMockResponse));
     }
 
     /**

@@ -48,7 +48,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
      * @param object &$object    Instantiated object that we will run method on.
      * @param string $methodName Method name to call
      * @param array  $parameters Array of parameters to pass into method.
-     *
+     * @throws exception
      * @return mixed Method return.
      */
     public function invokeMethod(&$object, $methodName, array $parameters = array()) {
@@ -65,12 +65,16 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
      * @param object &$object    Instantiated object that we will run method on.
      * @param string $propertyName property that shall be set
      * @param array  $value value to be set
-     *
+     * @throws exception
      * @return mixed Method return.
      */
     public function invokeSetAttribute(&$object, $propertyName, $value) {
         $reflection = new \ReflectionClass(get_class($object));
-        $property = $reflection->getProperty($propertyName);
+        try {
+            $property = $reflection->getProperty($propertyName);
+        } catch(Exception $ex) {
+            $property = new \ReflectionProperty(get_class($object), $propertyName);
+        }
         $property->setAccessible(true);
 
         $property->setValue($object, $value);

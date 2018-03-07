@@ -51,11 +51,12 @@ class fcpayone_adminview extends oxAdminView {
      */
     public function fcGetAdminSeperator() {
         $iVersion = $this->_oFcpoHelper->fcpoGetIntShopVersion();
+        $sReturn = '&';
         if($iVersion < 4300) {
-            return '?';
-        } else {
-            return '&';
+            $sReturn = '?';
         }
+
+        return $sReturn;
     }
     
     /**
@@ -100,7 +101,8 @@ class fcpayone_adminview extends oxAdminView {
     public function fcpoGetMerchantId()
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        return $oConfig->getConfigParam('sFCPOMerchantID');
+        $sFCPOMerchantID = $oConfig->getConfigParam('sFCPOMerchantID');
+        return $sFCPOMerchantID;
     }
 
 }

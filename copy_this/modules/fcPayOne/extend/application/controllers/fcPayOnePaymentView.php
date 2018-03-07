@@ -1593,24 +1593,24 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         $blReturn = false;
         if ($sPaymentId == 'fcpopo_installment') {
             $blReturn = (
-                    is_array($aBankData) &&
-                    isset($aBankData['fcpo_payolution_installment_iban']) &&
-                    isset($aBankData['fcpo_payolution_installment_bic']) &&
-                    !empty($aBankData['fcpo_payolution_installment_iban']) &&
-                    !empty($aBankData['fcpo_payolution_installment_bic']) &&
-                    isset($aBankData['fcpo_payolution_installment_accountholder']) &&
-                    !empty($aBankData['fcpo_payolution_installment_accountholder'])
-                    );
+                is_array($aBankData) &&
+                isset($aBankData['fcpo_payolution_installment_iban']) &&
+                isset($aBankData['fcpo_payolution_installment_bic']) &&
+                !empty($aBankData['fcpo_payolution_installment_iban']) &&
+                !empty($aBankData['fcpo_payolution_installment_bic']) &&
+                isset($aBankData['fcpo_payolution_installment_accountholder']) &&
+                !empty($aBankData['fcpo_payolution_installment_accountholder'])
+            );
         } else if ($sPaymentId == 'fcpopo_debitnote') {
             $blReturn = (
-                    is_array($aBankData) &&
-                    isset($aBankData['fcpo_payolution_debitnote_iban']) &&
-                    isset($aBankData['fcpo_payolution_debitnote_bic']) &&
-                    !empty($aBankData['fcpo_payolution_debitnote_iban']) &&
-                    !empty($aBankData['fcpo_payolution_debitnote_bic']) &&
-                    isset($aBankData['fcpo_payolution_debitnote_accountholder']) &&
-                    !empty($aBankData['fcpo_payolution_debitnote_accountholder'])
-                    );
+                is_array($aBankData) &&
+                isset($aBankData['fcpo_payolution_debitnote_iban']) &&
+                isset($aBankData['fcpo_payolution_debitnote_bic']) &&
+                !empty($aBankData['fcpo_payolution_debitnote_iban']) &&
+                !empty($aBankData['fcpo_payolution_debitnote_bic']) &&
+                isset($aBankData['fcpo_payolution_debitnote_accountholder']) &&
+                !empty($aBankData['fcpo_payolution_debitnote_accountholder'])
+            );
         }
 
         return $blReturn;

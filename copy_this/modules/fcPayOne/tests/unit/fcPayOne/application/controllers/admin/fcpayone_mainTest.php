@@ -231,6 +231,8 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_main extends OxidTest
             '_fcpoInsertProfiles',
             '_fcpoCheckRequestAmazonPayConfiguration',
             '_handlePayPalExpressLogos',
+            '_fcpoInsertRatePayProfiles',
+            'fcpoLoadConfigs'
         ));
         $oTestObject->method('_fcpoCheckAndAddStoreId')->will($this->returnValue(null));
         $oTestObject->method('_fcpoCheckAndAddCampaign')->will($this->returnValue(null));
@@ -241,13 +243,17 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_main extends OxidTest
         $oTestObject->method('_fcpoInsertProfiles')->will($this->returnValue(null));
         $oTestObject->method('_fcpoCheckRequestAmazonPayConfiguration')->will($this->returnValue(null));
         $oTestObject->method('_handlePayPalExpressLogos')->will($this->returnValue(null));
+        $oTestObject->method('_fcpoInsertRatePayProfiles')->will($this->returnValue(null));
+        $oTestObject->method('fcpoLoadConfigs')->will($this->returnValue(null));
 
 
         $oMockConfig = $this->getMockBuilder('oxConfig')->disableOriginalConstructor()->getMock();
         $oMockConfig->expects($this->any())->method('saveShopConfVar')->will($this->returnValue(true));
+        $oMockConfig->expects($this->any())->method('getShopId')->will($this->returnValue('someShopId'));
 
         $aConfVars = array();
-        $aConfVars['sFCPOApprovalText'] = 'VarValue';
+        $aConfVars['sFCPOApprovalText'] = array('some', 'data');
+        $aConfVars['someOtherIndex'] = "This\nis\nno\narray";
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
         $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));
@@ -449,7 +455,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_main extends OxidTest
      * @return void
      */
     public function test__fcpoRequestAndAddAmazonConfig_Coverage() {
-        $oTestObject = $this->getMock('fcpayone_main', array('_fcpoRequestAndAddAmazonConfig'));
+        $oTestObject = $this->getMock('fcpayone_main', array('_fcpoSaveAmazonConfigFromResponse'));
         $oTestObject->method('_fcpoSaveAmazonConfigFromResponse')->will($this->returnValue(true));
 
         $aMockResponse = array('someConfig');
@@ -590,6 +596,24 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_main extends OxidTest
         
         $this->assertEquals($aExpect, $oTestObject->fcpoGetStoreIds());
         $this->_fcpoTruncateTable('fcpoklarnastoreids');
+    }
+
+    /**
+     * Testing fcpoGetRatePayProfiles for coverage
+     *
+     * @param void
+     * @return void
+     */
+    public function test_fcpoGetRatePayProfiles_Coverage() {
+        $oTestObject = oxNew('fcpayone_main');
+
+        $aMockRatePayProfiles = array('some', 'profile', 'info');
+
+        $oMockRatepay = $this->getMockBuilder('fcporatepay')->disableOriginalConstructor()->getMock();
+        $oMockRatepay->expects($this->any())->method('fcpoGetRatePayProfiles')->will($this->returnValue($aMockRatePayProfiles));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoRatePay', $oMockRatepay);
+
+        $this->assertEquals($aMockRatePayProfiles, $oTestObject->fcpoGetRatePayProfiles());
     }
 
     /**
@@ -927,6 +951,18 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_main extends OxidTest
             $aResponse = $this->invokeMethod($oTestObject, '_fcGetJsPreviewCodeValue', $aCurrentTestSetup['params']);
             $this->assertEquals($aCurrentTestSetup['expect'], $aResponse);
         }
+    }
+
+    /**
+     * Testing _multilineToArray for coverage
+     */
+    public function test__multilineToArray_Coverage() {
+        $oTestObject = oxNew('fcpayone_main');
+
+        $sMockInput = "some\nvalues\n\nand\nstuff";
+        $aExpect = array('some', 'values', 'and', 'stuff');
+
+        $this->assertEquals($aExpect, $oTestObject->_multilineToArray($sMockInput));
     }
 
     /**
