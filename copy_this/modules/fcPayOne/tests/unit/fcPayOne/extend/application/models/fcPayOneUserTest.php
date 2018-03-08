@@ -74,7 +74,9 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
             ->method('_fcpoAddOrUpdateAmazonUser')
             ->will($this->returnValue(null));
 
-        $this->assertEquals(null, $oTestObject->fcpoSetAmazonOrderReferenceDetailsResponse());
+        $aMockResponse['add_paydata[email]'] = 'someMail';
+
+        $this->assertEquals(null, $oTestObject->fcpoSetAmazonOrderReferenceDetailsResponse($aMockResponse));
     }
 
     /**

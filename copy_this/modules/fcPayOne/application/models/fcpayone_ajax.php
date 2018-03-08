@@ -134,7 +134,7 @@ class fcpayone_ajax extends oxBase {
      * @return bool
      */
     public function fcpoTriggerPrecheck($sPaymentId, $sParamsJson) {
-        $oPaymentController = oxNew('payment');
+        $oPaymentController = $this->_oFcpoHelper->getFactoryObject('payment');
         $oPaymentController->setPayolutionAjaxParams(json_decode($sParamsJson, true));
         $mPreCheckResult =  $oPaymentController->fcpoPayolutionPreCheck($sPaymentId);
         $sReturn = ($mPreCheckResult === true) ? 'SUCCESS': $mPreCheckResult;
@@ -148,8 +148,8 @@ class fcpayone_ajax extends oxBase {
      * @param type $sPaymentId
      * @return mixed
      */
-    public function fcpoTriggerInstallmentCalculation() {
-        $oPaymentController = oxNew('payment');
+    public function fcpoTriggerInstallmentCalculation($sPaymentId) {
+        $oPaymentController = $this->_oFcpoHelper->getFactoryObject('payment');
 
         $oPaymentController->fcpoPerformInstallmentCalculation($sPaymentId);
         $mResult = $oPaymentController->fcpoGetInstallments();
@@ -167,11 +167,11 @@ class fcpayone_ajax extends oxBase {
      */
     public function fcpoParseCalculation2Html($aCalculation) {
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
-        
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+
         $sTranslateInstallmentSelection = utf8_encode($oLang->translateString('FCPO_PAYOLUTION_INSTALLMENT_SELECTION'));
         $sTranslateSelectInstallment = utf8_encode($oLang->translateString('FCPO_PAYOLUTION_SELECT_INSTALLMENT'));
-        
-        $oConfig = $this->getConfig();
+
         $sHtml = '
             <div class="content">
                 <p id="payolution_installment_calculation_headline" class="payolution_installment_box_headline">2. '.$sTranslateInstallmentSelection.'</p>
@@ -182,7 +182,7 @@ class fcpayone_ajax extends oxBase {
         $sHtml .= '<fieldset>';
         foreach ($aCalculation as $sKey=>$aCurrentInstallment) {
             $sHtml .= $this->_fcpoGetInsterestHiddenFields($sKey, $aCurrentInstallment);
-            $sHtml .= $this->_fcpoGetInsterestRadio($sKey, $aCurrentInstallment);
+            $sHtml .= $this->_fcpoGetInsterestRadio($sKey);
             $sHtml .= $this->_fcpoGetInsterestLabel($sKey, $aCurrentInstallment);
             $sHtml .= '<br>';
         }
@@ -226,7 +226,7 @@ class fcpayone_ajax extends oxBase {
      * @return string
      */
     public function fcpoReturnErrorMessage($sMessage) {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         if (!$oConfig->isUtf()) {
             $sMessage = utf8_encode($sMessage);
         }
@@ -279,11 +279,10 @@ class fcpayone_ajax extends oxBase {
      * Returns a html radio button for current installment offer
      * 
      * @param string $sKey
-     * @param array $aCurrentInstallment
      * @return string
      */
-    protected function _fcpoGetInsterestRadio($sKey, $aCurrentInstallment) {
-        $sHtml .= '<input type="radio" id="payolution_installment_offer_'.$sKey.'" name="payolution_installment_selection" value="'.$sKey.'">';
+    protected function _fcpoGetInsterestRadio($sKey) {
+        $sHtml = '<input type="radio" id="payolution_installment_offer_'.$sKey.'" name="payolution_installment_selection" value="'.$sKey.'">';
         
         return $sHtml;
     }

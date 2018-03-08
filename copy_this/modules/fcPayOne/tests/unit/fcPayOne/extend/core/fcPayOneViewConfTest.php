@@ -270,7 +270,7 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase {
         $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
-        $this->assertEquals('someSellerId', $oTestObject->fcpoGetAmazonPayClientId());
+        $this->assertEquals('someSellerId', $oTestObject->fcpoGetAmazonPaySellerId());
     }
 
     /**
@@ -324,7 +324,7 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase {
         $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
-        $this->assertEquals('someButtonColor', $oTestObject->fcpoGetAmazonPayButtonType());
+        $this->assertEquals('someButtonColor', $oTestObject->fcpoGetAmazonPayButtonColor());
     }
 
     /**
@@ -517,6 +517,14 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase {
         $this->invokeSetAttribute($oTestObject, '_iAmzWidgetIncludeCounter', $iMockCount);
 
         $this->assertEquals($iMockCount, $oTestObject->fcpoGetCurrentAmzWidgetCount());
+    }
+
+    /**
+     * Testing fcpoSetCurrentAmazonButtonId for coverage
+     */
+    public function test_fcpoSetCurrentAmazonButtonId_Coverage() {
+        $oTestObject = oxNew('fcPayOneViewConf');
+        $this->assertEquals(null, $oTestObject->fcpoSetCurrentAmazonButtonId('someId'));
     }
 
     /**
