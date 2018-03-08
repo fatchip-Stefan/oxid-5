@@ -60,25 +60,25 @@ class fcpoerrormapping extends oxBase {
         
         $oDb = $this->_oFcpoHelper->fcpoGetDb(true);
 
-        $sQuery = "SELECT oxid, fcpo_error_code, fcpo_lang_id, fcpo_mapped_message FROM fcpoerrormapping {$sWhere} ORDER BY oxid ASC";
-        $oResult = $oDb->Execute($sQuery);
-        if ($oResult != false && $oResult->recordCount() > 0) {
-            while (!$oResult->EOF) {
-                // collect data
-                $sOxid = $oResult->fields['oxid'];
-                $sErrorCode = $oResult->fields['fcpo_error_code'];
-                $sLangId = $oResult->fields['fcpo_lang_id'];
-                $sMappedMessage = $oResult->fields['fcpo_mapped_message'];
-                
-                // create object
-                $oMapping = new stdClass();
-                $oMapping->sOxid = $sOxid;
-                $oMapping->sErrorCode = $sErrorCode;
-                $oMapping->sLangId = $sLangId;
-                $oMapping->sMappedMessage = $sMappedMessage;
-                $aMappings[] = $oMapping;
-                $oResult->moveNext();
-            }
+        $sQuery = "
+          SELECT oxid, fcpo_error_code, fcpo_lang_id, fcpo_mapped_message 
+          FROM fcpoerrormapping {$sWhere} ORDER BY oxid ASC";
+        $aRows = $oDb->getAll($sQuery);
+
+        foreach ($aRows as $aRow) {
+            // collect data
+            $sOxid = $aRow['oxid'];
+            $sErrorCode = $aRow['fcpo_error_code'];
+            $sLangId = $aRow['fcpo_lang_id'];
+            $sMappedMessage = $aRow['fcpo_mapped_message'];
+
+            // create object
+            $oMapping = new stdClass();
+            $oMapping->sOxid = $sOxid;
+            $oMapping->sErrorCode = $sErrorCode;
+            $oMapping->sLangId = $sLangId;
+            $oMapping->sMappedMessage = $sMappedMessage;
+            $aMappings[] = $oMapping;
         }
 
         return $aMappings;
@@ -87,31 +87,21 @@ class fcpoerrormapping extends oxBase {
     /**
      * Extracts all error codes from xml file adn returns them as array
      * 
-     * @param void
+     * @param string $sType
      * @return mixed
+     * @throws exception
      */
     public function fcpoGetAvailableErrorCodes($sType='general') {
-        $mReturn = $sErrorXmlPath = false;
-        if ($sType == 'general') {
-            $sErrorXmlPath = getShopBasePath() . "/modules/fcPayOne/payoneerrors.xml";
-            $sErrorXmlPath = str_replace('//', '/', $sErrorXmlPath);
+        $sErrorXmlPath = $this->_fcpoGetErrorXmlPath($sType);
+
+        try {
+            $oXml = simplexml_load_file($sErrorXmlPath);
+            $aReturn = $this->_fcpoParseXml($oXml);
+            $mReturn = (is_array($aReturn)) ? $aReturn : false;
+        } catch (Exception $ex) {
+            throw $ex;
         }
-        elseif ($sType == 'iframe') {
-            $sErrorXmlPath = getShopBasePath() . "/modules/fcPayOne/iframeerrors.xml";
-            $sErrorXmlPath = str_replace('//', '/', $sErrorXmlPath);
-        }
-        
-        if (file_exists($sErrorXmlPath)) {
-            try {
-                $oXml = simplexml_load_file($sErrorXmlPath);
-                $aReturn = $this->_fcpoParseXml($oXml);
-                $mReturn = (is_array($aReturn)) ? $aReturn : false;
-            } catch (oxException $ex) {
-                $mReturn = false;
-                throw $ex;
-            }
-        }
-        
+
         return $mReturn;
     }
 
@@ -156,7 +146,24 @@ class fcpoerrormapping extends oxBase {
 
         return $sMappedMessage;
     }
-    
+
+    /**
+     * Returns path for error xml depending on type
+     *
+     * @param $sType
+     * @return string
+     */
+    protected function _fcpoGetErrorXmlPath($sType) {
+        $sErrorXmlPath = getShopBasePath() . "/modules/fcPayOne/payoneerrors.xml";
+        $sErrorXmlPath = str_replace('//', '/', $sErrorXmlPath);
+        if ($sType == 'iframe') {
+            $sErrorXmlPath = getShopBasePath() . "/modules/fcPayOne/iframeerrors.xml";
+            $sErrorXmlPath = str_replace('//', '/', $sErrorXmlPath);
+        }
+
+        return $sErrorXmlPath;
+    }
+
     /**
      * Returns where part of requesting error mappings from errormapping table
      * 
@@ -185,7 +192,7 @@ class fcpoerrormapping extends oxBase {
      * @return array
      */
     protected function _fcpoParseXml($oXml) {
-        $oUBase = oxNew('oxUBase');
+        $oUBase = $this->_oFcpoHelper->getFactoryObject('oxUBase');
         $sAbbr = $oUBase->getActiveLangAbbr();
         $sMessageEntry = "error_message_".$sAbbr;
         $aEntries = array();
@@ -206,20 +213,6 @@ class fcpoerrormapping extends oxBase {
     }
 
     /**
-     * Converts a simplexml object into array
-     * 
-     * @param object $oXml
-     * @param array $aOut
-     */
-    protected function _fcpoXml2Array($oXml, $aOut = array()) {
-        foreach ((array) $oXml as $iIndex => $node) {
-            $aOut[$iIndex] = ( is_object($node) ) ? $this->_fcpoXml2Array($node) : $node;
-        }
-
-        return $aOut;
-    }
-
-    /**
      * Returns the matching query for updating/adding data
      * 
      * @param string $sMappingId
@@ -227,13 +220,12 @@ class fcpoerrormapping extends oxBase {
      * @return string
      */
     protected function _fcpoGetQuery($sMappingId, $aData, $sType) {
-        // quote values from outer space
+        $sQuery = $this->_fcpoGetUpdateQuery($sMappingId, $aData, $sType);
+
         if (array_key_exists('delete', $aData) !== false) {
             $oDb = $this->_oFcpoHelper->fcpoGetDb();
             $sOxid = $oDb->quote($sMappingId);
             $sQuery = "DELETE FROM fcpoerrormapping WHERE oxid = {$sOxid}";
-        } else {
-            $sQuery = $this->_fcpoGetUpdateQuery($sMappingId, $aData, $sType);
         }
 
         return $sQuery;
@@ -255,14 +247,8 @@ class fcpoerrormapping extends oxBase {
         $sMappedMessage = $this->_oFcpoDb->quote($aData['sMappedMessage']);
         $sType = $this->_oFcpoDb->quote($sType);
 
-        if ($blValidNewEntry) {
-            $sQuery = " INSERT INTO fcpoerrormapping (
-                            fcpo_error_code,     fcpo_lang_id,  fcpo_mapped_message, fcpo_error_type
-                        ) VALUES (
-                            {$sErrorCode},    {$sLangId}, {$sMappedMessage}, {$sType}
-                        )";
-        } else {
-            $sQuery = " UPDATE fcpoerrormapping
+        // updating is default
+        $sQuery = " UPDATE fcpoerrormapping
                         SET
                             fcpo_error_code = {$sErrorCode},
                             fcpo_lang_id = {$sLangId},
@@ -270,6 +256,13 @@ class fcpoerrormapping extends oxBase {
                             fcpo_error_type = {$sType}
                         WHERE
                             oxid = {$sOxid}";
+
+        if ($blValidNewEntry) {
+            $sQuery = " INSERT INTO fcpoerrormapping (
+                            fcpo_error_code,     fcpo_lang_id,  fcpo_mapped_message, fcpo_error_type
+                        ) VALUES (
+                            {$sErrorCode},    {$sLangId}, {$sMappedMessage}, {$sType}
+                        )";
         }
 
         return $sQuery;

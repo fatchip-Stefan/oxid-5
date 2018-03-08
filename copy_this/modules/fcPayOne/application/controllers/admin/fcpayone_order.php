@@ -356,7 +356,7 @@ class fcpayone_order extends fcpayone_admindetails {
         $soxId = $this->getEditObjectId();
         $mReturn = false;
 
-        $oOrder = oxNew("oxorder");
+        $oOrder = $this->_oFcpoHelper->getFactoryObject("oxorder");
         if ($oOrder->load($soxId)) {
             $mReturn = $oOrder;
         }

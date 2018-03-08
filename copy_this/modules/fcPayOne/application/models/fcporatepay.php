@@ -47,19 +47,23 @@ class fcporatepay extends oxBase {
      * @return void
      */
     public function fcpoInsertProfile($sOxid, $aRatePayData) {
-        if (array_key_exists('delete', $aRatePayData) !== false) {
-            $sQuery = "DELETE FROM fcporatepay WHERE oxid = " . oxDb::getDb()->quote($sOxid);
-            $this->_oFcpoDb->Execute($sQuery);
-        } else {
+        $blDeleteEntry = (array_key_exists('delete', $aRatePayData) !== false);
+
+        $sQuery = "DELETE FROM fcporatepay WHERE oxid = " . $this->_oFcpoDb->quote($sOxid);
+        if (!$blDeleteEntry) {
             $sQuery = " UPDATE
                             fcporatepay
                         SET
-                            shopid = " . oxDb::getDb()->quote($aRatePayData['shopid']) . ",
-                            currency = " . oxDb::getDb()->quote($aRatePayData['currency']) . ",
-                            oxpaymentid = " . oxDb::getDb()->quote($aRatePayData['paymentid']) . "
+                            shopid = " . $this->_oFcpoDb->quote($aRatePayData['shopid']) . ",
+                            currency = " . $this->_oFcpoDb->quote($aRatePayData['currency']) . ",
+                            oxpaymentid = " . $this->_oFcpoDb->quote($aRatePayData['paymentid']) . "
                         WHERE
-                            oxid = " . oxDb::getDb()->quote($sOxid);
-            $this->_oFcpoDb->Execute($sQuery);
+                            oxid = " . $this->_oFcpoDb->quote($sOxid);
+        }
+
+        $this->_oFcpoDb->Execute($sQuery);
+
+        if (!$blDeleteEntry) {
             $this->_fcpoUpdateRatePayProfile($sOxid);
         }
     }
@@ -72,6 +76,7 @@ class fcporatepay extends oxBase {
      */
     public function fcpoGetRatePayProfiles($sPaymentId = null) {
         $aReturn = array();
+        $oDb = $this->_oFcpoHelper->fcpoGetDb();
         
         $sFilterPaymentId = "";
         if (is_string($sPaymentId)) {
@@ -79,20 +84,17 @@ class fcporatepay extends oxBase {
         }
         
         $sQuery = "SELECT * FROM fcporatepay {$sFilterPaymentId}";
-        $oRs = $this->_oFcpoDb->Execute($sQuery);
+        $aRows = $oDb->getAll($sQuery);
         $aFields = $this->fcpoGetFields();
-        
-        if ($oRs != false && $oRs->recordCount()) {
-            while(!$oRs->EOF) {
-                $sOxid = $oRs->fields[0];
-                foreach ($oRs->fields as $iIndex=>$sValue) {
-                    $aRow[$aFields[$iIndex]] = $sValue; 
-                }
-                $aReturn[$sOxid] = $aRow;
-                $oRs->moveNext();
+
+        foreach ($aRows as $aRow) {
+            $sOxid = $aRow[0];
+            foreach ($aRow as $iIndex=>$sValue) {
+                $aRow[$aFields[$iIndex]] = $sValue;
             }
+            $aReturn[$sOxid] = $aRow;
         }
-        
+
         return $aReturn;
     }
     
@@ -104,6 +106,7 @@ class fcporatepay extends oxBase {
      * @return void
      */
     public function fcpoAddRatePayProfile() {
+        $oDb = $this->_oFcpoHelper->fcpoGetDb();
         $oUtilsObject = $this->_oFcpoHelper->fcpoGetUtilsObject();
         $sNewOxid = $oUtilsObject->generateUId();
         $sQuery = "
@@ -177,7 +180,8 @@ class fcporatepay extends oxBase {
                 '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
             )
         ";
-        $this->_oFcpoDb->Execute($sQuery);
+
+        $oDb->Execute($sQuery);
     }
     
     /**
@@ -207,35 +211,14 @@ class fcporatepay extends oxBase {
      */
     public function fcpoGetFields() {
         $sQuery = "SHOW FIELDS FROM fcporatepay";
-        $oRs = $this->_oFcpoDb->Execute($sQuery);
+        $aRows = $this->_oFcpoDb->getAll($sQuery);
         $aReturn = array();
-        
-        if ($oRs != false && $oRs->recordCount() > 0) {
-            while(!$oRs->EOF) {
-                $aReturn[] = $oRs->fields[0];
-                $oRs->moveNext();
-            }
-        }
-        
-        return $aReturn;
-    }
-    
-    /**
-     * 
-     * 
-     * @param array $aMatchData
-     * @return mixed boolean/array
-     */
-    public function fcpoMatchRatePayProfile($aMatchData) {
-        $dBasketValue = $aMatchData['basketvalue'];
-        $sPaymentId = $aMatchData['paymentid'];
-        $sProfilePaymentActiveField = $this->_fcpoGetProfilePaymentActiveField($sPaymentId);
-        $aRatePayProfiles = $this->fcpoGetRatePayProfiles();
-        
-        foreach ($aRatePayProfiles as $aRatePayProfile) {
-            $dProfileBaketValueMin = $aRatePayProfile['tx_limit_invoice_min'];
+
+        foreach ($aRows as $aRow) {
+            $aReturn[] = $aRow[0];
         }
 
+        return $aReturn;
     }
     
     /**
@@ -264,8 +247,7 @@ class fcporatepay extends oxBase {
      */
     protected function _fcpoUpdateRatePayProfile($sOxid) {
         $aRatePayData = $this->fcpoGetProfileData($sOxid);
-        $oConfig = $this->getConfig();
-        $oRequest = oxNew('fcporequest');
+        $oRequest = $this->_oFcpoHelper->getFactoryObject('fcporequest');
         $aResponse = $oRequest->sendRequestRatePayProfile($aRatePayData);
         if (isset($aResponse['status']) && $aResponse['status'] == 'OK') {
             $this->_fcpoUpdateRatePayProfileByResponse($sOxid, $aResponse);
