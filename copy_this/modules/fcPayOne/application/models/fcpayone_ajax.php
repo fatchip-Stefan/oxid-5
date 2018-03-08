@@ -336,7 +336,7 @@ if ($sPaymentId) {
     }
     
     if ($sAction == 'calculation') {
-        $mResult = $oPayoneAjax->fcpoTriggerInstallmentCalculation();
+        $mResult = $oPayoneAjax->fcpoTriggerInstallmentCalculation($sPaymentId);
         if (is_array($mResult) && count($mResult) > 0) {
             // we have got a calculation result. Parse it to needed html
             echo $oPayoneAjax->fcpoParseCalculation2Html($mResult);
