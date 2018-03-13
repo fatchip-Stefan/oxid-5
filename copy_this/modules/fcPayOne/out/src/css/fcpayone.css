@@ -173,6 +173,10 @@
     bottom: 5px;
 }
 
+#fcpoCreditcardSpinner {
+    text-align: center;
+}
+
 @media screen and (min-width: 0px) and (max-width: 961px) {
     .fcCol {
         float: left;

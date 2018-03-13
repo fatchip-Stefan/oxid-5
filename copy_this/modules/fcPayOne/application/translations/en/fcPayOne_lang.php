@@ -188,6 +188,7 @@ $aLang = array(
     'FCPO_MAIL_AMZ_DECLINED_BODY'                   => "Valued customer,\n\nThank you very much for your order at %s.\nAmazon Pay was not able to process your payment.\nPlease go to https://pay.amazon.com/uk/ and update the payment information for your order. Afterwards we will automatically request payment again from Amazon Pay and you will receive a confirmation email.\n\nKind regards,\n\n%s",
     'FCPO_SECINVOICE_BIRTHDATE' => 'Please enter your birthday',
     'FCPO_NOT_ADULT' => 'Due to your age you are not allowed to use this payment. Please select another payment method',
+    'FCPO_RATEPAY_REJECTED_401' => 'Ratepay payment is faded currently. Please add text here.',
 );
 
 /*

@@ -94,6 +94,12 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
   
     /**
      * Flag that indicates that payone payment of this order is flagged as redirect payment
+     * Flag for marking order as generally problematic
+     * @var bool
+     */
+    protected $_blOrderHasProblems = false;
+
+    /** Flag that indicates that payone payment of this order is flagged as redirect payment
      * @var boolean
      */
     protected $_blOrderPaymentFlaggedAsRedirect = null;
@@ -141,6 +147,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * 
      * @param string $sEmail
      * @return mixed
+     * @todo Should be moved to oxUser
      */
     public function fcpoDoesUserAlreadyExist($sEmail) {
         $sQuery = "SELECT oxid FROM oxuser WHERE oxusername = " . oxDb::getDb()->quote($sEmail) . " AND oxpassword != ''";
@@ -391,6 +398,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
 
         // store orderid
         $oBasket->setOrderId($this->getId());
+        $this->_fcpoAddShadowBasketOrderId();
 
         // updating wish lists
         $this->_updateWishlist($oBasket->getContents(), $oUser);
@@ -538,6 +546,11 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
             return self::ORDER_STATE_ORDEREXISTS;
         }
 
+        // check if basket is still the same as it was before
+        if ($blSaveAfterRedirect) {
+            $this->_fcCompareBasketAgainstShadowBasket($oBasket);
+        }
+
         // if not recalculating order, use sess_challenge id, else leave old order id
         if (!$blRecalculatingOrder) {
             // use this ID
@@ -554,7 +567,163 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
     }
 
     /**
-     * Determine if finalizing order will be done by exiting with orderexists statement
+     * Checks if previously saved basket is still the same (valid) as it is now
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcCompareBasketAgainstShadowBasket($oBasket) {
+        $oShadowBasket = $this->fcpoGetShadowBasket();
+        $blIsValid = $this->_fcpoCompareBaskets($oBasket, $oShadowBasket);
+        if ($blIsValid === false) {
+            $this->_fcpoMarkOrderAsProblematic();
+            $this->_fcpoAddShadowBasketCheckDate();
+        } else {
+            $this->_fcpoDeleteShadowBasket();
+        }
+    }
+
+    /**
+     * Adding checkdate to basket, so we can see how much time has been between
+     * creating and checking the shadow basket
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoAddShadowBasketCheckDate() {
+        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+        $oSession = $this->getSession();
+        $sSessionId = $oSession->getId();
+
+        $sQuery = "
+            UPDATE            
+                fcposhadowbasket
+            SET
+              	FCPOCHECKED=NOW()
+            WHERE
+                FCPOSESSIONID=".$oDb->quote($sSessionId)."
+            LIMIT 1
+        ";
+        $oDb->Execute($sQuery);
+    }
+
+    /**
+     * Adds orderid to shadowbasket table, so it is possible to analyze
+     * differences
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoAddShadowBasketOrderId() {
+        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+        $oSession = $this->getSession();
+        $sSessionId = $oSession->getId();
+
+        $sQuery = "
+            UPDATE            
+                fcposhadowbasket
+            SET
+              	OXORDERID=".$oDb->quote($this->getId())."
+            WHERE
+                FCPOSESSIONID=".$oDb->quote($sSessionId)."
+            LIMIT 1
+        ";
+        $oDb->Execute($sQuery);
+    }
+
+    /**
+     * Deleting Shadow-Basket
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoDeleteShadowBasket() {
+        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+        $oSession = $this->getSession();
+        $sSessionId = $oSession->getId();
+
+        $sQuery = "
+            DELETE FROM            
+                fcposhadowbasket
+            WHERE
+                FCPOSESSIONID=".$oDb->quote($sSessionId)."
+            LIMIT 1
+        ";
+        $oDb->Execute($sQuery);
+    }
+
+    /**
+     * Compares current basket with prior saved basket for avoiding fraud
+     *
+     * @param $oBasket
+     * @param $oShadowBasket
+     * @return bool
+     */
+    protected function _fcpoCompareBaskets($oBasket, $oShadowBasket) {
+        $blGeneralCheck = (
+            $oShadowBasket instanceof oxBasket &&
+            $oBasket instanceof oxBasket
+        );
+        if ($blGeneralCheck == false) {
+            $blReturn = false;
+        } else {
+            // compare brut sums
+            $dBruttoSumBasket = $oBasket->getBruttoSum();
+            $dBruttoSumShadowBasket = $oShadowBasket->getBruttoSum();
+
+            $blReturn = ($dBruttoSumBasket == $dBruttoSumShadowBasket);
+        }
+
+        return $blReturn;
+    }
+
+    /**
+     * Returns shadow Basket matching to sessionid
+     *
+     * @param $blByOrderId
+     * @return mixed object | bool
+     */
+     public function fcpoGetShadowBasket($blByOrderId=false) {
+        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+        $oSession = $this->getSession();
+        $sSessionId = $oSession->getId();
+        $oShadowBasket = false;
+
+        $sWhere = "FCPOSESSIONID=".$oDb->quote($sSessionId);
+        if ($blByOrderId){
+            $sWhere = "OXORDERID=".$oDb->quote($this->getId());
+        }
+
+        $sQuery = "
+            SELECT
+                FCPOBASKET
+            FROM 
+                fcposhadowbasket
+            WHERE
+                ".$sWhere."
+            LIMIT 1
+        ";
+
+        $sSerializedShadowBasket = $oDb->GetOne($sQuery);
+
+        if ($sSerializedShadowBasket) {
+            $oShadowBasket = unserialize(base64_decode($sSerializedShadowBasket));
+        }
+
+        return $oShadowBasket;
+    }
+
+    /**
+     * Mark order as problematic
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoMarkOrderAsProblematic() {
+        $this->_blOrderHasProblems = true;
+    }
+
+    /** Determine if finalizing order will be done by exiting with orderexists statement
      *
      * @param bool $blSaveAfterRedirect
      * @return void
@@ -599,6 +768,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * @param oxUser $oUser
      * @param oxBasket $oBasket
      * @param oxUserPayment $oUserPayment
+     * @return int
      */
     protected function _fcpoFinishOrder($blRecalculatingOrder, $oUser, $oBasket, $oUserPayment) {
         if (!$blRecalculatingOrder) {
@@ -625,22 +795,38 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
 
     /**
      * Sets order status depending on having an appointed error
-     * 
+     *
+     * @return void
      * @return void
      */
     protected function _fcpoSetOrderStatus() {
         $blIsAmazonPending = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonPayOrderIsPending');
-
+        $blOrderOk = $this->_fcpoValidateOrderAgainstProblems();
+      
         if ($blIsAmazonPending) {
             $this->_setOrderStatus('PENDING');
             $this->oxorder__oxfolder = new oxField('ORDERFOLDER_PROBLEMS', oxField::T_RAW);
             $this->save();
-        } elseif ($this->_fcpoGetAppointedError() === false) {
-            // updating order trans status (success status)
+        } elseif ($blOrderOk) {
             $this->_setOrderStatus('OK');
-        } else {
+        } else {        
             $this->_setOrderStatus('ERROR');
         }
+    }
+
+    /**
+     * Validates order for checking if there were any occuring problems
+     *
+     * @param void
+     * @return bool
+     */
+    protected function _fcpoValidateOrderAgainstProblems() {
+        $blOrderOk = (
+           $this->_fcpoGetAppointedError() === false &&
+           $this->_blOrderHasProblems === false
+        );
+
+        return $blOrderOk;
     }
 
     /**
@@ -1198,6 +1384,40 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
     }
 
     /**
+     * Creates a copy of basket in shadow table
+     *
+     * @param void
+     * @return void
+     */
+    public function fcpoCreateShadowBasket() {
+        $oSession = $this->getSession();
+        $oBasket = $oSession->getBasket();
+        $sSessionId = $oSession->getId();
+        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+
+        $sQuery = "
+            REPLACE INTO fcposhadowbasket
+            (
+              	FCPOSESSIONID,
+              	OXORDERID,
+              	FCPOBASKET,
+              	FCPOCREATED,
+              	FCPOCHECKED
+            )
+            VALUES
+            (
+              ".$oDb->quote($sSessionId).",
+              NULL,
+              '".base64_encode(serialize($oBasket))."',
+              NOW(),
+              NULL
+            )
+        ";
+
+        $oDb->Execute($sQuery);
+    }
+
+    /**
      * Returns new valid ordernr. Method depends on shop version
      * 
      * @param void
@@ -1277,6 +1497,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
         $iOrderNotChecked = $this->_fcpoGetOrderNotChecked();
+        $this->fcpoCreateShadowBasket();
 
         $blPresaveOrder = (bool) $oConfig->getConfigParam('blFCPOPresaveOrder');
         if ($blPresaveOrder === true) {
@@ -1423,16 +1644,34 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
     protected function _fcpoHandleAuthorizationError($aResponse, $oPayGateway) {
         $mReturn = false;
         $this->_fcpoFlagOrderPaymentAsRedirect(null);
-      
+
+        $sResponseErrorCode = (string) trim($aResponse['errorcode']);
+        $sResponseCustomerMessage = (string) trim($aResponse['customermessage']);
         $sPaymenttype = $this->oxorder__oxpaymenttype->value;
         if ($sPaymenttype == 'fcpoamazonpay') {
-            $sMessage = $this->fcpoGetAmazonErrorMessage($aResponse['errorcode']);
-            $mReturn = $this->_fcpoGetAmazonSuccessCode($aResponse['errorcode']);
-        } else {
-            $sMessage = $aResponse['customermessage'];
+            $sResponseErrorCode = $this->fcpoGetAmazonErrorMessage($aResponse['errorcode']);
+            $sResponseCustomerMessage = $this->_fcpoGetAmazonSuccessCode($aResponse['errorcode']);
         }
-        $oPayGateway->fcSetLastErrorNr($aResponse['errorcode']);
-        $oPayGateway->fcSetLastError($sMessage);
+        $this->_fcpoSetPayoneUserFlagsByAuthResponse($sResponseErrorCode,$sResponseCustomerMessage);
+    }
+
+    /**
+     * Adds flag to user if there is one matching
+     *
+     * @param string $sResponseErrorCode
+     * @param string $sResponseCustomerMessage
+     * @return void
+     */
+    protected function _fcpoSetPayoneUserFlagsByAuthResponse($sResponseErrorCode, $sResponseCustomerMessage) {
+        $oUserFlag = oxNew('fcpouserflag');
+        $blSuccess = $oUserFlag->fcpoLoadByErrorCode($sResponseErrorCode);
+
+        if ($blSuccess) {
+            $oUser = $this->getOrderUser();
+            $oUser->fcpoAddPayoneUserFlag($oUserFlag);
+        }
+        $oPayGateway->fcSetLastErrorNr($sResponseErrorCode);
+        $oPayGateway->fcSetLastError($sResponseCustomerMessage);
 
         return $mReturn;
     }

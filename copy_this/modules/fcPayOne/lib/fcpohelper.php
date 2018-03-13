@@ -79,6 +79,7 @@ class fcpohelper extends oxBase {
      * @param string $sClassName
      * @param string $sIncludePath optional
      * @return object
+     * @throws exception
      */
     public function fcpoGetInstance($sClassName, $sIncludePath = "") {
         try {
@@ -147,7 +148,7 @@ class fcpohelper extends oxBase {
      * static Getter for config instance
      * 
      * @param void
-     * @param mixed
+     * @return object
      */
     public static function fcpoGetStaticConfig() {
         if (self::_useRegistry() === true) {
