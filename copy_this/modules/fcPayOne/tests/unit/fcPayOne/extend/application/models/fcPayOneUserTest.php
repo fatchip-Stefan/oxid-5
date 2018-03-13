@@ -284,7 +284,61 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
             'add_paydata[shipping_zip]'=>'',
         );
 
-        $this->assertEquals('someUserId', $oTestObject->_fcpoAddAmazonUser($aMockResponse));
+        $this->assertEquals('someUserId', $oTestObject->_fcpoUpdateAmazonUser($aMockResponse));
+    }
+
+    /**
+     * Testing _fcpoAmazonAddDeliveryAddress for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test__fcpoAmazonAddDeliveryAddress_NotExists() {
+        $oTestObject = $this->getMock('fcPayOneUser', array(
+            '_fcpoSplitStreetAndStreetNr',
+            '_fcpoGetCountryIdByIso2',
+            '_fcpoCheckAddressExists',
+        ));
+        $oTestObject->expects($this->any())->method('_fcpoSplitStreetAndStreetNr')->will($this->returnValue(array('somestreet', '1')));
+        $oTestObject->expects($this->any())->method('_fcpoGetCountryIdByIso2')->will($this->returnValue('DE'));
+        $oTestObject->expects($this->any())->method('_fcpoCheckAddressExists')->will($this->returnValue(false));
+
+        $oMockAddress = $this->getMock('oxAddress', array(
+            'load',
+            'setId',
+            'save',
+            'getEncodedDeliveryAddress',
+        ));
+        $oMockAddress->expects($this->any())->method('load')->will($this->returnValue(null));
+        $oMockAddress->expects($this->any())->method('setId')->will($this->returnValue(null));
+        $oMockAddress->expects($this->any())->method('save')->will($this->returnValue(null));
+        $oMockAddress->expects($this->any())->method('getEncodedDeliveryAddress')->will($this->returnValue('someEncodedAddress'));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('getFactoryObject')->will($this->returnValue($oMockAddress));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $aMockResponse = array(
+            'add_paydata[billing_street]'=>'',
+            'add_paydata[billing_country]'=>'',
+            'add_paydata[email]'=>'',
+            'add_paydata[billing_zip]'=>'',
+            'add_paydata[billing_telephonenumber]'=>'',
+            'add_paydata[billing_firstnam'=>'',
+            'add_paydata[billing_lastname]'=>'',
+            'add_paydata[billing_city]'=>'',
+            'add_paydata[shipping_street]'=>'',
+            'add_paydata[shipping_country]'=>'',
+            'add_paydata[shipping_firstname]'=>'',
+            'add_paydata[shipping_lastname]'=>'',
+            'add_paydata[shipping_telephonenumber]'=>'',
+            'add_paydata[shipping_city]'=>'',
+            'add_paydata[shipping_country]'=>'',
+            'add_paydata[shipping_zip]'=>'',
+        );
+
+        $this->assertEquals(null, $oTestObject->_fcpoAmazonAddDeliveryAddress($aMockResponse, 'someUserId'));
     }
 
     /**
@@ -302,7 +356,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
         ));
         $oTestObject->expects($this->any())->method('_fcpoSplitStreetAndStreetNr')->will($this->returnValue(array('somestreet', '1')));
         $oTestObject->expects($this->any())->method('_fcpoGetCountryIdByIso2')->will($this->returnValue('DE'));
-        $oTestObject->expects($this->any())->method('_fcpoCheckAddressExists')->will($this->returnValue(array('street','parts')));
+        $oTestObject->expects($this->any())->method('_fcpoCheckAddressExists')->will($this->returnValue(false));
 
         $oMockAddress = $this->getMock('oxAddress', array(
             'load',

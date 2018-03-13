@@ -55,6 +55,31 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOneUserView extends Oxid
         $property->setValue($object, $value);
     }
 
+    /**
+     * Testing fcpoGetBasketErrorMessage for coverage
+     */
+    public function test_fcpoGetUserErrorMessage_Coverage() {
+        $oTestObject = oxNew('fcPayOneUserView');
+
+        $oHelper = $this->getMock('fcpohelper',
+            array(
+                'fcpoGetRequestParameter',
+                'fcpoDeleteSessionVariable'
+            )
+        );
+        $oHelper
+            ->expects($this->any())
+            ->method('fcpoGetRequestParameter')
+            ->will($this->returnValue('someMessage'));
+        $oHelper
+            ->expects($this->any())
+            ->method('fcpoDeleteSessionVariable')
+            ->will($this->returnValue(null));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals('someMessage', $oTestObject->fcpoGetUserErrorMessage());
+    }
+
 
     /**
      * Testing fcpoAmazonLoginReturn with needed data

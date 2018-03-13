@@ -55,7 +55,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrderarticleTest extends O
         $property->setValue($object, $value);
     }
     
-    
     /**
      * Testing save method for calling parent save
      */
@@ -154,8 +153,189 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrderarticleTest extends O
         
         $this->assertEquals(null, $oTestObject->save($oMockOrder, true));
     }
-    
-    
+
+    /**
+     * Testing _fcCheckReduceStockAfterRedirect for case no redirect payment
+     */
+    public function test__fcCheckReduceStockAfterRedirect_NoRedirect() {
+        $oMockBasket = $this->getMock('oxBasket', array(
+            'getPaymentId',
+        ));
+        $oMockBasket
+            ->expects($this->any())
+            ->method('getPaymentId')
+            ->will($this->returnValue('fcpopo_bill'));
+
+        $oMockSession = $this->getMock('oxSession', array(
+            'getBasket',
+        ));
+        $oMockSession
+            ->expects($this->any())
+            ->method('getBasket')
+            ->will($this->returnValue($oMockBasket));
+
+        $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
+        $oMockConfig
+            ->expects($this->any())
+            ->method('getConfigParam')
+            ->will($this->returnValue(false));
+
+        $oTestObject = $this->getMock('fcPayOneOrderarticle', array(
+            '_isRedirectAfterSave',
+        ));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_isRedirectAfterSave')
+            ->will($this->returnValue(true));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));
+        $oHelper->expects($this->any())->method('fcpoGetSession')->will($this->returnValue($oMockSession));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $oMockOrder = $this->getMock('oxOrder', array('save'));
+        $oMockOrder
+            ->expects($this->any())
+            ->method('save')
+            ->will($this->returnValue(true));
+
+        $this->assertEquals(true, $oTestObject->_fcCheckReduceStockAfterRedirect($oMockOrder));
+    }
+
+    /**
+     * Testing _fcCheckReduceStockAfterRedirect for case it is a redirect payment
+     */
+    public function test__fcCheckReduceStockAfterRedirect_RedirectAfterSave() {
+        $oMockBasket = $this->getMock('oxBasket', array(
+            'getPaymentId',
+        ));
+        $oMockBasket
+            ->expects($this->any())
+            ->method('getPaymentId')
+            ->will($this->returnValue('fcpopaypal'));
+
+        $oMockSession = $this->getMock('oxSession', array(
+            'getBasket',
+        ));
+        $oMockSession
+            ->expects($this->any())
+            ->method('getBasket')
+            ->will($this->returnValue($oMockBasket));
+
+        $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
+        $oMockConfig
+            ->expects($this->any())
+            ->method('getConfigParam')
+            ->will($this->returnValue(true));
+
+        $oTestObject = $this->getMock('fcPayOneOrderarticle', array(
+            '_isRedirectAfterSave',
+        ));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_isRedirectAfterSave')
+            ->will($this->returnValue(true));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));
+        $oHelper->expects($this->any())->method('fcpoGetSession')->will($this->returnValue($oMockSession));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $oMockOrder = $this->getMock('oxOrder', array('save'));
+        $oMockOrder
+            ->expects($this->any())
+            ->method('save')
+            ->will($this->returnValue(true));
+
+        $this->assertEquals(true, $oTestObject->_fcCheckReduceStockAfterRedirect($oMockOrder));
+    }
+
+    /**
+     * Testing _fcCheckReduceStockAfterRedirect for case that nothing matched
+     */
+    public function test__fcCheckReduceStockAfterRedirect_AnswerNo() {
+        $oMockBasket = $this->getMock('oxBasket', array(
+            'getPaymentId',
+        ));
+        $oMockBasket
+            ->expects($this->any())
+            ->method('getPaymentId')
+            ->will($this->returnValue('fcpopaypal'));
+
+        $oMockSession = $this->getMock('oxSession', array(
+            'getBasket',
+        ));
+        $oMockSession
+            ->expects($this->any())
+            ->method('getBasket')
+            ->will($this->returnValue($oMockBasket));
+
+        $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
+        $oMockConfig
+            ->expects($this->any())
+            ->method('getConfigParam')
+            ->will($this->returnValue(false));
+
+        $oTestObject = $this->getMock('fcPayOneOrderarticle', array(
+            '_isRedirectAfterSave',
+        ));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_isRedirectAfterSave')
+            ->will($this->returnValue(false));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));
+        $oHelper->expects($this->any())->method('fcpoGetSession')->will($this->returnValue($oMockSession));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $oMockOrder = $this->getMock('oxOrder', array('save'));
+        $oMockOrder
+            ->expects($this->any())
+            ->method('save')
+            ->will($this->returnValue(true));
+
+        $this->assertEquals(true, $oTestObject->_fcCheckReduceStockAfterRedirect($oMockOrder));
+    }
+
+
+    public function test__isRedirectAfterSave_Yes() {
+        $oTestObject = oxNew('fcPayOneOrderarticle');
+        $this->invokeSetAttribute($oTestObject, '_blIsRedirectAfterSave', null);
+
+        $oMockBasket = $this->getMock('oxBasket', array(
+            'getPaymentId',
+        ));
+        $oMockBasket
+            ->expects($this->any())
+            ->method('getPaymentId')
+            ->will($this->returnValue('fcpocreditcard_iframe'));
+
+        $oMockSession = $this->getMock('oxSession', array(
+            'getBasket',
+        ));
+        $oMockSession
+            ->expects($this->any())
+            ->method('getBasket')
+            ->will($this->returnValue($oMockBasket));
+
+        $oMockOrder = $this->getMock('oxOrder', array('save'));
+        $oMockOrder
+            ->expects($this->any())
+            ->method('save')
+            ->will($this->returnValue(true));
+        $oMockOrder->oxorder__fcpotxid = new oxField('');
+
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetSession')->will($this->returnValue($oMockSession));
+        $oHelper->expects($this->any())->method('fcpoGetRequestParameter')->will($this->returnValue('someParam'));
+        $oHelper->expects($this->any())->method('fcpoGetSessionVariable')->will($this->returnValue(false));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals(true, $oTestObject->_isRedirectAfterSave($oMockOrder));
+    }
+
     /**
      * Testing save method for calling parent delete
      */

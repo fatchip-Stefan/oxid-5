@@ -469,12 +469,11 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
     protected function _fcpoSplitAddress($sPayPalStreet) {
         $aSplit = explode(' ', $sPayPalStreet);
 
+        $sStreetNr = '';
+        $sStreet = $sPayPalStreet;
         if (count($aSplit) > 1) {
             $sStreetNr = array_pop($aSplit);
             $sStreet = implode(' ', $aSplit);
-        } else {
-            $sStreetNr = '';
-            $sStreet = $sPayPalStreet;
         }
 
         return array($sStreet, $sStreetNr);

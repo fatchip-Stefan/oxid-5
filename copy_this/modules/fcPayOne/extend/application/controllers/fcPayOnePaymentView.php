@@ -188,7 +188,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return string
      */
     public function fcpoGetSofoShowIban() {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $blFCPOSofoShowIban = $oConfig->getConfigParam('blFCPOSofoShowIban');
 
         $sReturn = ($blFCPOSofoShowIban) ? 'true' : 'false';
@@ -855,9 +855,10 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         if ($aRatepayMatchData['activation_status'] == '2') {
             $dBasketValue = $this->fcpoGetBasketSum();
 
-            if ($dBasketValue <= $aRatepayMatchData['basketvalue_max'] && $dBasketValue >= $aRatepayMatchData['basketvalue_min']) {
-                $blReturn = true;
-            }
+            $blReturn = (
+                $dBasketValue <= $aRatepayMatchData['basketvalue_max'] &&
+                $dBasketValue >= $aRatepayMatchData['basketvalue_min']
+            );
         }
 
         return $blReturn;
@@ -889,7 +890,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return array
      */
     protected function _fcpoFetchRatePayProfilesByPaymentType($sPaymentId) {
-        $oRatePay = oxNew('fcporatepay');
+        $oRatePay = $this->_oFcpoHelper->getFactoryObject('fcporatepay');
         $aProfiles = $oRatePay->fcpoGetRatePayProfiles($sPaymentId);
 
         return $aProfiles;
@@ -1177,10 +1178,9 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
             $blUserChanged = true;
         }
 
+        $blReturn = $blUserChanged;
         if ($blAlreadyChanged === true) {
             $blReturn = $blAlreadyChanged;
-        } else {
-            $blReturn = $blUserChanged;
         }
 
         return $blReturn;
@@ -1357,7 +1357,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return bool
      */
     public function fcpoRatePayShowBirthdate() {
-        $oConfig = $this->getConfig();
         $oUser = $this->getUser();
         $blShowUstid = $this->fcpoRatePayShowUstid();
 
@@ -1373,10 +1372,8 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return bool
      */
     public function fcpoRatePayShowFon() {
-        $oConfig = $this->getConfig();
         $oUser = $this->getUser();
         $blShowUstid = $this->fcpoRatePayShowUstid();
-        $blB2BMode = $oConfig->getConfigParam('blFCPORatePayB2BMode');
 
         $blReturn = ($oUser->oxuser__oxfon->value == '' && !$blShowUstid) ? true : false;
 
@@ -2093,14 +2090,10 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         if ($blPreCheckNeeded) {
             $oUser = $this->getUser();
             if (!$oUser) {
-                // try to fetch user from session
-                $oSession = $this->getSession();
-                $oBasket = $oSession->getBasket();
-                $oUser = $oBasket->getBasketUser();
+                $oUser = $this->_fcpoGetUserFromSession();
             }
             $oPORequest = $this->_oFcpoHelper->getFactoryObject('fcporequest');
             $aBankData = $this->_fcpoGetPayolutionBankData($sPaymentId);
-            $sSelectedIndex = $this->_fcpoGetPayolutionSelectedInstallmentIndex();
             $aResponse = $oPORequest->sendRequestPayolutionPreCheck($sPaymentId, $oUser, $aBankData, $sWorkOrderId);
             if ($aResponse['status'] == 'ERROR') {
                 $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
@@ -2321,10 +2314,10 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return void
      */
     protected function _fcpoSetKlarnaCampaigns() {
-        if ($this->_oFcpoHelper->fcpoGetRequestParameter('fcpo_klarna_campaign')) {
-            $this->_oFcpoHelper->fcpoSetSessionVariable('fcpo_klarna_campaign', $this->_oFcpoHelper->fcpoGetRequestParameter('fcpo_klarna_campaign'));
-        } else {
-            $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpo_klarna_campaign');
+        $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpo_klarna_campaign');
+        $sKlarnaCampaign = $this->_oFcpoHelper->fcpoGetRequestParameter('fcpo_klarna_campaign');
+        if ($sKlarnaCampaign) {
+            $this->_oFcpoHelper->fcpoSetSessionVariable('fcpo_klarna_campaign', $sKlarnaCampaign);
         }
     }
 
@@ -2930,10 +2923,10 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         $oUser = $this->getUser();
         $sUserField = 'oxuser__' . $sField;
 
-        try {
+        $sReturn = '';
+        $blPropertyExists = property_exists($oUser, $sUserField);
+        if ($blPropertyExists) {
             $sReturn = $oUser->$sUserField->value;
-        } catch (Exception $ex) {
-            $sReturn = '';
         }
 
         return $sReturn;

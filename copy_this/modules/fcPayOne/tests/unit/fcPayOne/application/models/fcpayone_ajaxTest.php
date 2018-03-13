@@ -205,7 +205,7 @@ class Unit_fcPayOne_Application_Models_fcpayone_ajaxTest extends OxidTestCase {
         $aMockResponse = array('status'=>'OK');
 
         $oMockRequest = $this->getMock('fcporequest', array(
-            'sendRequestSetAmazonOrderReferenceDetails',
+            'sendRequestGetAmazonOrderReferenceDetails',
         ));
         $oMockRequest
             ->expects($this->any())
@@ -374,7 +374,7 @@ class Unit_fcPayOne_Application_Models_fcpayone_ajaxTest extends OxidTestCase {
 
         $this->assertEquals(
             false,
-            $oTestObject->fcpoTriggerInstallmentCalculation()
+            $oTestObject->fcpoTriggerInstallmentCalculation('somePaymentId')
         );
     }
 

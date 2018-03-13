@@ -560,7 +560,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * @return void
      */
     protected function _fcpoCheckReturnOrderExists($blSaveAfterRedirect) {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sGetChallenge = $this->_oFcpoHelper->fcpoGetSessionVariable('sess_challenge');
         $blFCPOPresaveOrder = $oConfig->getConfigParam('blFCPOPresaveOrder');
 
@@ -1172,7 +1172,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * @return boolean
      */
     public function fcHandleAuthorization($blReturnRedirectUrl = false, $oPayGateway = null) {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $aDynvalue = $this->_oFcpoHelper->fcpoGetSessionVariable('dynvalue');
         $aDynvalue = $aDynvalue ? $aDynvalue : $this->_oFcpoHelper->fcpoGetRequestParameter('dynvalue');
 
@@ -1204,16 +1204,8 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * @return string
      */
     protected function _fcpoGetNextOrderNr() {
-        $oConfig = $this->getConfig();
-        $sShopVersion = $oConfig->getVersion();
-
-        if (version_compare($sShopVersion, '4.6.0', '>=')) {
-            $oCounter = oxNew('oxCounter');
-            $sOrderNr = $oCounter->getNext($this->_getCounterIdent());
-        } else {
-            $sQuery = "SELECT MAX(oxordernr)+1 FROM oxorder LIMIT 1";
-            $sOrderNr = $this->_oFcpoDb->GetOne($sQuery);
-        }
+        $oCounter = $this->_oFcpoHelper->getFactoryObject('oxCounter');
+        $sOrderNr = $oCounter->getNext($this->_getCounterIdent());
 
         return $sOrderNr;
     }
