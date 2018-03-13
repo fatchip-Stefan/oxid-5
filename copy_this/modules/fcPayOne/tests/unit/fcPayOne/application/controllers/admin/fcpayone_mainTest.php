@@ -131,10 +131,18 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_main extends OxidTest
         $aMockCurrency = array($oMockCurrency);
 
         $oMockConfig = $this->getMock('oxConfig', array('getCurrencyArray'));
-        $oMockConfig->expects($this->any())->method('getCurrencyArray')->will($this->returnValue($aMockCurrency));
+        $oMockConfig
+            ->expects($this->any())
+            ->method('getCurrencyArray')
+            ->will($this->returnValue($aMockCurrency));
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
-        $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));
+        $oHelper
+            ->expects($this->any())
+            ->method('fcpoGetConfig')
+            ->will($this->returnValue($oMockConfig));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
 
         $aExpect = array('someIso2Name');
 
@@ -960,7 +968,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_main extends OxidTest
         $oTestObject = oxNew('fcpayone_main');
 
         $sMockInput = "some\nvalues\n\nand\nstuff";
-        $aExpect = array('some', 'values', 'and', 'stuff');
+        $aExpect = array(0=>'some', 1=>'values', 3=>'and', 4=>'stuff');
 
         $this->assertEquals($aExpect, $oTestObject->_multilineToArray($sMockInput));
     }

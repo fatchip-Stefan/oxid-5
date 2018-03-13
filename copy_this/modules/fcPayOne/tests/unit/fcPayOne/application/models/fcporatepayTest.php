@@ -137,16 +137,18 @@ class Unit_fcPayOne_Application_Models_fcporatepay extends OxidTestCase {
      */
     public function test_fcpoGetFields_Coverage() {
         $oTestObject = oxNew('fcporatepay');
-        $aMockRow = array(
-            'field1'=>'value1',
-            'field2'=>'value2',
+        $aMockRows = array(
+            $aMockRow = array(
+                'field1',
+                'field2',
+            )
         );
 
         $oMockDb = $this->getMock('oxDb', array('getAll'));
-        $oMockDb->expects($this->any())->method('getAll')->will($this->returnValue($aMockRow));
+        $oMockDb->expects($this->any())->method('getAll')->will($this->returnValue($aMockRows));
         $this->invokeSetAttribute($oTestObject, '_oFcpoDb', $oMockDb);
 
-        $aExpect = array('field1', 'field2');
+        $aExpect = array('field1');
 
         $this->assertEquals($aExpect, $oTestObject->fcpoGetFields());
     }

@@ -296,7 +296,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $this->invokeSetAttribute($oTestObject, '_blIsRedirectAfterSave', null);
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
-        $this->assertEquals(true, $oTestObject->_isRedirectAfterSave());
+        $this->assertEquals(false, $oTestObject->_isRedirectAfterSave());
     }
 
     /**
@@ -1440,7 +1440,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
             ->will($this->returnValue($oMockConfig));
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
-        $this->assertEquals(true, $oTestObject->_fcpoCheckReturnOrderExists(true));
+        $this->assertEquals(false, $oTestObject->_fcpoCheckReturnOrderExists(true));
     }
 
     /**
@@ -2019,7 +2019,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oMockDatabase->expects($this->any())->method('GetOne')->will($this->returnValue(0));
         $this->invokeSetAttribute($oTestObject, '_oFcpoDb', $oMockDatabase);
 
-        $this->assertEquals(true, $oTestObject->allowDebit());
+        $this->assertEquals(false, $oTestObject->allowDebit());
     }
 
     /**
@@ -2727,17 +2727,37 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
      * @return void
      */
     public function test__fcpoHandleAuthorizationError_Standard() {
-        $oTestObject = $this->getMock('fcPayOneOrder', array('fcpoGetAmazonErrorMessage','_fcpoGetAmazonSuccessCode'));
-        $oTestObject->expects($this->any())->method('fcpoGetAmazonErrorMessage')->will($this->returnValue('someAmazonErrorMessage'));
-        $oTestObject->expects($this->any())->method('_fcpoGetAmazonSuccessCode')->will($this->returnValue('someAmazonSuccessCode'));
+        $oTestObject = $this->getMock('fcPayOneOrder', array(
+            'fcpoGetAmazonErrorMessage',
+            '_fcpoGetAmazonSuccessCode'
+        ));
+        $oTestObject
+            ->expects($this->any())
+            ->method('fcpoGetAmazonErrorMessage')
+            ->will($this->returnValue('someAmazonErrorMessage'));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_fcpoGetAmazonSuccessCode')
+            ->will($this->returnValue('someAmazonSuccessCode'));
+        $oTestObject->oxorder__oxpaymenttype = new oxField('somePaymentId');
 
-        $oMockPayGate = $this->getMock('oxPaymentGate', array('fcSetLastErrorNr', 'fcSetLastError'));
-        $oMockPayGate->expects($this->any())->method('fcSetLastErrorNr')->will($this->returnValue(true));
-        $oMockPayGate->expects($this->any())->method('fcSetLastError')->will($this->returnValue(true));
+        $oMockPayGate = $this->getMock('oxPaymentGate', array(
+            'fcSetLastErrorNr',
+            'fcSetLastError'
+        ));
+        $oMockPayGate
+            ->expects($this->any())
+            ->method('fcSetLastErrorNr')
+            ->will($this->returnValue(true));
+        $oMockPayGate
+            ->expects($this->any())
+            ->method('fcSetLastError')
+            ->will($this->returnValue(true));
 
-        $aMockResponse = array('errorcode' => 'someErrorCode', 'customermessage' => 'someMessage');
-
-        $this->invokeSetAttribute($oTestObject, 'oxorder__oxpaymenttype', new oxField('somePaymentId'));
+        $aMockResponse = array(
+            'errorcode' => 'someErrorCode',
+            'customermessage' => 'someMessage'
+        );
 
         $this->assertEquals(false, $oTestObject->_fcpoHandleAuthorizationError($aMockResponse, $oMockPayGate));
     }
@@ -2752,14 +2772,13 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oTestObject = $this->getMock('fcPayOneOrder', array('fcpoGetAmazonErrorMessage','_fcpoGetAmazonSuccessCode'));
         $oTestObject->expects($this->any())->method('fcpoGetAmazonErrorMessage')->will($this->returnValue('someAmazonErrorMessage'));
         $oTestObject->expects($this->any())->method('_fcpoGetAmazonSuccessCode')->will($this->returnValue('someAmazonSuccessCode'));
+        $oTestObject->oxorder__oxpaymenttype = new oxField('fcpoamazonpay');
 
         $oMockPayGate = $this->getMock('oxPaymentGate', array('fcSetLastErrorNr', 'fcSetLastError'));
         $oMockPayGate->expects($this->any())->method('fcSetLastErrorNr')->will($this->returnValue(true));
         $oMockPayGate->expects($this->any())->method('fcSetLastError')->will($this->returnValue(true));
 
         $aMockResponse = array('errorcode' => 'someErrorCode', 'customermessage' => 'someMessage');
-
-        $this->invokeSetAttribute($oTestObject, 'oxorder__oxpaymenttype', new oxField('fcpoamazonpay'));
 
         $this->assertEquals('someAmazonSuccessCode', $oTestObject->_fcpoHandleAuthorizationError($aMockResponse, $oMockPayGate));
     }
@@ -3021,7 +3040,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
      */
     public function test__fcpoSetAppointedError_Coverage() {
         $oTestObject = oxNew('fcPayOneOrder');
-        $this->assertEquals(true, $oTestObject->_fcpoSetAppointedError(true));
+        $this->assertEquals(null, $oTestObject->_fcpoSetAppointedError(true));
     }
 
 }

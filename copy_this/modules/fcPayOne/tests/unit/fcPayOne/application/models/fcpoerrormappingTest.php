@@ -84,32 +84,6 @@ class Unit_fcPayOne_Application_Models_fcpoerrormapping extends OxidTestCase {
     }
 
     /**
-     * @expectedException Exception
-     */
-    public function test_fcpoGetAvailableErrorCodes_Exception() {
-        $sMockPathXml = getShopBasePath() . "/payoneerrors.xml";
-        $sMockPathXml = str_replace('//', '/', $sMockPathXml);
-
-        $aMockParsedXml = array('some', 'mappings');
-
-        $oTestObject = $this->getMock('fcpoerrormapping', array(
-            '_fcpoGetErrorXmlPath',
-            '_fcpoParseXml',
-        ));
-
-        $oTestObject
-            ->expects($this->any())
-            ->method('_fcpoGetErrorXmlPath')
-            ->will($this->returnValue($sMockPathXml));
-        $oTestObject
-            ->expects($this->any())
-            ->method('_fcpoParseXml')
-            ->will($this->returnValue($aMockParsedXml));
-
-        $this->assertEquals($aMockParsedXml, $oTestObject->fcpoGetAvailableErrorCodes());
-    }
-
-    /**
      * Testing fcpoGetAvailableErrorCodes on parsed xml result
      */
     public function test_fcpoGetAvailableErrorCodes_ParsedXml() {
@@ -259,7 +233,7 @@ class Unit_fcPayOne_Application_Models_fcpoerrormapping extends OxidTestCase {
             ->will($this->returnValue('someUpdateQuery'));
 
         $oMockDb = $this->getMock('oxDb', array('quote'));
-        $oMockDb->expects($this->any())->method('quote')->will($this->returnValue('someId'));
+        $oMockDb->expects($this->any())->method('quote')->will($this->returnValue("'someId'"));
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
         $oHelper->expects($this->any())->method('fcpoGetDb')->will($this->returnValue($oMockDb));
@@ -305,15 +279,15 @@ class Unit_fcPayOne_Application_Models_fcpoerrormapping extends OxidTestCase {
     public function test__fcpoGetSearchQuery_Coverage() {
         $oTestObject = oxNew('fcpoerrormapping');
         $oMockDb = $this->getMock('oxDb', array('quote'));
-        $oMockDb->expects($this->any())->method('quote')->will($this->returnValue('someId'));
+        $oMockDb->expects($this->any())->method('quote')->will($this->returnValue("'someId'"));
 
         $sMockErrorCode = 'someErrorCode';
         $sMockLangId = 'someLangId';
         $sExpect = "
             SELECT fcpo_mapped_message FROM fcpoerrormapping 
             WHERE 
-            fcpo_error_code = '{$sMockErrorCode}' AND
-            fcpo_lang_id = '{$sMockLangId}'
+            fcpo_error_code = 'someId' AND
+            fcpo_lang_id = 'someId'
             LIMIT 1
         ";
 

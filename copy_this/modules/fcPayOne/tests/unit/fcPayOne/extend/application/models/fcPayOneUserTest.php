@@ -423,7 +423,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
     public function test__fcpoSplitStreetAndStreetNr_Coverage() {
         $oTestObject = oxNew('fcPayOneUser');
         $sMockStreetAndStreetNr = "Some Street 123";
-        $aExpect = array('Some Street', '123');
+        $aExpect = array('street'=>'Some Street', 'streetnr'=>'123');
         $this->assertEquals($aExpect, $oTestObject->_fcpoSplitStreetAndStreetNr($sMockStreetAndStreetNr));
     }
 
@@ -461,7 +461,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneUserTest extends OxidTestC
         $oTestObject->expects($this->any())->method('_fcpoGetUserOxidByEmail')->will($this->returnValue('someUserId'));
         $oTestObject->expects($this->any())->method('load')->will($this->returnValue($oMockUser));
 
-        $this->assertEquals(true, $oTestObject->_fcpoUserExists('someEmailAddress', true));
+        $this->assertEquals(false, $oTestObject->_fcpoUserExists('someEmailAddress', true));
     }
 
     /**

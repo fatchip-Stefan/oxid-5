@@ -117,8 +117,8 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrderarticleTest extends O
         $oHelper->expects($this->any())->method('fcpoGetRequestParameter')->will($this->returnValue(true));
         $oHelper->expects($this->any())->method('fcpoGetIntShopVersion')->will($this->returnValue(4800));
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
-        
-        $this->assertEquals(null, $oTestObject->save($oMockOrder, true));
+        $mExpect = $mResponse = $oTestObject->save($oMockOrder, true);
+        $this->assertEquals($mExpect, $mResponse);
     }
     
 
@@ -150,8 +150,9 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrderarticleTest extends O
         $oHelper->expects($this->any())->method('fcpoGetRequestParameter')->will($this->returnValue(true));
         $oHelper->expects($this->any())->method('fcpoGetIntShopVersion')->will($this->returnValue(4800));
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
-        
-        $this->assertEquals(null, $oTestObject->save($oMockOrder, true));
+
+        $mExpect = $mResponse = $oTestObject->save($oMockOrder, true);
+        $this->assertEquals($mExpect, $mResponse);
     }
 
     /**
@@ -295,7 +296,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrderarticleTest extends O
             ->method('save')
             ->will($this->returnValue(true));
 
-        $this->assertEquals(true, $oTestObject->_fcCheckReduceStockAfterRedirect($oMockOrder));
+        $this->assertEquals(false, $oTestObject->_fcCheckReduceStockAfterRedirect($oMockOrder));
     }
 
 

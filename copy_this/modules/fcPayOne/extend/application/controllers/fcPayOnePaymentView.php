@@ -1343,9 +1343,15 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     public function fcpoRatePayShowUstid() {
         $oConfig = $this->getConfig();
         $oUser = $this->getUser();
-        $blB2b2Mode = ($oConfig->getConfigParam('blFCPORatePayB2BMode') && $oUser->oxuser__oxcompany->value != '');
+        $blB2b2Mode = (
+            $oConfig->getConfigParam('blFCPORatePayB2BMode') &&
+            $oUser->oxuser__oxcompany->value != ''
+        );
         
-        $blReturn = ($oUser->oxuser__oxustid->value == '' && $blB2b2Mode) ? true : false;
+        $blReturn = (
+            $oUser->oxuser__oxustid->value == '' &&
+            $blB2b2Mode
+        ) ? true : false;
 
         return $blReturn;
     }
@@ -2975,7 +2981,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return string
      */
     public function fcpoGetPayolutionSepaAgreementLink() {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sShopUrl = $oConfig->getShopUrl();
         $sLink = $sShopUrl . '/modules/fcPayOne/lib/fcpopopup_content.php?loadurl=' . $this->_sPayolutionSepaAgreement;
 

@@ -58,7 +58,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_error_mapping extends
         $oTestObject
             ->expects($this->any())
             ->method('_fcpoAddNewMapping')
-            ->will($this->returnValue(null));
+            ->will($this->returnValue($aMockMappings));
 
         $this->assertEquals($aMockMappings, $oTestObject->getMappings());
     }
@@ -75,12 +75,12 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_error_mapping extends
         ));
         $oTestObject
             ->expects($this->any())
-            ->method('_fcpoGetExistingMappings')
+            ->method('_fcpoGetExistingIframeMappings')
             ->will($this->returnValue($aMockMappings));
         $oTestObject
             ->expects($this->any())
-            ->method('_fcpoAddNewMapping')
-            ->will($this->returnValue(null));
+            ->method('_fcpoAddNewIframeMapping')
+            ->will($this->returnValue($aMockMappings));
 
         $this->assertEquals($aMockMappings, $oTestObject->getIframeMappings());
     }

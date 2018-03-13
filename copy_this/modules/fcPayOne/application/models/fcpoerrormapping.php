@@ -93,16 +93,13 @@ class fcpoerrormapping extends oxBase {
      */
     public function fcpoGetAvailableErrorCodes($sType='general') {
         $sErrorXmlPath = $this->_fcpoGetErrorXmlPath($sType);
-
-        try {
-            $oXml = simplexml_load_file($sErrorXmlPath);
+        $aReturn = array();
+        $oXml = simplexml_load_file($sErrorXmlPath, 'SimpleXMLElement', LIBXML_NOWARNING);
+        if ($oXml) {
             $aReturn = $this->_fcpoParseXml($oXml);
-            $mReturn = (is_array($aReturn)) ? $aReturn : false;
-        } catch (Exception $ex) {
-            throw $ex;
         }
 
-        return $mReturn;
+        return $aReturn;
     }
 
     /**
