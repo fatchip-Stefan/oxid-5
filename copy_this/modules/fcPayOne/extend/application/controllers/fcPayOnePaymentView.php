@@ -1891,7 +1891,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
                 break;
             case 'fcpo_secinvoice':
                 $blValidBirthdateData = $this->_fcpoValidateSecInvoiceBirthdayData($sPaymentId, $aRequestedValues);
-                $blBirthdayRequired = true;
+                $blBirthdayRequired = $this->fcpoIsB2C();
                 break;
         }
 
