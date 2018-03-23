@@ -1652,7 +1652,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
             $sResponseErrorCode = $this->fcpoGetAmazonErrorMessage($aResponse['errorcode']);
             $sResponseCustomerMessage = $this->_fcpoGetAmazonSuccessCode($aResponse['errorcode']);
         }
-        $this->_fcpoSetPayoneUserFlagsByAuthResponse($sResponseErrorCode,$sResponseCustomerMessage);
+        $this->_fcpoSetPayoneUserFlagsByAuthResponse($sResponseErrorCode,$sResponseCustomerMessage, $oPayGateway);
     }
 
     /**
@@ -1660,9 +1660,10 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      *
      * @param string $sResponseErrorCode
      * @param string $sResponseCustomerMessage
+     * @param object $oPayGateway
      * @return void
      */
-    protected function _fcpoSetPayoneUserFlagsByAuthResponse($sResponseErrorCode, $sResponseCustomerMessage) {
+    protected function _fcpoSetPayoneUserFlagsByAuthResponse($sResponseErrorCode, $sResponseCustomerMessage, $oPayGateway) {
         $oUserFlag = oxNew('fcpouserflag');
         $blSuccess = $oUserFlag->fcpoLoadByErrorCode($sResponseErrorCode);
 
@@ -1672,8 +1673,6 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         }
         $oPayGateway->fcSetLastErrorNr($sResponseErrorCode);
         $oPayGateway->fcSetLastError($sResponseCustomerMessage);
-
-        return $mReturn;
     }
 
     /**
