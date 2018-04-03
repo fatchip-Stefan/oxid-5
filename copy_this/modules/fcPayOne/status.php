@@ -321,8 +321,7 @@ class fcPayOneTransactionStatusHandler extends oxBase {
 
         $blIsAmazonOrderFailed = (
             $sPaymentId == 'fcpoamazonpay' &&
-            $sTxAction == 'failed' &&
-            $sTxStatus == 'pending'
+            $sTxAction == 'failed'
         );
 
         if ($blIsAmazonRecover) {
