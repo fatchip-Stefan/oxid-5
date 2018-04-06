@@ -237,6 +237,8 @@ class fcpoRequest extends oxSuperCfg {
         $this->_checkAddress($oOrder, $oUser);
 
         $oConfig = $this->getConfig();
+        // see https://integrator.payone.de/jira/browse/OXID-172
+        $sRefNr = $oOrder->oxorder__oxpaymenttype->value == 'fcpopaydirekt' ? str_replace('_','-',$sRefNr) : $sRefNr;
 
         $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID')); //ID of PayOne Sub-Account
         $this->addParameter('reference', $sRefNr);
