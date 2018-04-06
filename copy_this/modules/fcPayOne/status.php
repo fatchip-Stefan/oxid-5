@@ -107,9 +107,12 @@ class fcPayOneTransactionStatusHandler extends oxBase {
 
     protected $_oFcpoHelper = null;
 
+    protected $_oFcViewConf = null;
+
     public function __construct() {
         parent::__construct();
         $this->_oFcpoHelper = oxNew('fcpohelper');
+        $this->_oFcViewConf = $this->_oFcpoHelper->getFactoryObject('oxViewConfig');
     }
 
     /**
@@ -358,7 +361,7 @@ class fcPayOneTransactionStatusHandler extends oxBase {
     protected function _fcpoSendAmazonDeclinedProblemMail($oOrder) {
         $oEmail = oxNew('oxemail');
         $sPrefixedCustomerEmail = $oOrder->oxorder__oxbillemail->value;
-        $sCustomerEmail = str_replace('fcpoamz_', '', $sPrefixedCustomerEmail);
+        $sCustomerEmail = $this->_oFcViewConf->fcpoAmazonEmailDecode($sPrefixedCustomerEmail);
 
         $sSubject = $this->_fcpoGetAmazonDeclinedSubject($oOrder);
         $sBody = $this->_fcpoGetAmazonDeclinedBody($oOrder);
@@ -390,6 +393,7 @@ class fcPayOneTransactionStatusHandler extends oxBase {
     protected function _fcpoSendGenericProblemMail($oOrder) {
         $oEmail = oxNew('oxemail');
         $sCustomerEmail = $oOrder->oxorder__oxbillemail->value;
+        $sCustomerEmail = $this->_oFcViewConf->fcpoAmazonEmailDecode($sCustomerEmail);
         $sSubject = $this->_fcpoGetGenericProblemMailSubject($oOrder);
         $sBody = $this->_fcpoGetGenericProblemMailBody($oOrder);
         $oEmail->sendEmail($sCustomerEmail, $sSubject, $sBody);
