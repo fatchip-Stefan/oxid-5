@@ -792,10 +792,6 @@ class fcpoRequest extends oxSuperCfg {
         if ($blB2BModeActive) {
             $blCompany = ($oUser->oxuser__oxcompany->value) ? true : false;
             $blReturn = $blCompany;
-            // check if we already have ustid, then showing is not needed
-            if ($blCompany) {
-                $blReturn = ($oUser->oxuser__oxustid->value) ? false : true;
-            }
         } else {
             $blReturn = false;
         }
@@ -1183,7 +1179,6 @@ class fcpoRequest extends oxSuperCfg {
         $blAddCompanyData = $this->_fcpoCheckAddCompanyData($oUser, $sPaymentId);
         if ($blAddCompanyData) {
             $this->addParameter('company', $oUser->oxuser__oxcompany->value);
-            $this->addParameter('add_paydata[company_uid]', $oUser->oxuser__oxustid->value);
             $this->addParameter('add_paydata[b2b]', 'yes');
         }
 

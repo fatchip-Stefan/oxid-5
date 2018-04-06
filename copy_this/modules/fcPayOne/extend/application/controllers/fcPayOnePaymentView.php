@@ -1462,6 +1462,8 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
 
         if ($blPayolutionPayment) {
             $blSavedSuccessfully = $this->_fcpoPayolutionSaveRequestedValues($sPaymentId);
+            // Steftest
+            $blSavedSuccessfully = true;
             $blAgreedDataUsage = $this->_fcpoCheckAgreedDataUsage($sPaymentId);
             $blValidMandatoryUserData = $this->_fcpoCheckPayolutionMandatoryUserData($sPaymentId);
 
@@ -1549,36 +1551,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         $blReturn = true;
         if ($blValidPayment) {
             $blHasTelephone = $this->_fcpoValidatePayolutionBillHasTelephone();
-            $blHasUstid = $this->_fcpoValidatePayolutionBillHasUstid();
-            $blReturn = ($blHasTelephone && $blHasUstid);
-        }
-
-        return $blReturn;
-    }
-
-    /**
-     * Method checks if user has valid ustid and if its mandatory anyway
-     * Will return true if check is not mandatory due to circumstances
-     *
-     * @param void
-     * @return bool
-     */
-    protected function _fcpoValidatePayolutionBillHasUstid() {
-        $blReturn = true;
-        $oConfig = $this->getConfig();
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
-        $blB2BModeActive = $oConfig->getConfigParam('blFCPOPayolutionB2BMode');
-        $blIsCompany = (bool)$this->fcpoGetUserValue('oxcompany');
-
-        if ($blIsCompany && $blB2BModeActive) {
-            $sUstid = $this->fcpoGetUserValue('oxustid');
-            $blReturn = (bool) $sUstid;
-        }
-
-        if (!$blReturn) {
-            $sMessage = $oLang->translateString('FCPO_PAYOLUTION_NO_USTID');
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
+            $blReturn = ($blHasTelephone);
         }
 
         return $blReturn;
@@ -1793,10 +1766,9 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         }
 
         $blSavedBirthday = $this->_fcpoSaveBirthdayData($aRequestedValues, $sPaymentId);
-        $blSavedUstid = $this->_fcpoSaveUserData($aRequestedValues, $sPaymentId,'oxustid');
         $blSavedTelephone = $this->_fcpoSaveUserData($aRequestedValues, $sPaymentId, 'oxfon');
 
-        $blSavedData = ($blSavedBirthday || $blSavedUstid || $blSavedTelephone);
+        $blSavedData = ($blSavedBirthday || $blSavedTelephone);
 
         return $blSavedData;
     }
