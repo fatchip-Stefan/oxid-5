@@ -166,6 +166,8 @@ $aLang = array(
     'FCPO_RATEPAY_BIRTHDATE' => 'Date of birth',
     'FCPO_SECINVOICE_BIRTHDATE' => 'Please enter your birthday',
     'FCPO_NOT_ADULT' => 'Due to your age you are not allowed to use this payment. Please select another payment method',
+    'FCPO_BIRTHDATE_INVALID' => 'Your birthday data is not valid.',
+    'FCPO_COMPANYDATA_INVALID' => 'Your company data is not complete. For ordering as a business entering either company name and VatId is mandatory.',
 );
 
 /*
