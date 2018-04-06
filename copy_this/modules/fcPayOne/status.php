@@ -357,7 +357,9 @@ class fcPayOneTransactionStatusHandler extends oxBase {
 
     protected function _fcpoSendAmazonDeclinedProblemMail($oOrder) {
         $oEmail = oxNew('oxemail');
-        $sCustomerEmail = $oOrder->oxorder__oxbillemail->value;
+        $sPrefixedCustomerEmail = $oOrder->oxorder__oxbillemail->value;
+        $sCustomerEmail = str_replace('fcpoamz_', '', $sPrefixedCustomerEmail);
+
         $sSubject = $this->_fcpoGetAmazonDeclinedSubject($oOrder);
         $sBody = $this->_fcpoGetAmazonDeclinedBody($oOrder);
         $oEmail->sendEmail($sCustomerEmail, $sSubject, $sBody);
