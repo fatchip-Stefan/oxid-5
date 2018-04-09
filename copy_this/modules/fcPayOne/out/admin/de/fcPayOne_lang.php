@@ -213,7 +213,6 @@ $aLang = array(
     'FCPO_GIFTCARD'                             => "Grußkarte",
     'FCPO_SURCHARGE'                            => 'Aufschlag',
     'FCPO_DEDUCTION'                            => 'Abschlag',
-    'FCPO_PAYMENTTYPE'                          => "Zahlungsart:",
     'FCPO_SHIPPINGCOST'                         => "Versandkosten",
     'FCPO_PRODUCT_CAPTURE'                      => "Abbuchen",
     'FCPO_PRODUCT_AMOUNT'                       => "Menge",
@@ -254,10 +253,6 @@ $aLang = array(
     'fcpo_status_transfer'                      => "Umbuchung (TRANSFER)",
     'fcpo_status_invoice'                       => "Erzeugung eines Belegs (INVOICE)",
 
-    'FCPO_KLARNA_STORE_ID_ADMIN'                => "StoreIDs",
-    'FCPO_KLARNA_ADD_STORE_ID'                  => "weitere StoreID hinzufügen",
-    'FCPO_KLARNA_DELETE_STORE_ID'               => "Löschen",
-
     'FCPO_CONFIG_GROUP_CONN'                    => "Verbindungs-Einstellungen",
     'FCPO_CONFIG_GROUP_GENERAL'                 => "Allgemein",
     'FCPO_CONFIG_GROUP_DEBITNOTE'               => "Lastschrift",
@@ -273,6 +268,8 @@ $aLang = array(
     'FCPO_KLARNA_CAMPAIGN_TITLE'                => "Titel",
     'FCPO_KLARNA_ADD_CAMPAIGN'                  => "weitere Kampagne hinzuf&uuml;gen",
     'FCPO_KLARNA_DELETE_STORE_ID'               => "Löschen",
+    'FCPO_KLARNA_STORE_ID_ADMIN'                => "StoreIDs",
+    'FCPO_KLARNA_ADD_STORE_ID'                  => "weitere StoreID hinzufügen",
 
     'FCPO_CONFIG_DEBIT_BANKDATA'                => "Eingabe der Bankdaten",
     'FCPO_CONFIG_DEBIT_MULTISELECT'             => "Liste der unterstützten Kontoländer.<br>Für Mehrfachmarkierung STRG-Taste gedrückt halten.",
@@ -409,9 +406,6 @@ $aLang = array(
     'FCPO_HELP_MALUS'                           => 'Die konfigurierten Abz&uuml;ge werden entsprechend dem R&uuml;ckgabewert der Adresspr&uuml;fung vom Bonit&auml;ts-Wert des Kunden abgezogen. Der Bonit&auml;ts-Wert kann 0 hierbei nicht unterschreiten.',
     'FCPO_SHADOW_BASKET'                        => 'Schatten-Warenkorb',
     'FCPO_POSSIBLE_FRAUD_DETECTED'              => 'Ein möglicher Betrugsversuch wurde entdeckt. Bitte prüfen Sie diesen Warenkorb gegen die Bestellung.',
-    'FCPO_PRODUCT_TITLE'                        => 'Name',
-    'FCPO_PRODUCT_AMOUNT'                       => 'Anzahl',
-    'FCPO_PRODUCT_PRICE'                        => 'Preis',
     'FCPO_GENERAL_SHADOWBASKET_BRUTTO'          => 'Bruttosumme des Prüfwarenkorbs',
     'FCPO_GENERAL_SHADOWBASKET_NETTO'           => 'Nettosumme des Prüfwarenkorbs',
     'FCPO_CONFIG_GROUP_PAYDIREKT'               => 'Paydirekt',

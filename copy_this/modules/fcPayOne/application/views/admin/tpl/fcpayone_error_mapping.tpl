@@ -1,6 +1,6 @@
 [{include file="headitem.tpl" title="fcpo_admin_config_status_mapping"|oxmultilangassign}]
 
-<form autocomplete="off" method="post" action="[{$shop->selflink}]">
+<form autocomplete="off" method="post" action="[{$oViewConf->getSelfLink()}]">
     [{$oViewConf->getHiddenSid()}]
     <input type="hidden" name="cl" value="fcpayone_error_mapping" />
     <input type="hidden" name="fnc" value="save" />
@@ -53,7 +53,7 @@
     [{/if}]
     <input type="submit" name="add" value="[{oxmultilang ident="fcpo_admin_config_add"}]" />
 </form>
-<form autocomplete="off" method="post" action="[{$shop->selflink}]">
+<form autocomplete="off" method="post" action="[{$oViewConf->getSelfLink()}]">
     [{$oViewConf->getHiddenSid()}]
     <input type="hidden" name="cl" value="fcpayone_error_mapping" />
     <input type="hidden" name="fnc" value="saveIframe" />
