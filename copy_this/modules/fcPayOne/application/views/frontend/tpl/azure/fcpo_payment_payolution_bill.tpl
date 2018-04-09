@@ -24,7 +24,7 @@
         <script src="[{$oViewConf->fcpoGetModuleJsPath('jquery-1.10.1.min.js')}]"></script>
         <script src="[{$oViewConf->fcpoGetModuleJsPath()}]lightview/lightview.js"></script>
         <ul class="form">
-            [{if $oView->fcpoShowB2C()}]
+            [{if $oView->fcpoShowPayolutionB2C()}]
                 <li>
                     <label>[{oxmultilang ident="FCPO_PAYOLUTION_BIRTHDATE"}]</label>
                     <select name="dynvalue[fcpo_payolution_bill_birthdate_day]">

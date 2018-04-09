@@ -467,8 +467,7 @@ class fcpoRequest extends oxSuperCfg {
                 $blAddRedirectUrls = $this->_fcpoAddRatePayParameters($oOrder);
                 break;
             case 'fcpo_secinvoice':
-                $this->addParameter('clearingtype', 'rec');
-                $this->addParameter('clearingsubtype', 'POV');
+                $blAddRedirectUrls = $this->_fcpoAddSecInvoiceParameters($oOrder);
                 break;
             default:
                 return false;
@@ -478,6 +477,20 @@ class fcpoRequest extends oxSuperCfg {
             $this->_addRedirectUrls('payment', $sRefNr);
         }
         return true;
+    }
+
+    /**
+     * Adds additional parameters for secure invoice payment rec/POV
+     *
+     * @param $oOrder
+     * @return  void
+     */
+    protected function _fcpoAddSecInvoiceParameters($oOrder) {
+        $this->addParameter('clearingtype', 'rec');
+        $this->addParameter('clearingsubtype', 'POV');
+        $blIsB2B = $this->_fcpoIsOrderB2B($oOrder);
+        $sBusinessRelation = ($blIsB2B) ? 'b2b' : 'b2c';
+        $this->addParameter('businessrelation', $sBusinessRelation);
     }
 
     protected function _addRedirectUrls($sAbortClass, $sRefNr = false, $blIsPayPalExpress = false) {
@@ -780,20 +793,15 @@ class fcpoRequest extends oxSuperCfg {
     }
 
     /**
-     * Template getter for checking which kind of field should be shown
+     * Method that determines if order is B2B
      * 
      * @param void
      * @return bool
      */
-    public function fcpoIsB2B($oUser) {
-        $oConfig = $this->getConfig();
-        $blB2BModeActive = $oConfig->getConfigParam('blFCPOPayolutionB2BMode');
-
-        if ($blB2BModeActive) {
-            $blCompany = ($oUser->oxuser__oxcompany->value) ? true : false;
-            $blReturn = $blCompany;
-        } else {
-            $blReturn = false;
+    protected function _fcpoIsOrderB2B($oOrder) {
+        $blReturn = ($oOrder->oxorder__oxbillcompany->value) ? true : false;
+        if ($blReturn) {
+            $blReturn = ($oOrder->oxorder__oxbillustid->value) ? true : false;
         }
 
         return $blReturn;
