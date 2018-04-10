@@ -1,6 +1,6 @@
 [{if $oView->hasPaymentMethodAvailableSubTypes('cc')}]
     [{assign var="dynvalue" value=$oView->getDynValue()}]
-    <dl id="fcpoCreditcard" style="display:none;">
+    <dl>
         <dt>
             <input id="payment_[{$sPaymentID}]" type="radio" name="paymentid" value="[{$sPaymentID}]" [{if $oView->getCheckedPaymentId() == $paymentmethod->oxpayments__oxid->value}]checked[{/if}]>
             <label for="payment_[{$sPaymentID}]">
@@ -20,7 +20,10 @@
                 </b>
             </label>
         </dt>
-        <dd class="[{if $oView->getCheckedPaymentId() == $paymentmethod->oxpayments__oxid->value}]activePayment[{/if}]">
+        <dd id="fcpoCreditcardSpinner" style="display: block;">
+            <img src="[{$oViewConf->fcpoGetModuleImgUrl()}]ajax-loader.gif">
+        </dd>
+        <dd id="fcpoCreditcard" style="display:none;" class="[{if $oView->getCheckedPaymentId() == $paymentmethod->oxpayments__oxid->value}]activePayment[{/if}]">
             <script type="text/javascript" src="[{$oViewConf->fcpoGetHostedPayoneJs()}]"></script>
             <input type="hidden" name="dynvalue[fcpo_kknumber]" value="">
             <input type="hidden" name="fcpo_cc_type" value="hosted">

@@ -183,7 +183,18 @@ class fcpayone_events
           fcpo_checkdate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
           PRIMARY KEY (fcpo_address_hash)
         ) ENGINE=INNODB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;";
-    
+
+    public static $sQueryTableFcpoShadowBasket = "
+        CREATE TABLE IF NOT EXISTS `fcposhadowbasket` (
+          `FCPOSESSIONID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL DEFAULT '',
+          `OXORDERID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT '',
+          `FCPOBASKET` text NOT NULL,
+          `FCPOCREATED` datetime NOT NULL,
+          `FCPOCHECKED` datetime DEFAULT NULL,
+          PRIMARY KEY (`FCPOSESSIONID`),
+          KEY `OXORDERID` (`OXORDERID`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+
     public static $sQueryTableRatePay = "
         CREATE TABLE `fcporatepay` (
           `OXID` char(32) COLLATE latin1_general_ci NOT NULL,
@@ -248,6 +259,31 @@ class fcpayone_events
           `valid_payment_firstdays` int(11) DEFAULT NULL,
           PRIMARY KEY (OXID)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+    ";
+
+    public static $sQueryTableFcpoUserFlags = "
+        CREATE TABLE IF NOT EXISTS `fcpouserflags` (
+          `OXID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+          `FCPOCODE` int(11) NOT NULL,
+          `FCPOEFFECT` varchar(3) COLLATE utf8_unicode_ci NOT NULL,
+          `FCPOFLAGDURATION` int(11) NOT NULL,
+          `FCPONAME` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+          `FCPODESC` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+          PRIMARY KEY (`OXID`),
+          UNIQUE KEY `FCPOCODE` (`FCPOCODE`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+    ";
+
+    public static $sQueryTableFcpoUser2Flag = "
+        CREATE TABLE IF NOT EXISTS `fcpouser2flag` (
+          `OXID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+          `OXUSERID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+          `FCPOUSERFLAGID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+          `FCPODISPLAYMESSAGE` text COLLATE utf8_unicode_ci NOT NULL,
+          `FCPOTIMESTAMP` datetime NOT NULL,
+          PRIMARY KEY (`OXID`),
+          KEY `OXUSERID` (`OXUSERID`,`FCPOUSERFLAGID`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;    
     ";
     
     public static $sQueryAlterOxorderTxid = "ALTER TABLE oxorder ADD COLUMN FCPOTXID VARCHAR(32) CHARSET utf8 COLLATE utf8_general_ci DEFAULT '' NOT NULL;";
@@ -441,6 +477,7 @@ class fcpayone_events
         self::addTableIfNotExists('fcpotransactionstatus', self::$sQueryTableFcpotransactionstatus);
         self::addTableIfNotExists('fcpopayment2country', self::$sQueryTableFcpopayment2country);
         self::addTableIfNotExists('fcpocheckedaddresses', self::$sQueryTableFcpocheckedaddresses);
+        self::addTableIfNotExists('fcposhadowbasket', self::$sQueryTableFcpoShadowBasket);
         self::addTableIfNotExists('fcpostatusforwarding', self::$sQueryTableFcpoStatusForwarding);
         self::addTableIfNotExists('fcpostatusmapping', self::$sQueryTableFcpoStatusMapping);
         self::addTableIfNotExists('fcpoerrormapping', self::$sQueryTableFcpoErrorMapping);
@@ -449,6 +486,8 @@ class fcpayone_events
         self::addTableIfNotExists('fcpopdfmandates', self::$sQueryTableFcpoPdfMandates);
         self::addTableIfNotExists('fcpopayoneexpresslogos', self::$sQueryTableFcpopaypalexpresslogos);
         self::addTableIfNotExists('fcporatepay', self::$sQueryTableRatePay);
+        self::addTableIfNotExists('fcpouserflags', self::$sQueryTableFcpoUserFlags);
+        self::addTableIfNotExists('fcpouser2flag', self::$sQueryTableFcpoUser2Flag);
 
         //ADD COLUMNS TO EXISTING TABLES
         self::addColumnIfNotExists('oxorder', 'FCPOTXID', self::$sQueryAlterOxorderTxid);
@@ -505,6 +544,8 @@ class fcpayone_events
         //ADD PAYPAL EXPRESS LOGOS
         self::insertRowIfNotExists('fcpopayoneexpresslogos', array('OXID' => '1'), "INSERT INTO fcpopayoneexpresslogos (OXID, FCPO_ACTIVE, FCPO_LANGID, FCPO_LOGO, FCPO_DEFAULT) VALUES(1, 1, 0, 'btn_xpressCheckout_de.gif', 1);");
         self::insertRowIfNotExists('fcpopayoneexpresslogos', array('OXID' => '2'), "INSERT INTO fcpopayoneexpresslogos (OXID, FCPO_ACTIVE, FCPO_LANGID, FCPO_LOGO, FCPO_DEFAULT) VALUES(2, 1, 1, 'btn_xpressCheckout_en.gif', 0);");
+        // add available user flags
+        self::insertRowIfNotExists('fcpouserflags', array('OXID' => '2'), "INSERT INTO fcpouserflags (OXID, FCPOCODE, FCPOEFFECT, FCPOFLAGDURATION, FCPONAME, FCPODESC) VALUES ('fcporatepayrejected', 307, 'RPR', 24, 'Ratepay Rejected', 'CUSTOM');");
     }
 
     /**
