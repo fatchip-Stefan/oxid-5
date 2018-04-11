@@ -121,8 +121,8 @@ class fcPayOneTransactionStatusHandler extends oxBase {
             if( $this->getConfig()->isUtf() ) {
                 $mValue = utf8_encode( $mValue );
             }
-            
-            $sReturn = oxDb::getDb()->quote( $mValue );
+            $db = oxDb::getInstance();
+            $sReturn = $db->escapeString($mValue);
         }
         
         return $sReturn;
