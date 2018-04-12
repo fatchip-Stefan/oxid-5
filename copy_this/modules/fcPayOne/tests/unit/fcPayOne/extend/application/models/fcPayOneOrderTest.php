@@ -1296,6 +1296,36 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
 
 
     /**
+     * Testing getOrderUser for coverage
+     */
+    public function test_getOrderUser_Coverage() {
+        $oTestObject = oxNew('fcPayOneOrder');
+        $oTestObject->oxorder__oxpaymenttype = new oxField('fcpoamazonpay');
+        $sExpectEmail = 'some@email.org';
+
+        $oMockViewConf = $this->getMock('oxViewConf', array('fcpoAmazonEmailDecode'));
+        $oMockViewConf
+            ->expects($this->any())
+            ->method('fcpoAmazonEmailDecode')
+            ->will($this->returnValue($sExpectEmail));
+
+        $oHelper = $this
+            ->getMockBuilder('fcpohelper')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $oHelper
+            ->expects($this->any())
+            ->method('getFactoryObject')
+            ->will($this->returnValue($oMockViewConf));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $oReturnUser = $oTestObject->getOrderUser();
+        $sReturnEmail = $oReturnUser->oxuser__oxusername->value;
+
+        $this->assertEquals($sExpectEmail, $sReturnEmail);
+    }
+
+    /**
      * Testing _fcpoHandleBasket for case that save after redirect is active
      */
     public function test__fcpoHandleBasket_SaveAfterRedirect() {

@@ -509,6 +509,27 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
     }
 
     /**
+     * Returns oxuser object of this user
+     * Adjustment for prefixed email (currently amazon)
+     *
+     * @param void
+     * @return oxUser
+     */
+    public function getOrderUser() {
+        $oUser = parent::getOrderUser();
+
+        $sPaymenttype = $this->oxorder__oxpaymenttype->value;
+        if ($sPaymenttype == 'fcpoamazonpay') {
+            $oViewConf = $this->_oFcpoHelper->getFactoryObject('oxViewConfig');
+            $sPrefixEmail = $oUser->oxuser__oxusername->value;
+            $sEmail = $oViewConf->fcpoAmazonEmailDecode($sPrefixEmail);
+            $oUser->oxuser__oxusername = new oxField($sEmail);
+        }
+
+        return $oUser;
+    }
+
+    /**
      * Handles basket loading into order
      * 
      * @param bool $blSaveAfterRedirect
