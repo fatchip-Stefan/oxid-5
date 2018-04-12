@@ -1229,6 +1229,19 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     }
 
     /**
+     * Template getter for checking if bankdata is mandatory
+     *
+     * @param string $sPaymentId
+     * @return bool
+     */
+    public function fcpoPayolutionShowBankData($sPaymentId) {
+        $blException =
+            $this->_fcpoCheckPayolutionBankDataCountryException($sPaymentId);
+
+        return !$blException;
+    }
+
+    /**
      * Returns the sum of basket
      *
      * @param void
@@ -1384,7 +1397,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
                             $mReturn = null;
                         }
                     }
-                } elseif (($sPaymentId == 'fcpopo_debitnote' || $sPaymentId == 'fcpopo_installment' ) && !$this->_blIsPayolutionInstallmentAjax) {
+                } elseif (($sPaymentId == 'fcpopo_debitnote' || $this->fcpoPayolutionShowBankData('fcpopo_installment') ) && !$this->_blIsPayolutionInstallmentAjax) {
                     $sMessage = $oLang->translateString('FCPO_PAYOLUTION_BANKDATA_INCOMPLETE');
                     $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
                     $this->_oFcpoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
