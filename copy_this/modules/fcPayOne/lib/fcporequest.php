@@ -948,13 +948,12 @@ class fcpoRequest extends oxSuperCfg {
         }
 
         $blValidBankData = (
-                isset($aBankData) &&
                 is_array($aBankData) &&
                 count($aBankData) == 3 &&
-                $aBankData['fcpo_payolution_' . $sFieldNameAddition . '_accountholder'] &&
                 $aBankData['fcpo_payolution_' . $sFieldNameAddition . '_iban'] &&
-                $aBankData['fcpo_payolution_' . $sFieldNameAddition . '_bic']
-                );
+                $aBankData['fcpo_payolution_' . $sFieldNameAddition . '_bic'] &&
+                $aBankData['fcpo_payolution_' . $sFieldNameAddition . '_accountholder']
+        );
 
         if ($blValidBankData) {
             $this->addParameter('iban', $aBankData['fcpo_payolution_' . $sFieldNameAddition . '_iban']);
@@ -1141,7 +1140,7 @@ class fcpoRequest extends oxSuperCfg {
                 $aBankData['fcpo_payolution_accountholder'] &&
                 $aBankData['fcpo_payolution_iban'] &&
                 $aBankData['fcpo_payolution_bic']
-                );
+        );
 
         if ($blValidBankData) {
             $this->addParameter('iban', $aBankData['fcpo_payolution_iban']);

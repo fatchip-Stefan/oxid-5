@@ -1597,7 +1597,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
                     'fcpo_payolution' . $sInstallmentAddition . '_bic',
                     'fcpo_payolution' . $sInstallmentAddition . '_accountholder',
                 );
-
                 if (in_array($sKey, $aMap)) {
                     $aBankData[$sKey] = $sParam;
                 }
@@ -1952,6 +1951,9 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      */
     protected function _fcpoPerformPayolutionPreCheck($sPaymentId, $sWorkOrderId = null) {
         $blPreCheckNeeded = $this->_fcpoCheckIfPrecheckNeeded($sPaymentId);
+        $aBankData = $this->_fcpoGetPayolutionBankData($sPaymentId);
+        $this->_oFcpoHelper->fcpoSetSessionVariable('payolution_bankdata', $aBankData);
+
         if ($blPreCheckNeeded) {
             $oUser = $this->getUser();
             if (!$oUser) {
@@ -1961,15 +1963,12 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
                 $oUser = $oBasket->getBasketUser();
             }
             $oPORequest = $this->_oFcpoHelper->getFactoryObject('fcporequest');
-            $aBankData = $this->_fcpoGetPayolutionBankData($sPaymentId);
-            $sSelectedIndex = $this->_fcpoGetPayolutionSelectedInstallmentIndex();
             $aResponse = $oPORequest->sendRequestPayolutionPreCheck($sPaymentId, $oUser, $aBankData, $sWorkOrderId);
             if ($aResponse['status'] == 'ERROR') {
                 $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
                 $blReturn = false;
             } else if (is_array($aResponse) && array_key_exists('workorderid', $aResponse) !== false) {
                 $this->_oFcpoHelper->fcpoSetSessionVariable('payolution_workorderid', $aResponse['workorderid']);
-                $this->_oFcpoHelper->fcpoSetSessionVariable('payolution_bankdata', $aBankData);
                 $blReturn = true;
             }
         } else {
