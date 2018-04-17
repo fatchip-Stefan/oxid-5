@@ -1189,7 +1189,6 @@ class fcpoRequest extends oxSuperCfg {
         $blAddCompanyData = $this->_fcpoCheckAddCompanyData($oUser, $sPaymentId);
         if ($blAddCompanyData) {
             $this->addParameter('company', $oUser->oxuser__oxcompany->value);
-            $this->addParameter('add_paydata[company_uid]', $oUser->oxuser__oxustid->value);
             $this->addParameter('add_paydata[b2b]', 'yes');
         }
 
@@ -1216,7 +1215,7 @@ class fcpoRequest extends oxSuperCfg {
     protected function _fcpoCheckAddCompanyData($oUser, $sPaymentId) {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $blB2BModeActive = $oConfig->getConfigParam('blFCPOPayolutionB2BMode');
-        $blValidPaymentForCompanyData = in_array($sPaymentId, array('fcpopo_bill'));
+        $blValidPaymentForCompanyData = in_array($sPaymentId, array('fcpopo_bill', 'fcpopo_debitnote'));
         $blReturn = ($blB2BModeActive && $oUser->oxuser__oxcompany->value && $blValidPaymentForCompanyData);
 
         return $blReturn;

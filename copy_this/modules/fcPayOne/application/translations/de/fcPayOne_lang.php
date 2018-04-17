@@ -87,7 +87,6 @@ $aLang = array(
     'FCPO_CONTINUE_TO_NEXT_STEP'                    => "Weiter zum nächsten Schritt",
     'FCPO_PAYMENT_INFORMATION'                      => "Bezahlinformation",
     'FCPO_PAGE_CHECKOUT_PAYMENT_EMPTY_TEXT'         => '<p>Derzeit ist keine Versandart für dieses Land definiert.</p> <p>Wir werden versuchen, Liefermöglichkeiten zu finden und Sie über die Versandkosten informieren.</p>',
-
     'FCPO_EMAIL_BANK_DETAILS'                       => 'Bankdetails',
     'FCPO_EMAIL_BANK'                               => 'Bankname:',
     'FCPO_EMAIL_ROUTINGNUMBER'                      => 'BLZ:',
@@ -107,11 +106,9 @@ $aLang = array(
     'FCPO_KLV_PERSONALID_INVALID'                   => 'Bitte füllen Sie das Feld aus.',
     'FCPO_KLV_INFO_NEEDED'                          => 'Um den Kauf mit Klarna Rechnung durchführen zu können, benötigen wir noch ein paar Angaben von Ihnen.',
     'FCPO_KLV_CONFIRMATION_MISSING'                 => 'Sie müssen noch Ihr Einverständnis mit der Übermittlung der Daten erklären.',
-
     'FCPO_KLS_CHOOSE_CAMPAIGN'                      => 'Bitte w&auml;hlen Sie die entsprechende Kampagne',
     'FCPO_KLS_CAMPAIGN_INVALID'                     => 'Sie m&uuml;ssen eine Kampagne ausw&auml;hlen.',
     'FCPO_KLS_NO_CAMPAIGN'                          => 'F&uuml;r Ihre aktuelle Kombination aus Lieferland, Sprache und W&auml;hrung gibt es keine Ratenkauf-Optionen.<br>Bitte w&auml;hlen Sie eine andere Zahlart.',
-
     'FCPO_ORDER_MANDATE_HEADER'                     => 'SEPA-Lastschrift',
     'FCPO_ORDER_MANDATE_INFOTEXT'                   => 'Damit wir die SEPA-Lastschrift von Ihrem Konto einziehen können, benötigen wir von Ihnen ein SEPA-Lastschriftmandat.',
     'FCPO_ORDER_MANDATE_CHECKBOX'                   => 'Ich möchte das Mandat erteilen<br>(elektronische Übermittlung)',
