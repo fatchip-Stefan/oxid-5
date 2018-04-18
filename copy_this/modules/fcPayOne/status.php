@@ -54,7 +54,7 @@ if(array_search($sRemoteIp, $aWhitelist) === false) {
             }
         }
     }
-    
+
     if($blMatch === false) {
         echo 'Access denied';
         exit;
@@ -382,7 +382,7 @@ class fcPayOneTransactionStatusHandler extends oxBase {
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
         $sBodyRaw = $oLang->translateString('FCPO_MAIL_AMZ_DECLINED_BODY');
         if (!$sBodyRaw) {
-            return 'Bodytext is missing';
+            $sBodyRaw = $this->fcpoGetFallbackText('FCPO_MAIL_AMZ_DECLINED_BODY');
         }
         $oShop = oxNew('oxShop');
         $oShop->load($oOrder->oxorder__oxshopid->value);
@@ -391,6 +391,16 @@ class fcPayOneTransactionStatusHandler extends oxBase {
         $sBody = sprintf($sBodyRaw, $sShopname, $sShopname);
 
         return $sBody;
+    }
+
+    protected function fcpoGetFallbackText($sIdent) {
+        $aTexts = array(
+            'FCPO_MAIL_AMZ_DECLINED_BODY'=>"Valued customer,\n\nThank you very much for your order at %s.\nAmazon Pay was not able to process your payment.\nPlease go to https://pay.amazon.com/uk/ and update the payment information for your order. Afterwards we will automatically request payment again from Amazon Pay and you will receive a confirmation email.\n\nKind regards,\n\n%s",
+        );
+
+        $sReturn = (isset($aTexts[$sIdent])) ? $aTexts[$sIdent] : 'Text is missing';
+
+        return $sReturn;
     }
 
     protected function _fcpoSendGenericProblemMail($oOrder) {
