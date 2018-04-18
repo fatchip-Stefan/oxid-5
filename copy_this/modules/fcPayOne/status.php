@@ -381,6 +381,9 @@ class fcPayOneTransactionStatusHandler extends oxBase {
     protected function _fcpoGetAmazonDeclinedBody($oOrder) {
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
         $sBodyRaw = $oLang->translateString('FCPO_MAIL_AMZ_DECLINED_BODY');
+        if (!$sBodyRaw) {
+            return 'Bodytext is missing';
+        }
         $oShop = oxNew('oxShop');
         $oShop->load($oOrder->oxorder__oxshopid->value);
         $sShopname = $oShop->oxshops__oxname->value;
