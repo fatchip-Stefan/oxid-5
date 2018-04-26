@@ -72,7 +72,6 @@ class fcpayone_boni_main extends fcpayone_admindetails {
      */
     public function render() {
         $sReturn = parent::render();
-        $oLang = $this->_oFcpoHelper->fcpoGetLang();
 
         $iLang = $this->_oFcpoHelper->fcpoGetRequestParameter("subjlang");
         if (empty($iLang)) {

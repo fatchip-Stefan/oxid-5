@@ -419,6 +419,7 @@ $aLang = array(
     'FCPO_BONI_ERROR_SET_TO_BONIVERSUM_PERSON'  => '<b>Bitte beachten Sie:</b><br>Der Adresschecktyp wurde auf "Boniversum Adresscheck Person" gesetzt, da ihre Bonitätsprüfung auf "Boniversum VERITA Score" gestellt ist.',
     'FCPO_BONI_ERROR_DEACTIVATED_REGULAR_ADDRESSCHECK' => '<b>Bitte beachten Sie:</b><br>Der reguläre Adresschecktyp wurde deaktiviert, da Sie Bonitätschecks aktiviert haben. Die hiermit zusammenhängenden Addresschecks werden seperat eingestellt.',
     'FCPO_BONI_ERROR_NO_BONIADDRESSCHECK_SET'  => '<b>Bitte beachten Sie:</b><br>Der Bonitäts Adresschecktyp wurde auf "BASIC" gesetzt, da Sie Bonitätschecks aktiviert haben, aber noch keinen dazugehörige Adresschecktyp ausgewählt haben.',
+    'FCPO_ADDRESSCHECKTYPE_REGULAR_SET_INACTIVE' => '<b>Bitte beachten Sie:</b><br>Der reguläre Adresschecktyp wurde deaktiviert, da Sie Bonitätschecks aktiviert haben. Bitte konfigurieren Sie den Adresscheck im Bereich der Bonitätsprüfung.',
     'FCPO_CONFIG_GROUP_PAYDIREKT'               => 'Paydirekt',
     'FCPO_PAYDIREKT_OVERCAPTURE'                => 'Overcapture erlauben?',
     'FCPO_HELP_PAYDIREKT_OVERCAPTURE'           => 'Erlaubt den Einzug eines um 10% höheren Betrags basierend auf der vorautorisierten Summe.<br><b>Bitte aktivieren Sie diese Option nur in Absprache mit Paydirekt!</b>',

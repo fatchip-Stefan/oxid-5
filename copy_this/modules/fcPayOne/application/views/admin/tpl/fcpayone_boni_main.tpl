@@ -154,7 +154,7 @@ function loadLang(obj) {
         [{else}]
             <tr>
                 <td class="edittext" colspan="3">
-                    <span class="fcpo_font_footnote">[{oxmultilang ident="FCPO_ADDRESSCHECKTYPE_REGULAR_SET_INACTIVE"}]</span>
+                    <span style="font-style: italic;color: lightcoral;">[{oxmultilang ident="FCPO_ADDRESSCHECKTYPE_REGULAR_SET_INACTIVE"}]</span>
                 </td>
             </tr>
         [{/if}]
