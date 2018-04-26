@@ -1692,7 +1692,7 @@ class fcpoRequest extends oxSuperCfg {
     protected function _fcpoCheckUseFallbackBoniversum($aResponse) {
         $oConfig = $this->getConfig();
         $sScore = $aResponse['score'];
-        $sAddresscheckType = $this->_fcpoGetAddressCheckType();
+        $sAddresscheckType = $this->_fcpoGetBoniAddresscheckType();
 
         $blUseFallBack = (
             $sScore == 'U' &&
@@ -1713,11 +1713,26 @@ class fcpoRequest extends oxSuperCfg {
     /**
      * Check, correct and return addresschecktype
      *
+     * @param void
+     * @return string
      */
     protected function _fcpoGetAddressCheckType() {
         $oConfig = $this->getConfig();
-        $sBoniCheckType = $oConfig->getConfigParam('sFCPOBonicheck');
         $sAddressCheckType = $oConfig->getConfigParam('sFCPOAddresscheck');
+
+        return $sAddressCheckType;
+    }
+
+    /**
+     * Check, correct and return addresschecktype
+     *
+     * @param void
+     * @return string
+     */
+    protected function _fcpoGetBoniAddresscheckType() {
+        $oConfig = $this->getConfig();
+        $sBoniCheckType = $oConfig->getConfigParam('sFCPOBonicheck');
+        $sAddressCheckType = $oConfig->getConfigParam('sFCPOConsumerAddresscheck');
 
         if ($sBoniCheckType == 'CE') {
             $sAddressCheckType = 'PB';
@@ -1869,7 +1884,7 @@ class fcpoRequest extends oxSuperCfg {
             $this->addParameter('mode', $oConfig->getConfigParam('sFCPOBoniOpMode')); //Operationmode live or test
             $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID')); //ID of PayOne Sub-Account
 
-            $this->addParameter('addresschecktype', $oConfig->getConfigParam('sFCPOAddresscheck'));
+            $this->addParameter('addresschecktype', $oConfig->getConfigParam('sFCPOConsumerAddresscheck'));
             $this->addParameter('consumerscoretype', $oConfig->getConfigParam('sFCPOBonicheck'));
 
             $this->addAddressParamsByUser($oUser);
