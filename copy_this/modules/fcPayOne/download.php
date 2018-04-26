@@ -99,6 +99,7 @@ class fcPayOneMandateDownload extends oxUBase {
         $sOrderId = $this->_oFcpoHelper->fcpoGetRequestParameter('id');
         $sUserId = $this->_oFcpoHelper->fcpoGetRequestParameter('uid');
         $sPath = false;
+        $oDb = oxDb::getDb();
         
         $oUser = $this->getUser();
         if($oUser) {
@@ -116,7 +117,7 @@ class fcPayOneMandateDownload extends oxUBase {
                             INNER JOIN
                                 oxorder AS b ON a.oxorderid = b.oxid
                             WHERE
-                                b.oxid = '".mysql_real_escape_string($sOrderId)."' AND
+                                b.oxid = ".$oDb->quote($sOrderId)." AND
                                 b.oxuserid = '{$sUserId}'
                             LIMIT 1";
             } else {
@@ -134,7 +135,7 @@ class fcPayOneMandateDownload extends oxUBase {
                                 b.oxorderdate DESC
                             LIMIT 1";
             }
-            $oResult = oxDb::getDb()->Execute($sQuery);
+            $oResult = $oDb->Execute($sQuery);
             if ($oResult != false && $oResult->recordCount() > 0) {
                 $sFilename = $oResult->fields[0];
                 $sOrderId = $oResult->fields[1];

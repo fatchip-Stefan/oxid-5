@@ -77,6 +77,17 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
     protected $_aPaymentsProfileIdentSave = array('fcporp_bill');
 
     /**
+     * Flag for marking order as generally problematic
+     * @var bool
+     */
+    protected $_blOrderHasProblems = false;
+
+    /** Flag that indicates that payone payment of this order is flagged as redirect payment
+     * @var boolean
+     */
+    protected $_blOrderPaymentFlaggedAsRedirect = null;
+
+    /**
      * init object construction
      * 
      * @return null
@@ -119,6 +130,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * 
      * @param string $sEmail
      * @return mixed
+     * @todo Should be moved to oxUser
      */
     public function fcpoDoesUserAlreadyExist($sEmail) {
         $sQuery = "SELECT oxid FROM oxuser WHERE oxusername = " . oxDb::getDb()->quote($sEmail) . " AND oxpassword != ''";
@@ -257,7 +269,8 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
     }
 
     /**
-     * Returns true if this request is the return to the shop from a payment provider where the user has been redirected to
+     * Returns true if this request is the return to the shop from a payment provider
+     * where the user has been redirected to
      * 
      * @return bool
      */
@@ -269,18 +282,19 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
             $sPaymentId = $oBasket->getPaymentId();
 
             $blUseRedirectAfterSave = (
-                    $this->_oFcpoHelper->fcpoGetRequestParameter('fcposuccess') &&
-                    $this->_oFcpoHelper->fcpoGetRequestParameter('refnr') &&
-                    (
+                $this->_oFcpoHelper->fcpoGetRequestParameter('fcposuccess') &&
+                $this->_oFcpoHelper->fcpoGetRequestParameter('refnr') &&
+                (
                     $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoTxid') ||
                     $sPaymentId == 'fcpocreditcard_iframe'
-                    )
-                    );
+                )
+            );
 
             if ($blUseRedirectAfterSave) {
                 $this->_blIsRedirectAfterSave = true;
             }
         }
+
         return $this->_blIsRedirectAfterSave;
     }
 
@@ -365,6 +379,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
 
         // store orderid
         $oBasket->setOrderId($this->getId());
+        $this->_fcpoAddShadowBasketOrderId();
 
         // updating wish lists
         $this->_updateWishlist($oBasket->getContents(), $oUser);
@@ -445,11 +460,18 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
     protected function _fcpoEarlyValidation($blSaveAfterRedirect, $oBasket, $oUser, $blRecalculatingOrder) {
         // check if this order is already stored
         $sGetChallenge = $this->_oFcpoHelper->fcpoGetSessionVariable('sess_challenge');
-        if ($blSaveAfterRedirect === false && $this->_checkOrderExist($sGetChallenge)) {
+        $blReturnOrderExists = $this->_fcpoCheckReturnOrderExists($blSaveAfterRedirect);
+
+        if ($blReturnOrderExists) {
             $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
             $oUtils->logger('BLOCKER');
             // we might use this later, this means that somebody klicked like mad on order button
             return self::ORDER_STATE_ORDEREXISTS;
+        }
+
+        // check if basket is still the same as it was before
+        if ($blSaveAfterRedirect) {
+            $this->_fcCompareBasketAgainstShadowBasket($oBasket);
         }
 
         // if not recalculating order, use sess_challenge id, else leave old order id
@@ -458,12 +480,189 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
             $this->setId($sGetChallenge);
 
             // validating various order/basket parameters before finalizing
-            if (($iOrderState = $this->validateOrder($oBasket, $oUser))) {
+            $iOrderState = $this->validateOrder($oBasket, $oUser);
+            if ($iOrderState) {
                 return $iOrderState;
             }
         }
 
         return null;
+    }
+
+    /**
+     * Checks if previously saved basket is still the same (valid) as it is now
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcCompareBasketAgainstShadowBasket($oBasket) {
+        $oShadowBasket = $this->fcpoGetShadowBasket();
+        $blIsValid = $this->_fcpoCompareBaskets($oBasket, $oShadowBasket);
+        if ($blIsValid === false) {
+            $this->_fcpoMarkOrderAsProblematic();
+            $this->_fcpoAddShadowBasketCheckDate();
+        } else {
+            $this->_fcpoDeleteShadowBasket();
+        }
+    }
+
+    /**
+     * Adding checkdate to basket, so we can see how much time has been between
+     * creating and checking the shadow basket
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoAddShadowBasketCheckDate() {
+        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+        $oSession = $this->getSession();
+        $sSessionId = $oSession->getId();
+
+        $sQuery = "
+            UPDATE            
+                fcposhadowbasket
+            SET
+              	FCPOCHECKED=NOW()
+            WHERE
+                FCPOSESSIONID=".$oDb->quote($sSessionId)."
+            LIMIT 1
+        ";
+        $oDb->Execute($sQuery);
+    }
+
+    /**
+     * Adds orderid to shadowbasket table, so it is possible to analyze
+     * differences
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoAddShadowBasketOrderId() {
+        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+        $oSession = $this->getSession();
+        $sSessionId = $oSession->getId();
+
+        $sQuery = "
+            UPDATE            
+                fcposhadowbasket
+            SET
+              	OXORDERID=".$oDb->quote($this->getId())."
+            WHERE
+                FCPOSESSIONID=".$oDb->quote($sSessionId)."
+            LIMIT 1
+        ";
+        $oDb->Execute($sQuery);
+    }
+
+    /**
+     * Deleting Shadow-Basket
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoDeleteShadowBasket() {
+        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+        $oSession = $this->getSession();
+        $sSessionId = $oSession->getId();
+
+        $sQuery = "
+            DELETE FROM            
+                fcposhadowbasket
+            WHERE
+                FCPOSESSIONID=".$oDb->quote($sSessionId)."
+            LIMIT 1
+        ";
+        $oDb->Execute($sQuery);
+    }
+
+    /**
+     * Compares current basket with prior saved basket for avoiding fraud
+     *
+     * @param $oBasket
+     * @param $oShadowBasket
+     * @return bool
+     */
+    protected function _fcpoCompareBaskets($oBasket, $oShadowBasket) {
+        $blGeneralCheck = (
+            $oShadowBasket instanceof oxBasket &&
+            $oBasket instanceof oxBasket
+        );
+        if ($blGeneralCheck == false) {
+            $blReturn = false;
+        } else {
+            // compare brut sums
+            $dBruttoSumBasket = $oBasket->getBruttoSum();
+            $dBruttoSumShadowBasket = $oShadowBasket->getBruttoSum();
+
+            $blReturn = ($dBruttoSumBasket == $dBruttoSumShadowBasket);
+        }
+
+        return $blReturn;
+    }
+
+    /**
+     * Returns shadow Basket matching to sessionid
+     *
+     * @param $blByOrderId
+     * @return mixed object | bool
+     */
+     public function fcpoGetShadowBasket($blByOrderId=false) {
+        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+        $oSession = $this->getSession();
+        $sSessionId = $oSession->getId();
+        $oShadowBasket = false;
+
+        $sWhere = "FCPOSESSIONID=".$oDb->quote($sSessionId);
+        if ($blByOrderId){
+            $sWhere = "OXORDERID=".$oDb->quote($this->getId());
+        }
+
+        $sQuery = "
+            SELECT
+                FCPOBASKET
+            FROM 
+                fcposhadowbasket
+            WHERE
+                ".$sWhere."
+            LIMIT 1
+        ";
+
+        $sSerializedShadowBasket = $oDb->GetOne($sQuery);
+
+        if ($sSerializedShadowBasket) {
+            $oShadowBasket = unserialize(base64_decode($sSerializedShadowBasket));
+        }
+
+        return $oShadowBasket;
+    }
+
+    /**
+     * Mark order as problematic
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoMarkOrderAsProblematic() {
+        $this->_blOrderHasProblems = true;
+    }
+
+    /** Determine if finalizing order will be done by exiting with orderexists statement
+     *
+     * @param bool $blSaveAfterRedirect
+     * @return void
+     */
+    protected function _fcpoCheckReturnOrderExists($blSaveAfterRedirect) {
+        $oConfig = $this->getConfig();
+        $sGetChallenge = $this->_oFcpoHelper->fcpoGetSessionVariable('sess_challenge');
+        $blFCPOPresaveOrder = $oConfig->getConfigParam('blFCPOPresaveOrder');
+
+        $blReturnOrderExists = (
+            $blSaveAfterRedirect === false &&
+            $this->_checkOrderExist($sGetChallenge) &&
+            $blFCPOPresaveOrder === false
+        );
+
+        return $blReturnOrderExists;
     }
 
     /**
@@ -492,6 +691,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * @param oxUser $oUser
      * @param oxBasket $oBasket
      * @param oxUserPayment $oUserPayment
+     * @return int
      */
     protected function _fcpoFinishOrder($blRecalculatingOrder, $oUser, $oBasket, $oUserPayment) {
         if (!$blRecalculatingOrder) {
@@ -518,16 +718,33 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
 
     /**
      * Sets order status depending on having an appointed error
-     * 
+     *
+     * @return void
      * @return void
      */
     protected function _fcpoSetOrderStatus() {
-        if ($this->_fcpoGetAppointedError() === false) {
+        $blOrderOk = $this->_fcpoValidateOrderAgainstProblems();
+        if ($blOrderOk === true) {
             // updating order trans status (success status)
             $this->_setOrderStatus('OK');
         } else {
             $this->_setOrderStatus('ERROR');
         }
+    }
+
+    /**
+     * Validates order for checking if there were any occuring problems
+     *
+     * @param void
+     * @return bool
+     */
+    protected function _fcpoValidateOrderAgainstProblems() {
+        $blOrderOk = (
+           $this->_fcpoGetAppointedError() === false &&
+           $this->_blOrderHasProblems === false
+        );
+
+        return $blOrderOk;
     }
 
     /**
@@ -753,9 +970,9 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      */
     public function allowAccountSettlement() {
         $blReturn = (
-                $this->oxorder__oxpaymenttype->value == 'fcpopayadvance' ||
-                $this->oxorder__oxpaymenttype->value == 'fcpoonlineueberweisung'
-                );
+            $this->oxorder__oxpaymenttype->value == 'fcpopayadvance' ||
+            $this->oxorder__oxpaymenttype->value == 'fcpoonlineueberweisung'
+        );
 
         return $blReturn;
     }
@@ -768,11 +985,11 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      */
     public function debitNeedsBankData() {
         $blReturn = (
-                $this->oxorder__oxpaymenttype->value == 'fcpoinvoice' ||
-                $this->oxorder__oxpaymenttype->value == 'fcpopayadvance' ||
-                $this->oxorder__oxpaymenttype->value == 'fcpocashondel' ||
-                $this->oxorder__oxpaymenttype->value == 'fcpoonlineueberweisung'
-                );
+            $this->oxorder__oxpaymenttype->value == 'fcpoinvoice' ||
+            $this->oxorder__oxpaymenttype->value == 'fcpopayadvance' ||
+            $this->oxorder__oxpaymenttype->value == 'fcpocashondel' ||
+            $this->oxorder__oxpaymenttype->value == 'fcpoonlineueberweisung'
+        );
 
         return $blReturn;
     }
@@ -786,10 +1003,10 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      */
     public function isDetailedProductInfoNeeded() {
         $blReturn = (
-                $this->oxorder__oxpaymenttype->value == 'fcpobillsafe' ||
-                $this->oxorder__oxpaymenttype->value == 'fcpoklarna' ||
-                $this->oxorder__oxpaymenttype->value == 'fcpocreditcard_iframe'
-                );
+            $this->oxorder__oxpaymenttype->value == 'fcpobillsafe' ||
+            $this->oxorder__oxpaymenttype->value == 'fcpoklarna' ||
+            $this->oxorder__oxpaymenttype->value == 'fcpocreditcard_iframe'
+        );
 
         return $blReturn;
     }
@@ -931,9 +1148,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * If not displays error and returns false.
      *
      * @param object $oBasket basket object
-     *
-     * @throws oxOutOfStockException exception
-     *
+     * @throws exception
      * @return null
      */
     public function validateStock($oBasket) {
@@ -1087,6 +1302,40 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
     }
 
     /**
+     * Creates a copy of basket in shadow table
+     *
+     * @param void
+     * @return void
+     */
+    public function fcpoCreateShadowBasket() {
+        $oSession = $this->getSession();
+        $oBasket = $oSession->getBasket();
+        $sSessionId = $oSession->getId();
+        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+
+        $sQuery = "
+            REPLACE INTO fcposhadowbasket
+            (
+              	FCPOSESSIONID,
+              	OXORDERID,
+              	FCPOBASKET,
+              	FCPOCREATED,
+              	FCPOCHECKED
+            )
+            VALUES
+            (
+              ".$oDb->quote($sSessionId).",
+              NULL,
+              '".base64_encode(serialize($oBasket))."',
+              NOW(),
+              NULL
+            )
+        ";
+
+        $oDb->Execute($sQuery);
+    }
+
+    /**
      * Returns new valid ordernr. Method depends on shop version
      * 
      * @param void
@@ -1150,6 +1399,16 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
     }
 
     /**
+     * Set flag for dynamic set as redirect payment into session
+     *
+     * @param bool $blFlaggedAsRedirect
+     * @return void
+     */
+    protected function _fcpoFlagOrderPaymentAsRedirect($blFlaggedAsRedirect = true) {
+        $this->_oFcpoHelper->fcpoSetSessionVariable('blDynFlaggedAsRedirectPayment', $blFlaggedAsRedirect);
+    }
+
+    /**
      * Handles case of redirect type authorization
      * 
      * @param array $aResponse
@@ -1160,9 +1419,11 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * @return void
      */
     protected function _fcpoHandleAuthorizationRedirect($aResponse, $sRefNr, $sAuthorizationType, $sMode, $blReturnRedirectUrl) {
+        $this->_fcpoFlagOrderPaymentAsRedirect();
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
         $iOrderNotChecked = $this->_fcpoGetOrderNotChecked();
+        $this->fcpoCreateShadowBasket();
 
         $blPresaveOrder = (bool) $oConfig->getConfigParam('blFCPOPresaveOrder');
         if ($blPresaveOrder === true) {
@@ -1230,6 +1491,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * @return void
      */
     protected function _fcpoHandleAuthorizationApproved($aResponse, $sRefNr, $sAuthorizationType, $sMode) {
+        $this->_fcpoFlagOrderPaymentAsRedirect(null);
         $iOrderNotChecked = $this->_fcpoGetOrderNotChecked();
         $sPaymentId = $this->oxorder__oxpaymenttype->value;
 
@@ -1306,9 +1568,30 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * @return void
      */
     protected function _fcpoHandleAuthorizationError($aResponse, $oPayGateway) {
+        $sResponseErrorCode = (string) trim($aResponse['errorcode']);
+        $sResponseCustomerMessage = (string) trim($aResponse['customermessage']);
+
+        $this->_fcpoFlagOrderPaymentAsRedirect(null);
+        $this->_fcpoSetPayoneUserFlagsByAuthResponse($sResponseErrorCode);
         if ($oPayGateway) {
-            $oPayGateway->fcSetLastErrorNr($aResponse['errorcode']);
-            $oPayGateway->fcSetLastError($aResponse['customermessage']);
+            $oPayGateway->fcSetLastErrorNr($sResponseErrorCode);
+            $oPayGateway->fcSetLastError($sResponseCustomerMessage);
+        }
+    }
+
+    /**
+     * Adds flag to user if there is one matching
+     *
+     * @param string $sResponseErrorCode
+     * @return void
+     */
+    protected function _fcpoSetPayoneUserFlagsByAuthResponse($sResponseErrorCode) {
+        $oUserFlag = oxNew('fcpouserflag');
+        $blSuccess = $oUserFlag->fcpoLoadByErrorCode($sResponseErrorCode);
+
+        if ($blSuccess) {
+            $oUser = $this->getOrderUser();
+            $oUser->fcpoAddPayoneUserFlag($oUserFlag);
         }
     }
 

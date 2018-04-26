@@ -1,28 +1,30 @@
 [{if $oView->hasPaymentMethodAvailableSubTypes('cc')}]
     [{assign var="dynvalue" value=$oView->getDynValue()}]
     <div class="well well-sm">
-        <dl id="fcpoCreditcard" style="display:none;">
+        <dl>
             <dt>
                 <input id="payment_[{$sPaymentID}]" type="radio" name="paymentid" value="[{$sPaymentID}]" [{if $oView->getCheckedPaymentId() == $paymentmethod->oxpayments__oxid->value}]checked[{/if}]>
                 <label for="payment_[{$sPaymentID}]">
                     <b>
                         [{$paymentmethod->oxpayments__oxdesc->value}]
                         [{if $paymentmethod->getPrice()}]
-                        [{assign var="oPaymentPrice" value=$paymentmethod->getPrice()}]
-                        [{if $oViewConf->isFunctionalityEnabled('blShowVATForPayCharge')}]
-                        ([{oxprice price=$oPaymentPrice->getNettoPrice() currency=$currency}]
-                        [{if $oPaymentPrice->getVatValue() > 0}]
-                        [{oxmultilang ident="PLUS_VAT"}] [{oxprice price=$oPaymentPrice->getVatValue() currency=$currency}]
-                        [{/if}])
-                        [{else}]
-                        ([{oxprice price=$oPaymentPrice->getBruttoPrice() currency=$currency}])
-                        [{/if}]
+                            [{assign var="oPaymentPrice" value=$paymentmethod->getPrice()}]
+                            [{if $oViewConf->isFunctionalityEnabled('blShowVATForPayCharge')}]
+                                ([{oxprice price=$oPaymentPrice->getNettoPrice() currency=$currency}]
+                                [{if $oPaymentPrice->getVatValue() > 0}]
+                                    [{oxmultilang ident="PLUS_VAT"}] [{oxprice price=$oPaymentPrice->getVatValue() currency=$currency}]
+                                [{/if}])
+                            [{else}]
+                                ([{oxprice price=$oPaymentPrice->getBruttoPrice() currency=$currency}])
+                            [{/if}]
                         [{/if}]
                     </b>
                 </label>
             </dt>
-            </dt>
-            <dd class="[{if $oView->getCheckedPaymentId() == $paymentmethod->oxpayments__oxid->value}]activePayment[{/if}]">
+            <dd id="fcpoCreditcardSpinner" style="display: block;">
+                <img src="[{$oViewConf->fcpoGetModuleImgUrl()}]ajax-loader.gif">
+            </dd>
+            <dd id="fcpoCreditcard" style="display:none;" class="[{if $oView->getCheckedPaymentId() == $paymentmethod->oxpayments__oxid->value}]activePayment[{/if}]">
                 <script type="text/javascript" src="[{$oViewConf->fcpoGetHostedPayoneJs()}]"></script>
                 <input type="hidden" name="dynvalue[fcpo_kknumber]" value="">
                 <input type="hidden" name="fcpo_cc_type" value="hosted">
@@ -54,7 +56,7 @@
                         <div class="col-lg-9">
                             <span id="cardcvc2" class="inputIframe"></span>
                         </div>
-                    </div>        
+                    </div>
                 [{/if}]
                 <div class="form-group">
                     <label for="expireInput" class="req control-label col-lg-3">[{oxmultilang ident="FCPO_VALID_UNTIL"}]</label>

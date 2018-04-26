@@ -574,6 +574,18 @@
                 </dd>
                 <div class="spacer"></div>
             </dl>
+            <dl>
+                <dt>Bancontact</dt>
+                <dd style="margin-top: 4px; margin-left: 150px;">
+                    <input type="hidden" name="confbools[blFCPOBCTActivated]" value="false">
+                    <input type="checkbox" name="confbools[blFCPOBCTActivated]" value="true"  [{if ($confbools.blFCPOBCTActivated)}]checked[{/if}]>
+                    <input type="button" onclick="JavaScript:showDialog('[{$oView->fcGetAdminSeperator()}]cl=fcpayone_main&amp;aoc=1&amp;oxid=BCT&amp;type=sb');" class="" value="[{oxmultilang ident="GENERAL_ASSIGNCOUNTRIES"}]">
+                    [{oxinputhelp ident="FCPO_HELP_ASSIGNCOUNTRIES_2"}]
+                    <input type="radio" name="confbools[blFCPOSBBCTLive]" value="1" [{if $confbools.blFCPOSBBCTLive == '1'}]checked[{/if}]> <strong>Live</strong>
+                    <input type="radio" name="confbools[blFCPOSBBCTLive]" value="0" [{if $confbools.blFCPOSBBCTLive == '0' || !$confbools.blFCPOSBBCTLive}]checked[{/if}]> Test
+                </dd>
+                <div class="spacer"></div>
+            </dl>
         </div>
     </div>
     
@@ -870,7 +882,24 @@
             </dl>      
         </div>
     </div>
-                
+
+    <div class="groupExp">
+        <div>
+            <a href="#" onclick="_groupExp(this);return false;" class="rc"><b>[{oxmultilang ident="FCPO_CONFIG_GROUP_PAYDIREKT"}]</b></a>
+            <dl>
+                <dt>
+                    <input type="hidden" name="confbools[blFCPOAllowOvercapture]" value="false">
+                    <input type="checkbox" class="txt" name="confbools[blFCPOAllowOvercapture]" value="true" [{if $confbools.blFCPOAllowOvercapture}]checked[{/if}] [{$readonly}]>
+                    [{oxinputhelp ident="FCPO_HELP_PAYDIREKT_OVERCAPTURE"}]
+                </dt>
+                <dd>
+                    [{oxmultilang ident="FCPO_PAYDIREKT_OVERCAPTURE"}]
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+        </div>
+    </div>
+
     <br>
     <input type="submit" class="edittext" name="save" value="[{oxmultilang ident="GENERAL_SAVE"}]" onClick="Javascript:document.myedit.fnc.value='save'" [{$readonly}]>
     <input type="submit" class="edittext" name="export" value="[{oxmultilang ident="FCPO_EXPORT_CONFIG"}]" target="_blank" onClick="Javascript:document.myedit.fnc.value='export'" [{$readonly}]>

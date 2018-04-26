@@ -237,6 +237,8 @@ class fcpoRequest extends oxSuperCfg {
         $this->_checkAddress($oOrder, $oUser);
 
         $oConfig = $this->getConfig();
+        // see https://integrator.payone.de/jira/browse/OXID-172
+        $sRefNr = $oOrder->oxorder__oxpaymenttype->value == 'fcpopaydirekt' ? str_replace('_','-',$sRefNr) : $sRefNr;
 
         $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID')); //ID of PayOne Sub-Account
         $this->addParameter('reference', $sRefNr);
@@ -400,6 +402,7 @@ class fcpoRequest extends oxSuperCfg {
      */
     protected function setPaymentParameters($oOrder, $aDynvalue, $sRefNr) {
         $blAddRedirectUrls = false;
+        $oConfig = $this->getConfig();
 
         switch ($oOrder->oxorder__oxpaymenttype->value) {
             case 'fcpocreditcard':
@@ -451,6 +454,10 @@ class fcpoRequest extends oxSuperCfg {
                 if (strlen($sRefNr) <= 37) {// 37 is the max in this parameter for paydirekt - otherwise the request will fail
                     $this->addParameter('narrative_text', $sRefNr);
                 }
+                $blAllowOvercapture = $oConfig->getConfigParam('blFCPOAllowOvercapture');
+                if ($blAllowOvercapture) {
+                    $this->addParameter('add_paydata[over_capture]','yes');
+                }
                 $blAddRedirectUrls = true;
                 break;
             case 'fcpopo_bill':
@@ -461,6 +468,9 @@ class fcpoRequest extends oxSuperCfg {
             case 'fcporp_bill':
                 $blAddRedirectUrls = $this->_fcpoAddRatePayParameters($oOrder);
                 break;
+            case 'fcpo_secinvoice':
+                $blAddRedirectUrls = $this->_fcpoAddSecInvoiceParameters($oOrder);
+                break;
             default:
                 return false;
         }
@@ -469,6 +479,20 @@ class fcpoRequest extends oxSuperCfg {
             $this->_addRedirectUrls('payment', $sRefNr);
         }
         return true;
+    }
+
+    /**
+     * Adds additional parameters for secure invoice payment rec/POV
+     *
+     * @param $oOrder
+     * @return  void
+     */
+    protected function _fcpoAddSecInvoiceParameters($oOrder) {
+        $this->addParameter('clearingtype', 'rec');
+        $this->addParameter('clearingsubtype', 'POV');
+        $blIsB2B = $this->_fcpoIsOrderB2B($oOrder);
+        $sBusinessRelation = ($blIsB2B) ? 'b2b' : 'b2c';
+        $this->addParameter('businessrelation', $sBusinessRelation);
     }
 
     protected function _addRedirectUrls($sAbortClass, $sRefNr = false, $blIsPayPalExpress = false) {
@@ -569,6 +593,12 @@ class fcpoRequest extends oxSuperCfg {
                 break;
             case 'P24':
                 $this->addParameter('bankcountry', 'PL');
+                break;
+            case 'BCT':
+                $oBillCountry = oxNew('oxcountry');
+                $oBillCountry->load($oOrder->oxorder__oxbillcountryid->value);
+                $this->addParameter('bankcountry', $oBillCountry->oxcountry__oxisoalpha2->value);
+                break;
             default:
                 break;
         }
@@ -765,24 +795,15 @@ class fcpoRequest extends oxSuperCfg {
     }
 
     /**
-     * Template getter for checking which kind of field should be shown
+     * Method that determines if order is B2B
      * 
      * @param void
      * @return bool
      */
-    public function fcpoIsB2B($oUser) {
-        $oConfig = $this->getConfig();
-        $blB2BModeActive = $oConfig->getConfigParam('blFCPOPayolutionB2BMode');
-
-        if ($blB2BModeActive) {
-            $blCompany = ($oUser->oxuser__oxcompany->value) ? true : false;
-            $blReturn = $blCompany;
-            // check if we already have ustid, then showing is not needed
-            if ($blCompany) {
-                $blReturn = ($oUser->oxuser__oxustid->value) ? false : true;
-            }
-        } else {
-            $blReturn = false;
+    protected function _fcpoIsOrderB2B($oOrder) {
+        $blReturn = ($oOrder->oxorder__oxbillcompany->value) ? true : false;
+        if ($blReturn) {
+            $blReturn = ($oOrder->oxorder__oxbillustid->value) ? true : false;
         }
 
         return $blReturn;
@@ -1060,13 +1081,13 @@ class fcpoRequest extends oxSuperCfg {
         $this->addParameter('language', $this->_oFcpoHelper->fcpoGetLang()->getLanguageAbbr());
 
         $blValidBankData = (
-                isset($aBankData) &&
-                is_array($aBankData) &&
-                count($aBankData) == 3 &&
-                $aBankData['fcpo_payolution_installment_accountholder'] &&
-                $aBankData['fcpo_payolution_installment_iban'] &&
-                $aBankData['fcpo_payolution_installment_bic']
-                );
+            isset($aBankData) &&
+            is_array($aBankData) &&
+            count($aBankData) == 3 &&
+            $aBankData['fcpo_payolution_installment_accountholder'] &&
+            $aBankData['fcpo_payolution_installment_iban'] &&
+            $aBankData['fcpo_payolution_installment_bic']
+        );
 
         if ($blValidBankData) {
             $this->addParameter('iban', $aBankData['fcpo_payolution_installment_iban']);
@@ -1167,7 +1188,6 @@ class fcpoRequest extends oxSuperCfg {
         $blAddCompanyData = $this->_fcpoCheckAddCompanyData($oUser, $sPaymentId);
         if ($blAddCompanyData) {
             $this->addParameter('company', $oUser->oxuser__oxcompany->value);
-            $this->addParameter('add_paydata[company_uid]', $oUser->oxuser__oxustid->value);
             $this->addParameter('add_paydata[b2b]', 'yes');
         }
 
@@ -1194,7 +1214,7 @@ class fcpoRequest extends oxSuperCfg {
     protected function _fcpoCheckAddCompanyData($oUser, $sPaymentId) {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $blB2BModeActive = $oConfig->getConfigParam('blFCPOPayolutionB2BMode');
-        $blValidPaymentForCompanyData = in_array($sPaymentId, array('fcpopo_bill'));
+        $blValidPaymentForCompanyData = in_array($sPaymentId, array('fcpopo_bill', 'fcpopo_debitnote'));
         $blReturn = ($blB2BModeActive && $oUser->oxuser__oxcompany->value && $blValidPaymentForCompanyData);
 
         return $blReturn;
@@ -2025,6 +2045,7 @@ class fcpoRequest extends oxSuperCfg {
             return $aOutput;
         }
 
+        $sRequestUrl = '';
         foreach ($this->_aParameters as $sKey => $sValue) {
             if (is_array($sValue)) {
                 foreach ($sValue as $i => $val1) {
