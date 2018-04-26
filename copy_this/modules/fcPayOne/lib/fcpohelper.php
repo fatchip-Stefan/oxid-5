@@ -45,6 +45,16 @@ class fcpohelper extends oxBase {
     }
 
     /**
+     * Returns a static instance of given object name
+     *
+     * @param $sObjectName
+     * @return mixed
+     */
+    public function getStaticInstance($sObjectName) {
+        return oxRegistry::get($sObjectName);
+    }
+
+    /**
      * Wrapper for ini get calls
      * 
      * @param string $sConfigVar
