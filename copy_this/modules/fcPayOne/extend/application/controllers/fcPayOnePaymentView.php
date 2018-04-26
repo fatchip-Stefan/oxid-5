@@ -121,6 +121,10 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         'mobile' => 'mobile',
     );
 
+    protected $_aPayolutionInstallmentBankDataExeptionCountries = array(
+        'a7c40f6321c6f6109.43859248'
+    );
+
     /**
      * init object construction
      *
@@ -1350,6 +1354,19 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     }
 
     /**
+     * Template getter for checking if bankdata is mandatory
+     *
+     * @param string $sPaymentId
+     * @return bool
+     */
+    public function fcpoPayolutionShowBankData($sPaymentId) {
+        $blException =
+            $this->_fcpoCheckPayolutionBankDataCountryException($sPaymentId);
+
+        return !$blException;
+    }
+
+    /**
      * Returns the sum of basket
      *
      * @param void
@@ -1504,7 +1521,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
                             $mReturn = null;
                         }
                     }
-                } elseif (($sPaymentId == 'fcpopo_debitnote' || $sPaymentId == 'fcpopo_installment' ) && !$this->_blIsPayolutionInstallmentAjax) {
+                } elseif (($sPaymentId == 'fcpopo_debitnote' || $this->fcpoPayolutionShowBankData('fcpopo_installment') ) && !$this->_blIsPayolutionInstallmentAjax) {
                     $sMessage = $oLang->translateString('FCPO_PAYOLUTION_BANKDATA_INCOMPLETE');
                     $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
                     $this->_oFcpoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
@@ -1594,15 +1611,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     protected function _fcpoValidateBankData($aBankData, $sPaymentId) {
         $blReturn = false;
         if ($sPaymentId == 'fcpopo_installment') {
-            $blReturn = (
-                is_array($aBankData) &&
-                isset($aBankData['fcpo_payolution_installment_iban']) &&
-                isset($aBankData['fcpo_payolution_installment_bic']) &&
-                !empty($aBankData['fcpo_payolution_installment_iban']) &&
-                !empty($aBankData['fcpo_payolution_installment_bic']) &&
-                isset($aBankData['fcpo_payolution_installment_accountholder']) &&
-                !empty($aBankData['fcpo_payolution_installment_accountholder'])
-            );
+            $blReturn = $this->_fcpoValidateBankDataPayolutionInstallment($aBankData, $sPaymentId);
         } else if ($sPaymentId == 'fcpopo_debitnote') {
             $blReturn = (
                 is_array($aBankData) &&
@@ -1613,6 +1622,46 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
                 isset($aBankData['fcpo_payolution_debitnote_accountholder']) &&
                 !empty($aBankData['fcpo_payolution_debitnote_accountholder'])
             );
+        }
+
+        return $blReturn;
+    }
+
+    /**
+     * Checking Bankdata for payolution installment
+     *
+     * @param $aBankData
+     * @return bool
+     */
+    protected function _fcpoValidateBankDataPayolutionInstallment($aBankData, $sPaymentId) {
+        $blCountryExeption = $this->_fcpoCheckPayolutionBankDataCountryException($sPaymentId);
+        $blReturn = true;
+        if (!$blCountryExeption) {
+            $blReturn = (
+                is_array($aBankData) &&
+                isset($aBankData['fcpo_payolution_installment_iban']) &&
+                isset($aBankData['fcpo_payolution_installment_bic']) &&
+                !empty($aBankData['fcpo_payolution_installment_iban']) &&
+                !empty($aBankData['fcpo_payolution_installment_bic']) &&
+                isset($aBankData['fcpo_payolution_installment_accountholder']) &&
+                !empty($aBankData['fcpo_payolution_installment_accountholder'])
+            );
+        }
+
+        return $blReturn;
+    }
+
+    /**
+     * Returns if there is
+     *
+     * @param $sPaymentId
+     * @return void
+     */
+    protected function _fcpoCheckPayolutionBankDataCountryException($sPaymentId) {
+        $blReturn = false;
+        if ($sPaymentId == 'fcpopo_installment') {
+            $sBillCountryId = $this->getUserBillCountryId();
+            $blReturn = in_array($sBillCountryId, $this->_aPayolutionInstallmentBankDataExeptionCountries);
         }
 
         return $blReturn;
@@ -1643,7 +1692,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
                     'fcpo_payolution' . $sInstallmentAddition . '_bic',
                     'fcpo_payolution' . $sInstallmentAddition . '_accountholder',
                 );
-
                 if (in_array($sKey, $aMap)) {
                     $aBankData[$sKey] = $sParam;
                 }
@@ -2172,6 +2220,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     protected function _fcpoPerformPayolutionPreCheck($sPaymentId, $sWorkOrderId = null) {
         $blPreCheckNeeded = $this->_fcpoCheckIfPrecheckNeeded($sPaymentId);
         $aBankData = $this->_fcpoGetPayolutionBankData($sPaymentId);
+        $this->_oFcpoHelper->fcpoSetSessionVariable('payolution_bankdata', $aBankData);
         if ($blPreCheckNeeded) {
             $oUser = $this->getUser();
             if (!$oUser) {
@@ -2181,15 +2230,12 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
                 $oUser = $oBasket->getBasketUser();
             }
             $oPORequest = $this->_oFcpoHelper->getFactoryObject('fcporequest');
-            $aBankData = $this->_fcpoGetPayolutionBankData($sPaymentId);
-            $sSelectedIndex = $this->_fcpoGetPayolutionSelectedInstallmentIndex();
             $aResponse = $oPORequest->sendRequestPayolutionPreCheck($sPaymentId, $oUser, $aBankData, $sWorkOrderId);
             if ($aResponse['status'] == 'ERROR') {
                 $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
                 $blReturn = false;
             } else if (is_array($aResponse) && array_key_exists('workorderid', $aResponse) !== false) {
                 $this->_oFcpoHelper->fcpoSetSessionVariable('payolution_workorderid', $aResponse['workorderid']);
-                $this->_oFcpoHelper->fcpoSetSessionVariable('payolution_bankdata', $aBankData);
                 $blReturn = true;
             }
         } else {
