@@ -1682,6 +1682,28 @@ class fcpoRequest extends oxSuperCfg {
     }
 
     /**
+     * Checks if boniaddresscheck has been performed before and trigger
+     * calling the api. Save request result for later calls
+     *
+     * @param oxUser $oUser
+     * @return mixed bool|array
+     */
+    protected function _fcpoSendRequestConsumerScore($oUser) {
+        if ($this->_wasAddressCheckedBefore() === false) {
+            $aResponse = $this->send();
+            $aResponse = $this->_fcpoCheckUseFallbackBoniversum($aResponse);
+            $this->setPayoneMalus($oUser, $aResponse);
+
+            if ($this->_fcpoCheckAddressCanBeSaved($aResponse)) {
+                $this->_saveCheckedAddress($aResponse);
+            }
+
+            return $aResponse;
+        }
+        return true;
+    }
+
+    /**
      * Handles the setting of address params depending on the kind of order
      *
      * @param $oUser
@@ -1932,7 +1954,12 @@ class fcpoRequest extends oxSuperCfg {
      */
     public function sendRequestConsumerscore($oUser) {
         // Consumerscore only allowed in germany
-        if ($this->getCountryIso2($oUser->oxuser__oxcountryid->value) == 'DE') {
+        $sCountryIso = $this->getCountryIso2($oUser->oxuser__oxcountryid->value);
+        $blCountryValid = (
+            $sCountryIso == 'DE'
+        );
+
+        if ($blCountryValid) {
             $oConfig = $this->getConfig();
             $this->addParameter('request', 'consumerscore');
             $this->addParameter('mode', $oConfig->getConfigParam('sFCPOBoniOpMode')); //Operationmode live or test
@@ -1949,8 +1976,7 @@ class fcpoRequest extends oxSuperCfg {
 
             $this->addParameter('language', $this->_oFcpoHelper->fcpoGetLang()->getLanguageAbbr());
 
-            $aResponse = $this->send();
-            $aResponse = $this->_fcpoCheckUseFallbackBoniversum($aResponse);
+            $aResponse = $this->_fcpoSendRequestConsumerscore($oUser);
 
             return $aResponse;
         } else {

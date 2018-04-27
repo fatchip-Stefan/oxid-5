@@ -352,6 +352,7 @@ $aLang = array(
     'FCPO_CREDITRATING_BONIVERSUM_GREEN'        => 'Green',
     'FCPO_BONI_ERROR_SET_TO_BONIVERSUM_PERSON'  => '<b>Please note:</b><br>Adresschecktype has been set to "Boniversum Addresscheck Person" , due to your  Bonicheck has been set to "Boniversum VERITA Score".',
     'FCPO_BONI_ERROR_DEACTIVATED_REGULAR_ADDRESSCHECK' => '<b>Please note:</b><br>Regular Adresschecktyp has been deactivated due to your Bonicheck is set active. Addresschecktype is configured seperately within the Bonicheck-Configuration.',
+    'FCPO_BONI_ERROR_DEACTIVATED_BONI_ADDRESSCHECK' => '<b>Please note:</b><br>Boni adresscheck has been deactivated due to bonicheck itself is inactive.',
     'FCPO_BONI_ERROR_NO_BONIADDRESSCHECK_SET'  => '<b>Please note:</b><br>Adresschecktype has been set to "BASIC" due to your Bonicheck is set active, but no mandatory Adresschecktype has been set.',
     'FCPO_ADDRESSCHECKTYPE_REGULAR_SET_INACTIVE' => '<b>Please note:</b><br>Regular Adresschecktyp has been deactivated due to your Bonicheck is set active. Please configure Addresschecktype in Bonicheck-Section.',
     'FCPO_CONFIG_GROUP_PAYDIREKT'               => 'Paydirekt',

@@ -55,6 +55,7 @@ class fcpayone_boni_main extends fcpayone_admindetails {
         '1' => 'FCPO_BONI_ERROR_SET_TO_BONIVERSUM_PERSON',
         '2' => 'FCPO_BONI_ERROR_DEACTIVATED_REGULAR_ADDRESSCHECK',
         '3' => 'FCPO_BONI_ERROR_NO_BONIADDRESSCHECK_SET',
+        '4' => 'FCPO_BONI_ERROR_DEACTIVATED_BONI_ADDRESSCHECK',
     );
 
     /**
@@ -142,7 +143,6 @@ class fcpayone_boni_main extends fcpayone_admindetails {
      */
     public function fcpoShowRegularAddresscheck() {
         $blBoniCheckActive = $this->_fcpoCheckBonicheckIsActive();
-
         if ($blBoniCheckActive) {
             $this->_fcpoDeactivateRegularAddressCheck();
         }
@@ -161,8 +161,10 @@ class fcpayone_boni_main extends fcpayone_admindetails {
     protected function _fcpoCheckBonicheckIsActive() {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sFCPOBonicheck = $oConfig->getConfigParam('sFCPOBonicheck');
-
-        $blIsActive = ($sFCPOBonicheck !== '-1');
+        $blIsActive = (
+            $sFCPOBonicheck !== null &&
+            $sFCPOBonicheck !== '-1'
+        );
 
         return $blIsActive;
     }
@@ -176,7 +178,10 @@ class fcpayone_boni_main extends fcpayone_admindetails {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $sFCPOAddresscheck = $oConfig->getConfigParam('sFCPOAddresscheck');
 
-        $blIsActive = ($sFCPOAddresscheck !== 'NO');
+        $blIsActive = (
+            $sFCPOAddresscheck !== null &&
+            $sFCPOAddresscheck !== 'NO'
+        );
 
         return $blIsActive;
     }
@@ -195,6 +200,17 @@ class fcpayone_boni_main extends fcpayone_admindetails {
         $blIsActive = (bool) $sFCPOConsumerAddresscheck;
 
         return $blIsActive;
+    }
+
+    /**
+     * Deactivates bonicheck addresscheck type
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoDeactivateBoniAdresscheck() {
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oConfig->saveShopConfVar("str", 'sFCPOConsumerAddresscheck', null);
     }
 
     /**
@@ -255,9 +271,20 @@ class fcpayone_boni_main extends fcpayone_admindetails {
      */
     protected function _fcpoValidateDuplicateAddresscheck() {
         $blBoniCheckActive = $this->_fcpoCheckBonicheckIsActive();
+        $blBoniAddressCheckActive = $this->_fcpoBoniAddresscheckActive();
+
+        $blDeactivateBoniAddressCheck = (
+            !$blBoniCheckActive &&
+            $blBoniAddressCheckActive
+        );
+
+        if ($blDeactivateBoniAddressCheck) {
+            $this->_fcpoDeactivateBoniAdresscheck();
+            $this->_aValidationCodes[] = 4;
+        }
+
         $blRegularAddressCheckActive =
             $this->_fcpoCheckRegularAddressCheckActive();
-
         $blDuplicateAddressCheck = (
             $blBoniCheckActive &&
             $blRegularAddressCheckActive
@@ -270,7 +297,7 @@ class fcpayone_boni_main extends fcpayone_admindetails {
     }
 
     /**
-     * Validates addresscheck related to boniversion. Correct settings and return error
+     * Validates addresscheck related to boniversum. Correct settings and return error
      * code for notifying user
      *
      * @param void
@@ -278,23 +305,23 @@ class fcpayone_boni_main extends fcpayone_admindetails {
      */
     protected function _fcpoValidateAddresscheckBoniversum() {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
-        $aConfStrs = $this->_oFcpoHelper->fcpoGetRequestParameter("confstrs");
-
-        $blFurtherCheck = (
-            isset($aConfStrs['sFCPOBonicheck']) &&
-            isset($aConfStrs['sFCPOConsumerAddresscheck'])
+        $sFCPOBonicheck = $oConfig->getConfigParam('sFCPOBonicheck');
+        $sFCPOConsumerAddresscheck = $oConfig->getConfigParam('sFCPOConsumerAddresscheck');
+        $blCorrectSetting = (
+            is_string($sFCPOBonicheck) &&
+            is_string($sFCPOConsumerAddresscheck) &&
+            (
+                $sFCPOBonicheck == 'CE' &&
+                $sFCPOConsumerAddresscheck != 'PB'
+            )
         );
 
-        if ($blFurtherCheck) {
-            $sBoniCheckType = $aConfStrs['sFCPOBonicheck'];
-            $sBoniAddresscheckType = $aConfStrs['sFCPOConsumerAddresscheck'];
-
-            if ($sBoniCheckType == 'CE' && $sBoniAddresscheckType != 'PB') {
-                // addresschecktype ALWAYS has to be PB if bonichecktype is CE => Set error code ...
-                $this->_aValidationCodes[] = 1;
-                // ... and fix setting
-                $oConfig->saveShopConfVar("str", 'sFCPOConsumerAddresscheck', 'PB');
-            }
+        if ($blCorrectSetting) {
+            // addresschecktype ALWAYS has to be PB if bonichecktype is CE
+            // => Set error code ...
+            $this->_aValidationCodes[] = 1;
+            // ... and fix setting
+            $oConfig->saveShopConfVar("str", 'sFCPOConsumerAddresscheck', 'PB');
         }
     }
 
