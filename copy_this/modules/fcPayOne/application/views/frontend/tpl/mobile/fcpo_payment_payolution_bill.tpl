@@ -5,11 +5,7 @@
     <script src="[{$oViewConf->fcpoGetModuleJsPath('jquery-1.10.1.min.js')}]"></script>
     <script src="[{$oViewConf->fcpoGetModuleJsPath()}]lightview/lightview.js"></script>
     <ul class="form">
-        [{if $oView->fcpoShowB2B()}]
-            <li>
-                <input type="text" size="20" maxlength="64" name="dynvalue[fcpo_payolution_bill_oxustid]" autocomplete="off" value="[{$oView->fcpoGetUserValue('oxustid')}]" placeholder="[{oxmultilang ident="FCPO_PAYOLUTION_USTID"}]" />
-            </li>
-        [{elseif $oView->fcpoShowB2C()}]
+        [{if $oView->fcpoShowPayolutionB2C()}]
             <li>
                 <input placceholder="[{oxmultilang ident="FCPO_PAYOLUTION_YEAR"}]" type="text" size="5" maxlength="4" name="dynvalue[fcpo_payolution_bill_birthdate_year]" value="[{$oView->fcpoGetBirthdayField('year')}]">&nbsp;
                 <input placceholder="[{oxmultilang ident="FCPO_PAYOLUTION_MONTH"}]" type="text" size="3" maxlength="2" name="dynvalue[fcpo_payolution_bill_birthdate_month]" value="[{$oView->fcpoGetBirthdayField('month')}]">&nbsp;
