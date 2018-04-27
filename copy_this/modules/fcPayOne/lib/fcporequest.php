@@ -1645,42 +1645,96 @@ class fcpoRequest extends oxSuperCfg {
         $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID')); //ID of PayOne Sub-Account
         $sAddresschecktype = $this->_fcpoGetAddressCheckType();
         $this->addParameter('addresschecktype', $sAddresschecktype);
+        $this->addParameter('language', $this->_oFcpoHelper->fcpoGetLang()->getLanguageAbbr());
 
-        if ($sAddresschecktype == 'PE' && $this->getCountryIso2($oUser->oxuser__oxcountryid->value) != 'DE') {
-            //AddressCheck Person nur in Deutschland
-            //Erfolgreichen Check simulieren
+        $blAddressCountryCheck = $this->_fcpaValidateAddresscheckAgainstCountry($oUser);
+        if (!$blAddressCountryCheck) {
+            // simulate successful check
             return array('fcWrongCountry' => true);
-        } elseif ($sAddresschecktype == 'BA' && array_search($this->getCountryIso2($oUser->oxuser__oxcountryid->value), $this->_aValidCountrys) === false) {
-            //AddressCheck Basic nur in bestimmten L?ndern
-            //Erfolgreichen Check simulieren
-            return array('fcWrongCountry' => true);
-        } else {
-            $oAddress = oxNew('oxaddress');
-            if ($blCheckDeliveryAddress === true) {
-                $sDeliveryAddressId = $oUser->getSelectedAddressId();
-                if ($sDeliveryAddressId) {
-                    $oAddress->load($sDeliveryAddressId);
-                } else {
-                    return false;
-                }
-                $this->addAddressParamsByAddress($oAddress);
-            } else {
-                $this->addAddressParamsByUser($oUser);
-            }
-
-            $this->addParameter('language', $this->_oFcpoHelper->fcpoGetLang()->getLanguageAbbr());
-
-            if ($this->_wasAddressCheckedBefore() === false) {
-                $aResponse = $this->send();
-
-                if ($this->_fcpoCheckAddressCanBeSaved($aResponse)) {
-                    $this->_saveCheckedAddress($aResponse);
-                }
-
-                return $aResponse;
-            }
-            return true;
         }
+
+        $blSuccess = $this->_fcpoSetAddresscheckAddressParams($oUser, $blCheckDeliveryAddress);
+        if (!$blSuccess) return false;
+
+        $mResponse = $this->_fcpoSendRequestStandardAddressCheck();
+
+        return $mResponse;
+    }
+
+    /**
+     * Checks if addresscheck has been performed before and trigger
+     * calling the api. Save request result for later calls
+     *
+     * @param void
+     * @return mixed array|bool
+     */
+    protected function _fcpoSendRequestStandardAddressCheck() {
+        if ($this->_wasAddressCheckedBefore() === false) {
+            $aResponse = $this->send();
+
+            if ($this->_fcpoCheckAddressCanBeSaved($aResponse)) {
+                $this->_saveCheckedAddress($aResponse);
+            }
+
+            return $aResponse;
+        }
+        return true;
+    }
+
+    /**
+     * Handles the setting of address params depending on the kind of order
+     *
+     * @param $oUser
+     * @param $blCheckDeliveryAddress
+     * @return bool
+     */
+    protected function _fcpoSetAddresscheckAddressParams($oUser, $blCheckDeliveryAddress) {
+        $blReturn = false;
+        $oAddress = oxNew('oxaddress');
+
+        if ($blCheckDeliveryAddress === true) {
+            $sDeliveryAddressId = $oUser->getSelectedAddressId();
+            if ($sDeliveryAddressId) {
+                $oAddress->load($sDeliveryAddressId);
+                $this->addAddressParamsByAddress($oAddress);
+                $blReturn = true;
+            }
+        } else {
+            $this->addAddressParamsByUser($oUser);
+            $blReturn = true;
+        }
+
+        return $blReturn;
+    }
+
+    /**
+     * Process addresscheck related validations against users country
+     * and addresschecktype combo
+     *
+     * @param $oUser
+     * @return bool
+     */
+    protected function _fcpaValidateAddresscheckAgainstCountry($oUser) {
+        $sAddresschecktype = $this->_fcpoGetAddressCheckType();
+
+        $sCountryIso = $this->getCountryIso2($oUser->oxuser__oxcountryid->value);
+
+        $blAddresscheckPEOnlyGermany = (
+            $sAddresschecktype == 'PE' &&
+            $sCountryIso != 'DE'
+        );
+
+        $blAddresscheckBasicOnlyInCertainCountries = (
+            $sAddresschecktype == 'BA' &&
+            array_search($sCountryIso, $this->_aValidCountrys) === false
+        );
+
+        $blValid = (
+            !$blAddresscheckPEOnlyGermany &&
+            !$blAddresscheckBasicOnlyInCertainCountries
+        );
+
+        return $blValid;
     }
 
     /**
