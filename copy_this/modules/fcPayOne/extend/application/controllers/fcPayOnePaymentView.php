@@ -295,6 +295,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
                 $this->getIdeal(),
                 $this->getP24(),
                 $this->getBancontact(),
+                $this->getEPS(),
             ),
         );
 
