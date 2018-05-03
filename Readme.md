@@ -1,9 +1,9 @@
-# PAYONE FinanceGate
+# PAYONE Payment for Oxid
 ![license LGPL](https://img.shields.io/badge/license-LGPL-blue.svg)
 [![GitHub issues](https://img.shields.io/github/issues/PAYONE-GmbH/oxid-5.svg)](https://github.com/PAYONE-GmbH/oxid-5/issues)
 
 # PAYMENT FOR YOUR OXID-SHOP 
-The Payone-FinanceGate-Module is already certified by OXID to guarantee faultless code quality and correct operation, but we are willing to do an even better job. The community here on Github is a great help for that and we are happy about your participation. Take a look at our released version and send us commits or other feedback to take care for the best possible solution.
+The Payone-Payment-Module is already certified by OXID to guarantee faultless code quality and correct operation, but we are willing to do an even better job. The community here on Github is a great help for that and we are happy about your participation. Take a look at our released version and send us commits or other feedback to take care for the best possible solution.
 
 ## Important functions for OXID
 *	Seamless integration in the checkout processes
@@ -14,7 +14,7 @@ The Payone-FinanceGate-Module is already certified by OXID to guarantee faultles
 *	Find all currently supported payment methods on www.payone.com/oxid
 
 ## More information
-More information about OXID on https://www.payone.com/oxid or https://shop.fatchip.de/OXID-PAYONE-FinanceGate-Connector.html<br>
+More information about OXID on https://www.payone.com/oxid or https://www.fatchip.de/Plugins/OXID-eShop/OXID-PAYONE-Connector.html<br>
 Videoguide: Installation and configuration (German): https://www.youtube.com/playlist?list=PLlzKa20PSzulrW3Yg7XmP3rkvDywe-DMe 
 
 ## Requirements
@@ -23,7 +23,7 @@ Installed OXID eShop > v4.7.0
 ## Installation
 1.	Extract the module-package.
 2.	Copy the content of the folder "copy_this" into your shop root-folder (where config.inc.php lies).
-3.	Go to Extensions->Modules, select the "PAYONE FinanceGate" extension and press the "Activate" Button in the "Overview" tab.
+3.	Go to Extensions->Modules, select the "PAYONE Payment for Oxid eShop" extension and press the "Activate" Button in the "Overview" tab.
 4.	Next you need to deposit a transaction url in the PAYONE-Webinterface at Konfiguration -> Zahlungsportale -> YOUR_PORTAL -> Erweitert -> TransactionStatus URL. The URL has to look like this: http://->YOUR_SHOP<-/modules/fcPayOne/status.php
 5.	Empty "tmp" folder.
 6. 	There is a new menu item in the OXID-Interface named PAYONE. Here you can set your merchant connect data.
@@ -102,12 +102,12 @@ Folder application/views/admin/de:
 * logoclaim.gif
 
 3.	Copy the content of "copy this" into your shop root-folder (where config.inc.php lies).
-4.	Activate the "Payone FinanceGate"
+4.	Activate the "PAYONE Payment for Oxid eShop"
 
 If you updating from version 2.x or higher:
-1.	Deactivate the "Payone FinanceGate"
+1.	Deactivate the "PAYONE Payment for Oxid eShop"
 2.	Copy the content of "copy this" into your shop root-folder (where config.inc.php lies).
-3.	Activate the "Payone FinanceGate"
+3.	Activate the "PAYONE Payment for Oxid eShop"
 
 ## Notice
 When you are using the creditcard iframe payment-method there is no transaction-id ( txid ) in the moment where the order is created. The transaction-id will be filled in seconds later, when the first "TransactionStatus" from Payone comes in. So when using pixi or another ERP where the transaction-id is needed, make sure to export the order only when the transaction-id is already there.
