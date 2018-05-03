@@ -97,41 +97,39 @@ class fcpoconfigexport extends oxBase {
      * Returns payone configuration
      * 
      * @param string $sShopId
-     * @return void
+     * @param int  $iLang
+     * @return array
      */
     public function fcpoGetConfig($sShopId, $iLang=0) {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $oDb = $this->_oFcpoHelper->fcpoGetDb(true);
-        $sQuery = "select oxvarname, oxvartype, DECODE( oxvarvalue, " . $oDb->quote($oConfig->getConfigParam('sConfigKey')) . ") as oxvarvalue from oxconfig where oxshopid = '$sShopId' AND (oxvartype = 'str' OR oxvartype = 'bool' OR oxvartype = 'arr')";
-        $oResult = $oDb->Execute($sQuery);
+        $sConfigKey = $oConfig->getConfigParam('sConfigKey');
+        $sQuery = "select oxvarname, oxvartype, DECODE( oxvarvalue, " . $oDb->quote($sConfigKey) . ") as oxvarvalue from oxconfig where oxshopid = '$sShopId' AND (oxvartype = 'str' OR oxvartype = 'bool' OR oxvartype = 'arr')";
+        $aRows = $oDb->getAll($sQuery);
+        $oStr = getStr();
 
-        if ($oResult != false && $oResult->recordCount() > 0) {
-            $oStr = getStr();
-            while (!$oResult->EOF) {
-                $sVarName = $oResult->fields['oxvarname'];
-                $sVarType = $oResult->fields['oxvartype'];
-                $sVarVal = $oResult->fields['oxvarvalue'];
+        foreach ($aRows as $aRow) {
+            $sVarName = $aRow['oxvarname'];
+            $sVarType = $aRow['oxvartype'];
+            $sVarVal = $aRow['oxvarvalue'];
 
-                if ($sVarType == "bool")
-                    $this->_aConfBools[$sVarName] = ($sVarVal == "true" || $sVarVal == "1");
-                if ($sVarType == "str") {
-                    $sVarName = $this->fcpoGetMultilangConfStrVarName($sVarName, $iLang);
-                    
-                    $this->_aConfStrs[$sVarName] = $sVarVal;
-                    if ($this->_aConfStrs[$sVarName]) {
-                        $this->_aConfStrs[$sVarName] = $oStr->htmlentities($this->_aConfStrs[$sVarName]);
-                    }
+            if ($sVarType == "bool")
+                $this->_aConfBools[$sVarName] = ($sVarVal == "true" || $sVarVal == "1");
+            if ($sVarType == "str") {
+                $sVarName = $this->fcpoGetMultilangConfStrVarName($sVarName, $iLang);
+
+                $this->_aConfStrs[$sVarName] = $sVarVal;
+                if ($this->_aConfStrs[$sVarName]) {
+                    $this->_aConfStrs[$sVarName] = $oStr->htmlentities($this->_aConfStrs[$sVarName]);
                 }
+            }
 
-                if ($sVarType == "arr") {
-                    if (in_array($sVarName, $this->_aSkipMultiline)) {
-                        $this->_aConfArrs[$sVarName] = unserialize($sVarVal);
-                    } else {
-                        $this->_aConfArrs[$sVarName] = $oStr->htmlentities($this->_arrayToMultiline(unserialize($sVarVal)));
-                    }
+            if ($sVarType == "arr") {
+                if (in_array($sVarName, $this->_aSkipMultiline)) {
+                    $this->_aConfArrs[$sVarName] = unserialize($sVarVal);
+                } else {
+                    $this->_aConfArrs[$sVarName] = $oStr->htmlentities($this->_arrayToMultiline(unserialize($sVarVal)));
                 }
-
-                $oResult->moveNext();
             }
         }
 
@@ -606,14 +604,15 @@ class fcpoconfigexport extends oxBase {
      */
     protected function _getModuleInfo() {
         $iVersion = $this->_oFcpoHelper->fcpoGetIntShopVersion();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+
         if ($iVersion < 4600) {
-            $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
             $aModules = $oConfig->getConfigParam('aModules');
             foreach ($aModules as $sKey => $sValue) {
                 $aModules[$sKey] = '<![CDATA[' . $sValue . ']]>';
             }
         } else {
-            $sModulesDir = $this->getConfig()->getModulesDir();
+            $sModulesDir = $oConfig->getModulesDir();
 
             $oModuleList = $this->_oFcpoHelper->getFactoryObject("oxModuleList");
             $aOxidModules = $oModuleList->getModulesFromDir($sModulesDir);

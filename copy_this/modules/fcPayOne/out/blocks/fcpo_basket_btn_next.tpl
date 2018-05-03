@@ -7,3 +7,12 @@
         <input type="image" src="[{$oView->fcpoGetPayPalExpressPic()}]" style="float: right;margin-right:10px;">
     </form>
 [{/if}]
+[{if $oViewConf->fcpoCanDisplayAmazonPayButton()}]
+    [{assign var="sFcPoTemplatePath" value=$oViewConf->fcpoGetActiveThemePath()}]
+    [{assign var="sFcPoTemplatePath" value=$sFcPoTemplatePath|cat:'/fcpayone_amazon_paybutton.tpl'}]
+    [{include
+        file=$oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePath)
+        sAmazonButtonId='LoginWithAmazonButtonUp'
+        sAmazonButtonClass='payone_basket_amazon_btn_flow pull-right'
+    }]
+[{/if}]

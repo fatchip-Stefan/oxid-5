@@ -32,7 +32,7 @@ class fcPayOnePaymentgateway extends fcPayOnePaymentgateway_parent {
 	 * @extend executePayment
      * @return bool
      */
-    public function executePayment( $dAmount, &$oOrder ) {
+    public function executePayment($dAmount, &$oOrder) {
         #if($oOrder->isPayOnePaymentType() === false || $oOrder->isPayOneIframePayment()) {
         if($oOrder->isPayOnePaymentType() === false) {    
             return parent::executePayment($dAmount, $oOrder);
@@ -40,12 +40,10 @@ class fcPayOnePaymentgateway extends fcPayOnePaymentgateway_parent {
 
         $this->_iLastErrorNo = null;
         $this->_sLastError = null;
-        
         $oResponse = $oOrder->fcHandleAuthorization(false, $this);
         
         return $oResponse;
     }
-    
     
     /**
      * Setter for last error number

@@ -134,9 +134,9 @@ class fcpayone_error_mapping extends fcpayone_admindetails {
      * @return array
      */
     protected function _fcpoGetExistingIframeMappings() {
-        $aExistingErrorMappings = $this->_oFcpoErrorMapping->fcpoGetExistingMappings('iframe');
+        $aExistingIFrameMappings = $this->_oFcpoErrorMapping->fcpoGetExistingMappings('iframe');
 
-        return $aExistingErrorMappings;
+        return $aExistingIFrameMappings;
     }
 
     /**

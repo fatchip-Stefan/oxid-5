@@ -18,7 +18,6 @@
  * @copyright (C) Payone GmbH
  * @version   OXID eShop CE
  */
-
 class fcpohelper extends oxBase {
 
     /**
@@ -165,17 +164,18 @@ class fcpohelper extends oxBase {
      * Getter for config instance
      * 
      * @param void
-     * @return object
+     * @return mixed
      */
     public function fcpoGetConfig() {
-        return $this->getConfig();
+        $oConfig = $this->getConfig();
+        return $oConfig;
     }
 
     /**
      * Getter for session instance
      * 
      * @param void
-     * @return object
+     * @return mixed
      */
     public function fcpoGetSession() {
         return $this->getSession();
@@ -185,8 +185,7 @@ class fcpohelper extends oxBase {
      * Getter for database instance
      * 
      * @param $blAssoc with assoc mode
-     * @param mixed
-     * @return bool
+     * @return mixed
      */
     public function fcpoGetDb($blAssoc = false) {
         if ($blAssoc) {
@@ -333,8 +332,7 @@ class fcpohelper extends oxBase {
      * @return string
      */
     public function fcpoGetModuleVersion() {
-        include_once __DIR__."/../metadata.php";
-        return $aModule['version'];
+        return '2.1.6_5';
     }
 
     /**
@@ -465,6 +463,7 @@ class fcpohelper extends oxBase {
             'vsettlement',
             'transfer',
             'invoice',
+            'failed',
         );
     }
 

@@ -48,7 +48,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
      * @param object &$object    Instantiated object that we will run method on.
      * @param string $methodName Method name to call
      * @param array  $parameters Array of parameters to pass into method.
-     *
+     * @throws exception
      * @return mixed Method return.
      */
     public function invokeMethod(&$object, $methodName, array $parameters = array()) {
@@ -65,12 +65,16 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
      * @param object &$object    Instantiated object that we will run method on.
      * @param string $propertyName property that shall be set
      * @param array  $value value to be set
-     *
+     * @throws exception
      * @return mixed Method return.
      */
     public function invokeSetAttribute(&$object, $propertyName, $value) {
         $reflection = new \ReflectionClass(get_class($object));
-        $property = $reflection->getProperty($propertyName);
+        try {
+            $property = $reflection->getProperty($propertyName);
+        } catch(Exception $ex) {
+            $property = new \ReflectionProperty(get_class($object), $propertyName);
+        }
         $property->setAccessible(true);
 
         $property->setValue($object, $value);
@@ -287,12 +291,12 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
         $oHelper->expects($this->any())->method('fcpoGetSession')->will($this->returnValue($oMockSession));
         $oHelper->expects($this->any())->method('fcpoGetRequestParameter')->will($this->returnValue(true));
-        $oHelper->expects($this->any())->method('fcpoGetSessionVariable')->will($this->returnValue(true));
+        $oHelper->expects($this->any())->method('fcpoGetSessionVariable')->will($this->returnValue(false));
 
         $this->invokeSetAttribute($oTestObject, '_blIsRedirectAfterSave', null);
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
-        $this->assertEquals(true, $oTestObject->_isRedirectAfterSave());
+        $this->assertEquals(false, $oTestObject->_isRedirectAfterSave());
     }
 
     /**
@@ -744,6 +748,61 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     }
 
     /**
+     * Testig _setUser for coverage
+     * @throws exception
+     */
+    public function test__setUser_Coverage() {
+        $oTestObject = oxNew('fcPayOneOrder');
+        $this->invokeSetAttribute($oTestObject, '_sFcpoPaymentId', 'fcpoamazonpay');
+
+        $oMockUser = $this->getMock('oxUser', array(
+            'save',
+            'getDelAddressInfo',
+        ));
+        $oMockUser
+            ->expects($this->any())
+            ->method('save')
+            ->will($this->returnValue(null));
+        $oMockUser
+            ->expects($this->any())
+            ->method('getDelAddressInfo')
+            ->will($this->returnValue(false));
+        $oMockUser->oxorder__oxbillcompany = new oxField('');
+        $oMockUser->oxorder__oxbillemail = new oxField('some@email.com');
+        $oMockUser->oxorder__oxbillfname = new oxField('Some');
+        $oMockUser->oxorder__oxbilllname = new oxField('Guy');
+        $oMockUser->oxorder__oxbillstreet = new oxField('Some Street');
+        $oMockUser->oxorder__oxbillstreetnr = new oxField('123');
+        $oMockUser->oxorder__oxbilladdinfo = new oxField('');
+        $oMockUser->oxorder__oxbillustid = new oxField('');
+        $oMockUser->oxorder__oxbillcity = new oxField('Some City');
+        $oMockUser->oxorder__oxbillcountryid = new oxField('someBillcountryId');
+        $oMockUser->oxorder__oxbillstateid = new oxField('someBillstateId');
+        $oMockUser->oxorder__oxbillzip = new oxField('12345');
+        $oMockUser->oxorder__oxbillfon = new oxField('030123456789');
+        $oMockUser->oxorder__oxbillfax = new oxField('030987654321');
+        $oMockUser->oxorder__oxbillsal = new oxField('MR');
+
+        $oMockViewConf = $this->getMock('oxViewConfig', array(
+            'fcpoAmazonEmailDecode'
+        ));
+        $oMockViewConf
+            ->expects($this->any())
+            ->method('fcpoAmazonEmailDecode')
+            ->will($this->returnValue('somePrefixedEmail'));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('getFactoryObject')->will($this->returnValue($oMockViewConf));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        /**
+         * @todo: switched test off due to static parent call cannot be mocked
+         *        without using extralibs
+         */
+        // $this->assertEquals(null, $oTestObject->_setUser($oMockUser));
+    }
+
+    /**
      * Testing _fcpoProcessOrder for coverage
      * 
      * @param void
@@ -845,6 +904,428 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     }
 
     /**
+     * Testing executePayment for case no payone
+     */
+    public function test_executePayment_NoPayone() {
+        $oMockPayTransaction = $this->getMock('oxPaymentGateway', array(
+            'setPaymentParams',
+            'executePayment',
+            'getLastError',
+            'getLastErrorNo',
+        ));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('setPaymentParams')
+            ->will($this->returnValue(null));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('executePayment')
+            ->will($this->returnValue(1));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('getLastError')
+            ->will($this->returnValue('someError'));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('getLastErrorNo')
+            ->will($this->returnValue('someErrorNo'));
+
+        $oMockPrice = $this->getMock('oxPrice', array('getBruttoPrice'));
+        $oMockPrice
+            ->expects($this->any())
+            ->method('getBruttoPrice')
+            ->will($this->returnValue(199.99));
+        $oMockBasket = $this->getMock('oxBasket', array('getPrice'));
+        $oMockBasket
+            ->expects($this->any())
+            ->method('getPrice')
+            ->will($this->returnValue($oMockPrice));
+        $oMockUserPayment = $this->getMock('oxUserPayment', array('save'));
+        $oMockUserPayment
+            ->expects($this->any())
+            ->method('save')
+            ->will($this->returnValue(null));
+
+        $oTestObject = $this->getMock('fcPayOneOrder', array(
+            'isPayOnePaymentType',
+            '_getGateway',
+            'delete',
+        ));
+        $oTestObject
+            ->expects($this->any())
+            ->method('isPayOnePaymentType')
+            ->will($this->returnValue(false));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_getGateway')
+            ->will($this->returnValue($oMockPayTransaction));
+        $oTestObject
+            ->expects($this->any())
+            ->method('delete')
+            ->will($this->returnValue(null));
+
+        $sExpect = $sResponse = $oTestObject->_executePayment($oMockBasket, $oMockUserPayment);
+        $this->assertEquals($sExpect, $sResponse);
+    }
+
+    /**
+     * Testing executePayment for case numeric value given
+     */
+    public function test_executePayment_NumericResponse() {
+        $oMockPayTransaction = $this->getMock('oxPaymentGateway', array(
+            'setPaymentParams',
+            'executePayment',
+            'getLastError',
+            'getLastErrorNo',
+        ));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('setPaymentParams')
+            ->will($this->returnValue(null));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('executePayment')
+            ->will($this->returnValue(99));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('getLastError')
+            ->will($this->returnValue('someError'));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('getLastErrorNo')
+            ->will($this->returnValue('someErrorNo'));
+
+        $oMockPrice = $this->getMock('oxPrice', array('getBruttoPrice'));
+        $oMockPrice
+            ->expects($this->any())
+            ->method('getBruttoPrice')
+            ->will($this->returnValue(199.99));
+        $oMockBasket = $this->getMock('oxBasket', array('getPrice'));
+        $oMockBasket
+            ->expects($this->any())
+            ->method('getPrice')
+            ->will($this->returnValue($oMockPrice));
+        $oMockUserPayment = $this->getMock('oxUserPayment', array('save'));
+        $oMockUserPayment
+            ->expects($this->any())
+            ->method('save')
+            ->will($this->returnValue(null));
+
+        $oTestObject = $this->getMock('fcPayOneOrder', array(
+            'isPayOnePaymentType',
+            '_getGateway',
+            'delete',
+        ));
+        $oTestObject
+            ->expects($this->any())
+            ->method('isPayOnePaymentType')
+            ->will($this->returnValue(true));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_getGateway')
+            ->will($this->returnValue($oMockPayTransaction));
+        $oTestObject
+            ->expects($this->any())
+            ->method('delete')
+            ->will($this->returnValue(null));
+
+        $sExpect = $sResponse = $oTestObject->_executePayment($oMockBasket, $oMockUserPayment);
+        $this->assertEquals($sExpect, $sResponse);
+    }
+
+    /**
+     * Testing executePayment for case no numeric value returns
+     */
+    public function test_executePayment_NonNumericResponse() {
+        $oMockPayTransaction = $this->getMock('oxPaymentGateway', array(
+            'setPaymentParams',
+            'executePayment',
+            'getLastError',
+            'getLastErrorNo',
+        ));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('setPaymentParams')
+            ->will($this->returnValue(null));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('executePayment')
+            ->will($this->returnValue('someNonNumericValue'));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('getLastError')
+            ->will($this->returnValue('someError'));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('getLastErrorNo')
+            ->will($this->returnValue('someErrorNo'));
+
+        $oMockPrice = $this->getMock('oxPrice', array('getBruttoPrice'));
+        $oMockPrice
+            ->expects($this->any())
+            ->method('getBruttoPrice')
+            ->will($this->returnValue(199.99));
+        $oMockBasket = $this->getMock('oxBasket', array('getPrice'));
+        $oMockBasket
+            ->expects($this->any())
+            ->method('getPrice')
+            ->will($this->returnValue($oMockPrice));
+        $oMockUserPayment = $this->getMock('oxUserPayment', array('save'));
+        $oMockUserPayment
+            ->expects($this->any())
+            ->method('save')
+            ->will($this->returnValue(null));
+
+        $oTestObject = $this->getMock('fcPayOneOrder', array(
+            'isPayOnePaymentType',
+            '_getGateway',
+            'delete',
+        ));
+        $oTestObject
+            ->expects($this->any())
+            ->method('isPayOnePaymentType')
+            ->will($this->returnValue(true));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_getGateway')
+            ->will($this->returnValue($oMockPayTransaction));
+        $oTestObject
+            ->expects($this->any())
+            ->method('delete')
+            ->will($this->returnValue(null));
+
+        $sExpect = $sResponse = $oTestObject->_executePayment($oMockBasket, $oMockUserPayment);
+        $this->assertEquals($sExpect, $sResponse);
+    }
+
+
+    /**
+     * Testing executePayment for case last error set
+     */
+    public function test_executePayment_LastError() {
+        $oMockPayTransaction = $this->getMock('oxPaymentGateway', array(
+            'setPaymentParams',
+            'executePayment',
+            'getLastError',
+            'getLastErrorNo',
+        ));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('setPaymentParams')
+            ->will($this->returnValue(null));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('executePayment')
+            ->will($this->returnValue(0));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('getLastError')
+            ->will($this->returnValue('someError'));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('getLastErrorNo')
+            ->will($this->returnValue('someErrorNo'));
+
+        $oMockPrice = $this->getMock('oxPrice', array('getBruttoPrice'));
+        $oMockPrice
+            ->expects($this->any())
+            ->method('getBruttoPrice')
+            ->will($this->returnValue(199.99));
+        $oMockBasket = $this->getMock('oxBasket', array('getPrice'));
+        $oMockBasket
+            ->expects($this->any())
+            ->method('getPrice')
+            ->will($this->returnValue($oMockPrice));
+        $oMockUserPayment = $this->getMock('oxUserPayment', array('save'));
+        $oMockUserPayment
+            ->expects($this->any())
+            ->method('save')
+            ->will($this->returnValue(null));
+
+        $oTestObject = $this->getMock('fcPayOneOrder', array(
+            'isPayOnePaymentType',
+            '_getGateway',
+            'delete',
+        ));
+        $oTestObject
+            ->expects($this->any())
+            ->method('isPayOnePaymentType')
+            ->will($this->returnValue(true));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_getGateway')
+            ->will($this->returnValue($oMockPayTransaction));
+        $oTestObject
+            ->expects($this->any())
+            ->method('delete')
+            ->will($this->returnValue(null));
+
+        $sExpect = $sResponse = $oTestObject->_executePayment($oMockBasket, $oMockUserPayment);
+        $this->assertEquals($sExpect, $sResponse);
+    }
+
+    /**
+     * Testing executePayment for case last error number set
+     */
+    public function test_executePayment_LastErrorNo() {
+        $oMockPayTransaction = $this->getMock('oxPaymentGateway', array(
+            'setPaymentParams',
+            'executePayment',
+            'getLastError',
+            'getLastErrorNo',
+        ));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('setPaymentParams')
+            ->will($this->returnValue(null));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('executePayment')
+            ->will($this->returnValue(0));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('getLastError')
+            ->will($this->returnValue(null));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('getLastErrorNo')
+            ->will($this->returnValue('someErrorNo'));
+
+        $oMockPrice = $this->getMock('oxPrice', array('getBruttoPrice'));
+        $oMockPrice
+            ->expects($this->any())
+            ->method('getBruttoPrice')
+            ->will($this->returnValue(199.99));
+        $oMockBasket = $this->getMock('oxBasket', array('getPrice'));
+        $oMockBasket
+            ->expects($this->any())
+            ->method('getPrice')
+            ->will($this->returnValue($oMockPrice));
+        $oMockUserPayment = $this->getMock('oxUserPayment', array('save'));
+        $oMockUserPayment
+            ->expects($this->any())
+            ->method('save')
+            ->will($this->returnValue(null));
+
+        $oTestObject = $this->getMock('fcPayOneOrder', array(
+            'isPayOnePaymentType',
+            '_getGateway',
+            'delete',
+        ));
+        $oTestObject
+            ->expects($this->any())
+            ->method('isPayOnePaymentType')
+            ->will($this->returnValue(true));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_getGateway')
+            ->will($this->returnValue($oMockPayTransaction));
+        $oTestObject
+            ->expects($this->any())
+            ->method('delete')
+            ->will($this->returnValue(null));
+
+        $sExpect = $sResponse = $oTestObject->_executePayment($oMockBasket, $oMockUserPayment);
+        $this->assertEquals($sExpect, $sResponse);
+    }
+
+    /**
+     * Testing executePayment for case default error
+     */
+    public function test_executePayment_DefaultError() {
+        $oMockPayTransaction = $this->getMock('oxPaymentGateway', array(
+            'setPaymentParams',
+            'executePayment',
+            'getLastError',
+            'getLastErrorNo',
+        ));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('setPaymentParams')
+            ->will($this->returnValue(null));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('executePayment')
+            ->will($this->returnValue(0));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('getLastError')
+            ->will($this->returnValue(null));
+        $oMockPayTransaction
+            ->expects($this->any())
+            ->method('getLastErrorNo')
+            ->will($this->returnValue(null));
+
+        $oMockPrice = $this->getMock('oxPrice', array('getBruttoPrice'));
+        $oMockPrice
+            ->expects($this->any())
+            ->method('getBruttoPrice')
+            ->will($this->returnValue(199.99));
+        $oMockBasket = $this->getMock('oxBasket', array('getPrice'));
+        $oMockBasket
+            ->expects($this->any())
+            ->method('getPrice')
+            ->will($this->returnValue($oMockPrice));
+        $oMockUserPayment = $this->getMock('oxUserPayment', array('save'));
+        $oMockUserPayment
+            ->expects($this->any())
+            ->method('save')
+            ->will($this->returnValue(null));
+
+        $oTestObject = $this->getMock('fcPayOneOrder', array(
+            'isPayOnePaymentType',
+            '_getGateway',
+            'delete',
+        ));
+        $oTestObject
+            ->expects($this->any())
+            ->method('isPayOnePaymentType')
+            ->will($this->returnValue(true));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_getGateway')
+            ->will($this->returnValue($oMockPayTransaction));
+        $oTestObject
+            ->expects($this->any())
+            ->method('delete')
+            ->will($this->returnValue(null));
+
+        $sExpect = $sResponse = $oTestObject->_executePayment($oMockBasket, $oMockUserPayment);
+        $this->assertEquals($sExpect, $sResponse);
+    }
+
+
+    /**
+     * Testing getOrderUser for coverage
+     */
+    public function test_getOrderUser_Coverage() {
+        $oTestObject = oxNew('fcPayOneOrder');
+        $oTestObject->oxorder__oxpaymenttype = new oxField('fcpoamazonpay');
+        $sExpectEmail = 'some@email.org';
+
+        $oMockViewConf = $this->getMock('oxViewConf', array('fcpoAmazonEmailDecode'));
+        $oMockViewConf
+            ->expects($this->any())
+            ->method('fcpoAmazonEmailDecode')
+            ->will($this->returnValue($sExpectEmail));
+
+        $oHelper = $this
+            ->getMockBuilder('fcpohelper')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $oHelper
+            ->expects($this->any())
+            ->method('getFactoryObject')
+            ->will($this->returnValue($oMockViewConf));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $oReturnUser = $oTestObject->getOrderUser();
+        $sReturnEmail = $oReturnUser->oxuser__oxusername->value;
+
+        $this->assertEquals($sExpectEmail, $sReturnEmail);
+    }
+
+    /**
      * Testing _fcpoHandleBasket for case that save after redirect is active
      */
     public function test__fcpoHandleBasket_SaveAfterRedirect() {
@@ -893,8 +1374,8 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oMockUtils = $this->getMock('oxUtils', array('logger'));
         $oMockUtils->expects($this->any())->method('logger')->will($this->returnValue(true));
 
-        $oTestObject = $this->getMock('fcPayOneOrder', array('_checkOrderExist', 'setId', 'validateOrder'));
-        $oTestObject->expects($this->any())->method('_checkOrderExist')->will($this->returnValue(true));
+        $oTestObject = $this->getMock('fcPayOneOrder', array('_fcpoCheckReturnOrderExists', 'setId', 'validateOrder'));
+        $oTestObject->expects($this->any())->method('_fcpoCheckReturnOrderExists')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('setId')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('validateOrder')->will($this->returnValue(1));
 
@@ -917,8 +1398,8 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oMockUtils = $this->getMock('oxUtils', array('logger'));
         $oMockUtils->expects($this->any())->method('logger')->will($this->returnValue(true));
 
-        $oTestObject = $this->getMock('fcPayOneOrder', array('_checkOrderExist', 'setId', 'validateOrder'));
-        $oTestObject->expects($this->any())->method('_checkOrderExist')->will($this->returnValue(true));
+        $oTestObject = $this->getMock('fcPayOneOrder', array('_fcpoCheckReturnOrderExists', 'setId', 'validateOrder'));
+        $oTestObject->expects($this->any())->method('_fcpoCheckReturnOrderExists')->will($this->returnValue(false));
         $oTestObject->expects($this->any())->method('setId')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('validateOrder')->will($this->returnValue(1));
 
@@ -941,8 +1422,8 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oMockUtils = $this->getMock('oxUtils', array('logger'));
         $oMockUtils->expects($this->any())->method('logger')->will($this->returnValue(true));
 
-        $oTestObject = $this->getMock('fcPayOneOrder', array('_checkOrderExist', 'setId', 'validateOrder'));
-        $oTestObject->expects($this->any())->method('_checkOrderExist')->will($this->returnValue(true));
+        $oTestObject = $this->getMock('fcPayOneOrder', array('_fcpoCheckReturnOrderExists', 'setId', 'validateOrder'));
+        $oTestObject->expects($this->any())->method('_fcpoCheckReturnOrderExists')->will($this->returnValue(false));
         $oTestObject->expects($this->any())->method('setId')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('validateOrder')->will($this->returnValue(1));
 
@@ -956,6 +1437,40 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oMockUser = oxNew('oxUser');
 
         $this->assertEquals(null, $oTestObject->_fcpoEarlyValidation(true, $oMockBasket, $oMockUser, true));
+    }
+
+    /**
+     * Testing _fcpoCheckReturnOrderExists for coverage
+     */
+    public function test__fcpoCheckReturnOrderExists_Coverage() {
+        $oMockConfig = $this->getMock('oxConfig', array(
+            'getConfigParam',
+        ));
+        $oMockConfig
+            ->expects($this->any())
+            ->method('getConfigParam')
+            ->will($this->returnValue(false));
+
+        $oTestObject = $this->getMock('fcPayOneOrder', array(
+            '_checkOrderExist',
+        ));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_checkOrderExist')
+            ->will($this->returnValue(true));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper
+            ->expects($this->any())
+            ->method('fcpoGetSessionVariable')
+            ->will($this->returnValue('someSessChallenge'));
+        $oHelper
+            ->expects($this->any())
+            ->method('fcpoGetConfig')
+            ->will($this->returnValue($oMockConfig));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals(false, $oTestObject->_fcpoCheckReturnOrderExists(true));
     }
 
     /**
@@ -1017,9 +1532,30 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
      * Testing _fcpoSetOrderStatus for state ok
      */
     public function test__fcpoSetOrderStatus_Ok() {
-        $oTestObject = $this->getMock('fcPayOneOrder', array('_setOrderStatus', '_fcpoGetAppointedError'));
-        $oTestObject->expects($this->any())->method('_setOrderStatus')->will($this->returnValue(true));
-        $oTestObject->expects($this->any())->method('_fcpoGetAppointedError')->will($this->returnValue(false));
+        $oTestObject = $this->getMock('fcPayOneOrder', array(
+            '_setOrderStatus',
+            '_fcpoGetAppointedError',
+            'save',
+        ));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_setOrderStatus')
+            ->will($this->returnValue(true));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_fcpoGetAppointedError')
+            ->will($this->returnValue(false));
+        $oTestObject
+            ->expects($this->any())
+            ->method('save')
+            ->will($this->returnValue(true));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper
+            ->expects($this->any())
+            ->method('fcpoGetSessionVariable')
+            ->will($this->returnValue(false));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
         $this->assertEquals(null, $oTestObject->_fcpoSetOrderStatus());
     }
@@ -1028,9 +1564,62 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
      * Testing _fcpoSetOrderStatus for state error
      */
     public function test__fcpoSetOrderStatus_Error() {
-        $oTestObject = $this->getMock('fcPayOneOrder', array('_setOrderStatus', '_fcpoGetAppointedError'));
-        $oTestObject->expects($this->any())->method('_setOrderStatus')->will($this->returnValue(true));
-        $oTestObject->expects($this->any())->method('_fcpoGetAppointedError')->will($this->returnValue(true));
+        $oTestObject = $this->getMock('fcPayOneOrder', array(
+            '_setOrderStatus',
+            '_fcpoGetAppointedError',
+            'save',
+        ));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_setOrderStatus')
+            ->will($this->returnValue(true));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_fcpoGetAppointedError')
+            ->will($this->returnValue(true));
+        $oTestObject
+            ->expects($this->any())
+            ->method('save')
+            ->will($this->returnValue(true));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper
+            ->expects($this->any())
+            ->method('fcpoGetSessionVariable')
+            ->will($this->returnValue(false));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals(null, $oTestObject->_fcpoSetOrderStatus());
+    }
+
+    /**
+     * Testing _fcpoSetOrderStatus for state error
+     */
+    public function test__fcpoSetOrderStatus_AmazonPending() {
+        $oTestObject = $this->getMock('fcPayOneOrder', array(
+            '_setOrderStatus',
+            '_fcpoGetAppointedError',
+            'save',
+        ));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_setOrderStatus')
+            ->will($this->returnValue(true));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_fcpoGetAppointedError')
+            ->will($this->returnValue(false));
+        $oTestObject
+            ->expects($this->any())
+            ->method('save')
+            ->will($this->returnValue(true));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper
+            ->expects($this->any())
+            ->method('fcpoGetSessionVariable')
+            ->will($this->returnValue(true));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
         $this->assertEquals(null, $oTestObject->_fcpoSetOrderStatus());
     }
@@ -1339,6 +1928,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
      * @param void
      * @return void
      */
+/*
     public function test_save_Presave() {
         $oMockShop = $this->getMock('oxShop', array('getId'));
         $oMockShop->expects($this->any())->method('getId')->will($this->returnValue('oxbaseshop'));
@@ -1369,6 +1959,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
 
         $this->assertEquals($sExpect, $sResponse);
     }
+*/
 
     /**
      * Testing save without presave
@@ -1376,6 +1967,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
      * @param void
      * @return void
      */
+/*
     public function test_save_NoPresave() {
         $oMockShop = $this->getMock('oxShop', array('getId'));
         $oMockShop->expects($this->any())->method('getId')->will($this->returnValue('oxbaseshop'));
@@ -1406,6 +1998,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
 
         $this->assertEquals($sExpect, $sResponse);
     }
+*/
 
     /**
      * Testing allowCapture with authorization
@@ -1456,7 +2049,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oMockDatabase->expects($this->any())->method('GetOne')->will($this->returnValue(0));
         $this->invokeSetAttribute($oTestObject, '_oFcpoDb', $oMockDatabase);
 
-        $this->assertEquals(true, $oTestObject->allowDebit());
+        $this->assertEquals(false, $oTestObject->allowDebit());
     }
 
     /**
@@ -1896,6 +2489,14 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
      * @return void
      */
     public function test_fcHandleAuthorization_Coverage() {
+        $oMockConfig = $this->getMock('oxConfig', array(
+            'getConfigParam',
+        ));
+        $oMockConfig
+            ->expects($this->any())
+            ->method('getConfigParam')
+            ->will($this->returnValue(true));
+
         $aMockResponse = array();
         $oMockRequest = $this->getMock('fcporequest', array('getRefNr', 'sendRequestAuthorization'));
         $oMockRequest->expects($this->any())->method('getRefNr')->will($this->returnValue('someRefValue'));
@@ -1906,18 +2507,56 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oMockPayment->expects($this->any())->method('fcpoGetMode')->will($this->returnValue('test'));
         $oMockPayment->oxpayments__fcpoauthmode = new oxField('someAuthMode');
 
-        $oTestObject = $this->getMock('fcPayOneOrder', array('_fcpoHandleAuthorizationResponse', 'getOrderUser'));
-        $oTestObject->expects($this->any())->method('_fcpoHandleAuthorizationResponse')->will($this->returnValue(true));
-        $oTestObject->expects($this->any())->method('getOrderUser')->will($this->returnValue(true));
+        $oTestObject = $this->getMock('fcPayOneOrder', array(
+            '_fcpoHandleAuthorizationResponse',
+            'getOrderUser',
+            '_fcpoGetNextOrderNr',
+        ));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_fcpoHandleAuthorizationResponse')
+            ->will($this->returnValue(true));
+        $oTestObject
+            ->expects($this->any())
+            ->method('getOrderUser')
+            ->will($this->returnValue(true));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_fcpoGetNextOrderNr')
+            ->will($this->returnValue('someNewOrderNr'));
         $oTestObject->oxorder__oxpaymenttype = new oxField('somePaymentType');
 
         $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
         $oHelper->expects($this->any())->method('getFactoryObject')->will($this->onConsecutiveCalls($oMockRequest, $oMockPayment));
         $oHelper->expects($this->any())->method('fcpoGetSessionVariable')->will($this->returnValue(array()));
         $oHelper->expects($this->any())->method('fcpoSetSessionVariable')->will($this->returnValue(true));
+        $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
         $this->assertEquals(true, $oTestObject->fcHandleAuthorization());
+    }
+
+    /**
+     * Testing _fcpoGetNextOrderNr for coverage
+     * @throws exception
+     */
+    public function test__fcpoGetNextOrderNr() {
+        $oTestObject = oxNew('fcPayOneOrder');
+
+        $oMockCounter = $this->getMock('oxCounter', array('getNext'));
+        $oMockCounter
+            ->expects($this->any())
+            ->method('getNext')
+            ->will($this->returnValue('someNextOrderNr'));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper
+            ->expects($this->any())
+            ->method('getFactoryObject')
+            ->will($this->returnValue($oMockCounter));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals('someNextOrderNr', $oTestObject->_fcpoGetNextOrderNr());
     }
 
     /**
@@ -2112,20 +2751,326 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     }
 
     /**
-     * Testing _fcpoHandleAuthorizationError for coverage
+     * Testing _fcpoHandleAuthorizationError for standard payment
      * 
      * @param void
      * @return void
      */
-    public function test__fcpoHandleAuthorizationError_Coverage() {
-        $oTestObject = oxNew('fcPayOneOrder');
+    public function test__fcpoHandleAuthorizationError_Standard() {
+        $oTestObject = $this->getMock('fcPayOneOrder', array(
+            'fcpoGetAmazonErrorMessage',
+            '_fcpoGetAmazonSuccessCode'
+        ));
+        $oTestObject
+            ->expects($this->any())
+            ->method('fcpoGetAmazonErrorMessage')
+            ->will($this->returnValue('someAmazonErrorMessage'));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_fcpoGetAmazonSuccessCode')
+            ->will($this->returnValue('someAmazonSuccessCode'));
+        $oTestObject->oxorder__oxpaymenttype = new oxField('somePaymentId');
+
+        $oMockPayGate = $this->getMock('oxPaymentGate', array(
+            'fcSetLastErrorNr',
+            'fcSetLastError'
+        ));
+        $oMockPayGate
+            ->expects($this->any())
+            ->method('fcSetLastErrorNr')
+            ->will($this->returnValue(true));
+        $oMockPayGate
+            ->expects($this->any())
+            ->method('fcSetLastError')
+            ->will($this->returnValue(true));
+
+        $aMockResponse = array(
+            'errorcode' => 'someErrorCode',
+            'customermessage' => 'someMessage'
+        );
+
+        $this->assertEquals(false, $oTestObject->_fcpoHandleAuthorizationError($aMockResponse, $oMockPayGate));
+    }
+
+    /**
+     * Testing _fcpoHandleAuthorizationError for amazon payment
+     *
+     * @param void
+     * @return void
+     */
+    public function test__fcpoHandleAuthorizationError_Amazon() {
+        $oTestObject = $this->getMock('fcPayOneOrder', array('fcpoGetAmazonErrorMessage','_fcpoGetAmazonSuccessCode'));
+        $oTestObject->expects($this->any())->method('fcpoGetAmazonErrorMessage')->will($this->returnValue('someAmazonErrorMessage'));
+        $oTestObject->expects($this->any())->method('_fcpoGetAmazonSuccessCode')->will($this->returnValue('someAmazonSuccessCode'));
+        $oTestObject->oxorder__oxpaymenttype = new oxField('fcpoamazonpay');
+
         $oMockPayGate = $this->getMock('oxPaymentGate', array('fcSetLastErrorNr', 'fcSetLastError'));
         $oMockPayGate->expects($this->any())->method('fcSetLastErrorNr')->will($this->returnValue(true));
         $oMockPayGate->expects($this->any())->method('fcSetLastError')->will($this->returnValue(true));
 
         $aMockResponse = array('errorcode' => 'someErrorCode', 'customermessage' => 'someMessage');
 
-        $this->assertEquals(null, $oTestObject->_fcpoHandleAuthorizationError($aMockResponse, $oMockPayGate));
+        $this->assertEquals('someAmazonSuccessCode', $oTestObject->_fcpoHandleAuthorizationError($aMockResponse, $oMockPayGate));
+    }
+
+    /**
+     * Testing _fcpoSaveWorkorderId for coverage
+     *
+     * @param void
+     * @return void
+     */
+    public function test__fcpoSaveWorkorderId_Coverage() {
+        $oTestObject = oxNew('fcPayOneOrder');
+        $sMockPaymentId = 'fcpopo_bill';
+        $aMockResponse = array(
+            'add_paydata[workorderid]' => 'someWorkorderId',
+        );
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoDeleteSessionVariable')->will($this->returnValue(true));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals(null, $oTestObject->_fcpoSaveWorkorderId($sMockPaymentId, $aMockResponse));
+    }
+
+    /**
+     * Testing _fcpoSaveClearingReference for coverage
+     *
+     * @param void
+     * @return void
+     */
+    public function test__fcpoSaveClearingReference_Coverage() {
+        $oTestObject = oxNew('fcPayOneOrder');
+        $sMockPaymentId = 'fcpopo_bill';
+        $aMockResponse = array(
+            'add_paydata[clearing_reference]' => 'someClearingReference',
+        );
+
+
+        $this->assertEquals(null, $oTestObject->_fcpoSaveClearingReference($sMockPaymentId, $aMockResponse));
+    }
+
+    /**
+     * Testing _fcpoSaveProfileIdent for coverage
+     *
+     * @param void
+     * @return void
+     */
+    public function test__fcpoSaveProfileIdent_Coverage() {
+        $oTestObject = oxNew('fcPayOneOrder');
+        $sMockPaymentId = 'fcporp_bill';
+        $aMockResponse = array(
+            'userid' => 'someUserId',
+        );
+
+
+        $this->assertEquals(null, $oTestObject->_fcpoSaveProfileIdent($sMockPaymentId, $aMockResponse));
+    }
+
+    /**
+     * Testing fcpoGetAmazonErrorMessage for coverage
+     *
+     * @param void
+     * @return void
+     */
+    public function test_fcpoGetAmazonErrorMessage_Coverage() {
+        $oMockLang = $this->getMock('oxLang', array('translateString'));
+        $oMockLang->expects($this->any())->method('translateString')->will($this->returnValue('someMessage'));
+
+        $oTestObject = $this->getMock('fcPayOneOrder', array('fcpoGetAmazonErrorTranslationString'));
+        $oTestObject
+            ->expects($this->any())
+            ->method('fcpoGetAmazonErrorTranslationString')
+            ->will($this->returnValue('someTranslationString'));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetLang')->will($this->returnValue($oMockLang));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $this->assertEquals('someMessage', $oTestObject->fcpoGetAmazonErrorMessage('someErrorCode'));
+    }
+
+    /**
+     * Testing _fcpoGetAmazonSuccessCode for coverage
+     *
+     * @param void
+     * @return void
+     */
+    public function test__fcpoGetAmazonSuccessCode_Coverage() {
+        $oTestObject = oxNew('fcPayOneOrder');
+        $this->assertEquals(900, $oTestObject->_fcpoGetAmazonSuccessCode('900M'));
+    }
+
+    /**
+     * Testing fcpoGetAmazonErrorTranslationString in case of invalid payment method
+     *
+     * @param void
+     * @return void
+     */
+    public function test_fcpoGetAmazonErrorTranslationString_InvalidPaymentMethod() {
+        $oTestObject = oxNew('fcPayOneOrder');
+        $this->assertEquals(
+            'FCPO_AMAZON_ERROR_INVALID_PAYMENT_METHOD',
+            $oTestObject->fcpoGetAmazonErrorTranslationString(981)
+        );
+    }
+
+    /**
+     * Testing fcpoGetAmazonErrorTranslationString in case of amazon rejected
+     *
+     * @param void
+     * @return void
+     */
+    public function test_fcpoGetAmazonErrorTranslationString_AmazonRejected() {
+        $oTestObject = oxNew('fcPayOneOrder');
+        $this->assertEquals(
+            'FCPO_AMAZON_ERROR_REJECTED',
+            $oTestObject->fcpoGetAmazonErrorTranslationString(982)
+        );
+    }
+
+    /**
+     * Testing fcpoGetAmazonErrorTranslationString in case of processing error
+     *
+     * @param void
+     * @return void
+     */
+    public function test_fcpoGetAmazonErrorTranslationString_ProcessingError() {
+        $oTestObject = oxNew('fcPayOneOrder');
+        $this->assertEquals(
+            'FCPO_AMAZON_ERROR_PROCESSING_FAILURE',
+            $oTestObject->fcpoGetAmazonErrorTranslationString(983)
+        );
+    }
+
+    /**
+     * Testing fcpoGetAmazonErrorTranslationString in case of buyer equals seller
+     *
+     * @param void
+     * @return void
+     */
+    public function test_fcpoGetAmazonErrorTranslationString_BuyerEqualsSeller() {
+        $oTestObject = oxNew('fcPayOneOrder');
+        $this->assertEquals(
+            'FCPO_AMAZON_ERROR_BUYER_EQUALS_SELLER',
+            $oTestObject->fcpoGetAmazonErrorTranslationString(984)
+        );
+    }
+
+    /**
+     * Testing fcpoGetAmazonErrorTranslationString in case of payment not allowed
+     *
+     * @param void
+     * @return void
+     */
+    public function test_fcpoGetAmazonErrorTranslationString_PaymentNotAllowed() {
+        $oTestObject = oxNew('fcPayOneOrder');
+        $this->assertEquals(
+            'FCPO_AMAZON_ERROR_PAYMENT_NOT_ALLOWED',
+            $oTestObject->fcpoGetAmazonErrorTranslationString(985)
+        );
+    }
+
+    /**
+     * Testing fcpoGetAmazonErrorTranslationString in case of payment plan not set
+     *
+     * @param void
+     * @return void
+     */
+    public function test_fcpoGetAmazonErrorTranslationString_PlanNotSet() {
+        $oTestObject = oxNew('fcPayOneOrder');
+        $this->assertEquals(
+            'FCPO_AMAZON_ERROR_PAYMENT_PLAN_NOT_SET',
+            $oTestObject->fcpoGetAmazonErrorTranslationString(986)
+        );
+    }
+
+    /**
+     * Testing fcpoGetAmazonErrorTranslationString in case of shipping not set
+     *
+     * @param void
+     * @return void
+     */
+    public function test_fcpoGetAmazonErrorTranslationString_ShippingNotSet() {
+        $oTestObject = oxNew('fcPayOneOrder');
+        $this->assertEquals(
+            'FCPO_AMAZON_ERROR_SHIPPING_ADDRESS_NOT_SET',
+            $oTestObject->fcpoGetAmazonErrorTranslationString(987)
+        );
+    }
+
+    /**
+     * Testing fcpoGetAmazonErrorTranslationString in case of transaction
+     * timed out
+     *
+     * @param void
+     * @return void
+     */
+    public function test_fcpoGetAmazonErrorTranslationString_TimedOut() {
+        $oTestObject = oxNew('fcPayOneOrder');
+        $this->assertEquals(
+            'FCPO_AMAZON_ERROR_TRANSACTION_TIMED_OUT',
+            $oTestObject->fcpoGetAmazonErrorTranslationString(980)
+        );
+    }
+
+    /**
+     * Testing fcpoGetAmazonErrorTranslationString in case of non listed problem
+     *
+     * @param void
+     * @return void
+     */
+    public function test_fcpoGetAmazonErrorTranslationString_Default() {
+        $oTestObject = oxNew('fcPayOneOrder');
+        $this->assertEquals(
+            'FCPO_AMAZON_ERROR_900',
+            $oTestObject->fcpoGetAmazonErrorTranslationString('FantasyIsEverything')
+        );
+    }
+
+    /**
+     * Testing _fcpoIsPayonePaymentType with positive check on iframe
+     *
+     * @param void
+     * @return void
+     */
+    public function test__fcpoIsPayonePaymentType_Iframe() {
+        $oTestObject = oxNew('fcPayOneOrder');
+        $this->assertEquals(true, $oTestObject->_fcpoIsPayonePaymentType('fcpocreditcard_iframe', true));
+    }
+
+    /**
+     * Testing _fcpoIsPayonePaymentType with positive check on standard
+     *
+     * @param void
+     * @return void
+     */
+    public function test__fcpoIsPayonePaymentType_Standard() {
+        $oTestObject = oxNew('fcPayOneOrder');
+        $this->assertEquals(true, $oTestObject->_fcpoIsPayonePaymentType('fcpoinvoice'));
+    }
+
+    /**
+     * Testing _fcpoGetAppointedError for coverage
+     *
+     * @param void
+     * @return void
+     */
+    public function test__fcpoGetAppointedError_Coverage() {
+        $oTestObject = oxNew('fcPayOneOrder');
+        $this->invokeSetAttribute($oTestObject, '_blFcPayoneAppointedError', true);
+        $this->assertEquals(true, $oTestObject->_fcpoGetAppointedError());
+    }
+
+    /**
+     * Testing _fcpoSetAppointedError for coverage
+     *
+     * @param void
+     * @return void
+     */
+    public function test__fcpoSetAppointedError_Coverage() {
+        $oTestObject = oxNew('fcPayOneOrder');
+        $this->assertEquals(null, $oTestObject->_fcpoSetAppointedError(true));
     }
 
 }

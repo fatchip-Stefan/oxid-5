@@ -327,12 +327,57 @@ class fcpayone_order extends fcpayone_admindetails {
             $oLang = $this->_oFcpoHelper->fcpoGetLang();
             if ($this->_aResponse['status'] == 'APPROVED') {
                 $sReturn = '<span style="color: green;">' . $oLang->translateString($this->_sResponsePrefix . 'APPROVED', null, true) . '</span>';
+                $this->_fcpoCheckOrderSetPaid();
             } else if ($this->_aResponse['status'] == 'ERROR') {
                 $sReturn = '<span style="color: red;">' . $oLang->translateString($this->_sResponsePrefix . 'ERROR', null, true) . $this->_aResponse['errormessage'] . '</span>';
             }
         }
 
         return $sReturn;
+    }
+
+    /**
+     * Checks if latest call result was a capture. If so set order to paid by
+     * setting paid date
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoCheckOrderSetPaid() {
+        if ($this->_sResponsePrefix == 'FCPO_CAPTURE_') {
+            $this->_fcpoSetOrderPaid();
+        }
+    }
+
+    /**
+     * Returns current order as oxOrder object
+     *
+     * @param void
+     * @return mixed object|bool
+     */
+    protected function _fcpoGetOrder() {
+        $soxId = $this->getEditObjectId();
+        $mReturn = false;
+
+        $oOrder = $this->_oFcpoHelper->getFactoryObject("oxorder");
+        if ($oOrder->load($soxId)) {
+            $mReturn = $oOrder;
+        }
+
+        return $mReturn;
+    }
+
+    /**
+     * Sets order paid
+     *
+     */
+    protected function _fcpoSetOrderPaid() {
+        $soxId = $this->getEditObjectId();
+        $sNowDate = date('Y-m-d H:i:s');
+        $oDb = $this->_oFcpoHelper->fcpoGetDb();
+        $sQuery = "UPDATE oxorder SET oxpaid=".$oDb->quote($sNowDate)." WHERE OXID=".$oDb->quote($soxId);
+        $oDb->Execute($sQuery);
+        $this->_aViewData["updatelist"] =  "1";
     }
 
 }

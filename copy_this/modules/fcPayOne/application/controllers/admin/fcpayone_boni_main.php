@@ -172,7 +172,7 @@ class fcpayone_boni_main extends fcpayone_admindetails {
      */
     protected function _fcpoDisplayMessage($iValidateCode) {
         if ($iValidateCode > 0 && isset($this->_aValidateCode2Message[$iValidateCode])) {
-            $oUtilsView = oxRegistry::get('oxUtilsView');
+            $oUtilsView = $this->_oFcpoHelper->fcpoGetUtilsView();
             $sTranslateString = $this->_aValidateCode2Message[$iValidateCode];
             $oLang = $this->_oFcpoHelper->fcpoGetLang();
             $sTranslatedMessage = $oLang->translateString($sTranslateString);
