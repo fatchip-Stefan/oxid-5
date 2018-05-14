@@ -2176,6 +2176,31 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOnePaymentView extends O
     }
 
     /**
+     * Testing fcpoPayolutionShowBankData for case bill
+     */
+    public function test_fcpoPayolutionShowBankData_Bill() {
+        $oTestObject = oxNew('fcPayOnePaymentView');
+
+        $this->assertEquals(false, $oTestObject->fcpoPayolutionShowBankData('fcpopo_bill'));
+    }
+
+    /**
+     * Testing fcpoPayolutionShowBankData for case debitnote
+     */
+    public function test_fcpoPayolutionShowBankData_Debitnote() {
+        $oTestObject = $this->getMock('fcPayOnePaymentView', array(
+            '_fcpoCheckPayolutionBankDataCountryException',
+        ));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_fcpoCheckPayolutionBankDataCountryException')
+            ->will($this->returnValue(false));
+
+        $this->assertEquals(true, $oTestObject->fcpoPayolutionShowBankData('fcpopo_debitnote'));
+    }
+
+
+    /**
      * Testing fcpoGetBasketSum for coverage
      */
     public function test_fcpoGetBasketSum_Coverage() {
