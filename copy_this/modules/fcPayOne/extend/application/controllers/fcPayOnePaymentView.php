@@ -1397,6 +1397,12 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return bool
      */
     public function fcpoPayolutionShowBankData($sPaymentId) {
+        $blNoBankDataByPaymentId = ($sPaymentId == 'fcpopo_bill');
+
+        if ($blNoBankDataByPaymentId) {
+            return false;
+        }
+
         $blException =
             $this->_fcpoCheckPayolutionBankDataCountryException($sPaymentId);
 
@@ -1562,7 +1568,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
                             $mReturn = null;
                         }
                     }
-                } elseif (($sPaymentId == 'fcpopo_debitnote' || $this->fcpoPayolutionShowBankData('fcpopo_installment') ) && !$this->_blIsPayolutionInstallmentAjax) {
+                } elseif ($this->fcpoPayolutionShowBankData($sPaymentId) && !$this->_blIsPayolutionInstallmentAjax) {
                     $sMessage = $oLang->translateString('FCPO_PAYOLUTION_BANKDATA_INCOMPLETE');
                     $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
                     $this->_oFcpoHelper->fcpoSetSessionVariable('payerrortext', $sMessage);
@@ -1702,7 +1708,10 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         $blReturn = false;
         if ($sPaymentId == 'fcpopo_installment') {
             $sBillCountryId = $this->getUserBillCountryId();
-            $blReturn = in_array($sBillCountryId, $this->_aPayolutionInstallmentBankDataExeptionCountries);
+            $blReturn = in_array(
+                $sBillCountryId,
+                $this->_aPayolutionInstallmentBankDataExeptionCountries
+            );
         }
 
         return $blReturn;
