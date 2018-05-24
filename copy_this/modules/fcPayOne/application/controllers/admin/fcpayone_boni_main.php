@@ -37,6 +37,10 @@ class fcpayone_boni_main extends fcpayone_admindetails {
         'sFCPODenialText',
     );
 
+    /**
+     * Boni default values
+     * @var array
+     */
     protected $_aDefaultValues = array(
         'sFCPOMalusPPB' => '0',
         'sFCPOMalusPHB' => '150',
@@ -56,6 +60,8 @@ class fcpayone_boni_main extends fcpayone_admindetails {
         '2' => 'FCPO_BONI_ERROR_DEACTIVATED_REGULAR_ADDRESSCHECK',
         '3' => 'FCPO_BONI_ERROR_NO_BONIADDRESSCHECK_SET',
         '4' => 'FCPO_BONI_ERROR_DEACTIVATED_BONI_ADDRESSCHECK',
+        '5' => 'FCPO_BONI_ERROR_SET_TO_BASIC',
+        '6' => 'FCPO_BONI_ERROR_SET_TO_PERSON'
     );
 
     /**
@@ -235,8 +241,66 @@ class fcpayone_boni_main extends fcpayone_admindetails {
         $this->_aValidationCodes = array();
         $this->_fcpoCheckIssetBoniAddresscheck();
         $this->_fcpoValidateDuplicateAddresscheck();
+        $this->_fcpoValidateAddresscheckBasic();
+        $this->_fcpoValidateAddresscheckPerson();
         $this->_fcpoValidateAddresscheckBoniversum();
         $this->_fcpoDisplayValidationMessages();
+    }
+
+    /**
+     * Validate settings and check if this must be switched to basic addresscheck depending on
+     * selected bonicheck
+     *
+     * @param void
+     * @return int
+     */
+    protected function _fcpoValidateAddresscheckBasic() {
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $aConfStrs = $this->_oFcpoHelper->fcpoGetRequestParameter("confstrs");
+        $iValidateCode = 0;
+        $aMatchingBoniChecks = array('IH', 'IA', 'IB');
+        $aMatchingAddressChecks = array('BB');
+        $blSwitchToBasic = (
+            isset($aConfStrs['sFCPOBonicheck']) &&
+            isset($aConfStrs['sFCPOConsumerAddresscheck']) &&
+            in_array($aConfStrs['sFCPOBonicheck'], $aMatchingBoniChecks) &&
+            in_array($aConfStrs['sFCPOConsumerAddresscheck'], $aMatchingAddressChecks)
+        );
+        if ($blSwitchToBasic) {
+            $this->_aValidationCodes[] = 5;
+            $oConfig->saveShopConfVar("str", 'sFCPOConsumerAddresscheck', 'BA');
+        }
+
+        return $iValidateCode;
+    }
+
+    /**
+     * Validate settings and check if this must be switched to person addresscheck depending on
+     * selected bonicheck
+     *
+     * @param void
+     * @return int
+     */
+    protected function _fcpoValidateAddresscheckPerson() {
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $aConfStrs = $this->_oFcpoHelper->fcpoGetRequestParameter("confstrs");
+        $iValidateCode = 0;
+        $aMatchingBoniChecks = array('IH', 'IA', 'IB');
+        $aMatchingAddressChecks = array('PB');
+
+        $blSwitchToPerson = (
+            isset($aConfStrs['sFCPOBonicheck']) &&
+            isset($aConfStrs['sFCPOConsumerAddresscheck']) &&
+            in_array($aConfStrs['sFCPOBonicheck'], $aMatchingBoniChecks) &&
+            in_array($aConfStrs['sFCPOConsumerAddresscheck'], $aMatchingAddressChecks)
+        );
+
+        if ($blSwitchToPerson) {
+            $this->_aValidationCodes[] = 6;
+            $oConfig->saveShopConfVar("str", 'sFCPOConsumerAddresscheck', 'PE');
+        }
+
+        return $iValidateCode;
     }
 
     /**
