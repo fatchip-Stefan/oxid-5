@@ -1,3 +1,33 @@
+==2.2.1==
+Release date: 2018-05-15
+Bugfixes:
+  * Fixed Payolution Invoice
+
+==2.2.0==
+Release date: 2018-05-08
+Features:
+  * Added Amazon Pay
+  * Added Payolution CH
+  * Added Payone Secure Invoice
+  * Added Bancontact
+  * Added Overcapture option for Paydirekt
+
+Bugfixes:
+  * Fixed duration parameter in fcpopopup
+  * Fixed boni calculation depending on provider
+  * Fixed display of payment charges including vat
+  * Straightened out Payolution B2B and B2C checks
+  * Added AU to mandatory-state-list (thanks @mbecker-bemit)
+  * genericPayment narrative_text parameter now has dynamic value
+  * Compatibility to Oxid B2B edition now given again
+  * Fixed a bug where basket manipulation was possible (added shadow basket)
+  * Fixed a bug in the PayPal Express address handling with existing users
+  * Fixed a bug in Payolution IBAN/BIC handling
+  * Users denied by RatePay now cannot choose RatePay methods again
+  * Birthdate is only asked in B2C orders
+  * Replaced the last deprecated mysql_ functions
+  * Countless minor improvements and bug fixes
+
 ==2.1.6==
 Releasdate: 2017-01-17
   * Added check for personstatus UKN,PUG,PNZ and PNP

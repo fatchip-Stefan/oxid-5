@@ -148,6 +148,11 @@
     padding: 4px;
 }
 
+.fcpoRatepayAgreeRed {
+    font-weight:bold;
+    color:red;
+}
+
 /* overwriting OXID base style */
 .payment dl dd.activePayment {
     display: inline-block;
@@ -206,4 +211,5 @@
         width: 33.333333333%;
         display: table-cell;
     }
-}  
+}
+

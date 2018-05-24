@@ -43,22 +43,36 @@ class fcpayone_admindetails extends oxAdminDetails {
      * @var object
      */
     protected $_oFcpoPayPal = null;
+
     /**
      * fcpopaypal instance
      * @var object
      */
     protected $_oFcpoKlarna = null;
+
     /**
      * fcpomapping instance
      * @var object
      */
     protected $_oFcpoMapping = null;
+
     /**
      * fcpoforwarding instance
      * @var object
      */
     protected $_oFcpoForwarding = null;
-    
+
+    /**
+     * fcpoerrormapping instance
+     * @var object
+     */
+    protected $_oFcpoErrorMapping = null;
+
+    /**
+     * fcporatepay instance
+     * @var object
+     */
+    protected $_oFcpoRatePay = null;
 
     /**
      * Init needed data

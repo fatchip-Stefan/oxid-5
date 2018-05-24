@@ -52,8 +52,6 @@ class fcPayOneOrderarticle extends fcPayOneOrderarticle_parent {
      * @return bool
      */
     public function save($oOrder = false, $blFinishingSave = true) {
-        $oSession = $this->_oFcpoHelper->fcpoGetSession();
-        $oBasket = $oSession->getBasket();
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $blPresaveOrder = $oConfig->getConfigParam('blFCPOPresaveOrder');
 
@@ -67,7 +65,7 @@ class fcPayOneOrderarticle extends fcPayOneOrderarticle_parent {
             return parent::save();
         }
 
-        $blReduceStockAfterRedirect = $this->_fcCheckReduceStockAfterRedirect($blFinishingSave, $oOrder);
+        $blReduceStockAfterRedirect = $this->_fcCheckReduceStockAfterRedirect($oOrder);
         if ($blReduceStockAfterRedirect) {
             $iReduceAmount = $this->oxorderarticles__oxamount->value * (-1);
             $this->updateArticleStock($iReduceAmount, $oConfig->getConfigParam('blAllowNegativeStock'));
@@ -101,11 +99,11 @@ class fcPayOneOrderarticle extends fcPayOneOrderarticle_parent {
     /**
      * Method checks conditions for reducing stock after using a redirect payment
      * It depends on settings and payment method
-     * 
-     * @param boolean $blFinishingSave
+     *
+     * @param object $oOrder
      * @return boolean
      */
-    protected function _fcCheckReduceStockAfterRedirect($blFinishingSave, $oOrder) {
+    protected function _fcCheckReduceStockAfterRedirect($oOrder) {
         $oSession = $this->_oFcpoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
         $sPaymentId = $oBasket->getPaymentId();
@@ -141,11 +139,11 @@ class fcPayOneOrderarticle extends fcPayOneOrderarticle_parent {
             $sTxid = ($oOrder->oxorder__fcpotxid->value) ? $oOrder->oxorder__fcpotxid->value : $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoTxid');
 
             $blUseRedirectAfterSave = (
-                    $sSuccess && $sRefNr &&
-                    (
+                $sSuccess && $sRefNr &&
+                (
                     $sTxid || $sPaymentId == 'fcpocreditcard_iframe'
-                    )
-                    );
+                )
+            );
 
             if ($blUseRedirectAfterSave) {
                 $this->_blIsRedirectAfterSave = true;

@@ -21,27 +21,15 @@
 /*
  * load OXID Framework
  */
-function getShopBasePath()
-{
-    return dirname(__FILE__).'/../../../../';
+
+if (!function_exists('getShopBasePath')) {
+    function getShopBasePath()
+    {
+        return dirname(__FILE__).'/../../../../';
+    }
 }
 
-if ( file_exists( getShopBasePath() . "/bootstrap.php" ) ) {
-	require_once getShopBasePath() . "/bootstrap.php";
-}
-else {
-    // global variables which are important for older OXID.
-    $_SERVER['REQUEST_METHOD'] = 'POST';
-    $_SERVER['HTTP_USER_AGENT'] = 'payone_ajax';
-    $_SERVER['HTTP_ACCEPT_LANGUAGE'] = '';
-    $_SERVER['HTTP_REFERER'] = '';
-    $_SERVER['QUERY_STRING'] = '';
-    
-    require getShopBasePath() . 'modules/functions.php';
-    require_once getShopBasePath() . 'core/oxfunctions.php';
-    require_once getShopBasePath() . 'views/oxubase.php';
-}
-
+require_once getShopBasePath() . "/bootstrap.php";
 
 // receive params
 $sPaymentId = filter_input( INPUT_POST, 'paymentid' );
@@ -70,8 +58,75 @@ class fcpayone_ajax extends oxBase {
         parent::__construct();
         $this->_oFcpoHelper = oxNew('fcpohelper');
     }
-    
-    
+
+    /**
+     * Triggers a call on payoneapi for handling ajax calls for referencedetails
+     *
+     * @param $sParamsJson
+     * @return void
+     */
+    public function fcpoGetAmazonReferenceId($sParamsJson) {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $aParams = json_decode($sParamsJson,true);
+        $sAmazonReferenceId = $aParams['fcpoAmazonReferenceId'];
+        $oSession->deleteVariable('fcpoAmazonReferenceId');
+        $oSession->setVariable('fcpoAmazonReferenceId', $sAmazonReferenceId);
+        $sAmazonLoginAccessToken = $oSession->getVariable('sAmazonLoginAccessToken');
+
+        // do the call cascade
+        $this->_fcpoHandleGetOrderReferenceDetails($sAmazonReferenceId, $sAmazonLoginAccessToken);
+        $this->_fcpoHandleSetOrderReferenceDetails($sAmazonReferenceId, $sAmazonLoginAccessToken);
+    }
+
+    /**
+     * Triggers call setorderreferencedetails
+     *
+     * @param $sAmazonReferenceId
+     * @param $sAmazonLoginAccessToken
+     * @return void
+     */
+    protected function _fcpoHandleSetOrderReferenceDetails($sAmazonReferenceId, $sAmazonLoginAccessToken) {
+        $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
+        $oRequest = $this->_oFcpoHelper->getFactoryObject('fcporequest');
+        $sWorkorderId = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonWorkorderId');
+
+        $aResponse = $oRequest->sendRequestSetAmazonOrderReferenceDetails($sAmazonReferenceId, $sAmazonLoginAccessToken, $sWorkorderId);
+
+        if ($aResponse['status'] == 'OK') {
+            $oUser = $this->_oFcpoHelper->getFactoryObject('oxuser');
+            $oUser->fcpoSetAmazonOrderReferenceDetailsResponse($aResponse);
+        } else {
+            $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+            $sShopUrl = $oConfig->getShopUrl();
+            $oUtils->redirect($sShopUrl."index.php?cl=basket");
+        }
+    }
+
+    /**
+     * Triggers call getorderreferencedetails
+     *
+     * @param $sAmazonReferenceId
+     * @param $sAmazonLoginAccessToken
+     * @return void
+     */
+    protected function _fcpoHandleGetOrderReferenceDetails($sAmazonReferenceId, $sAmazonLoginAccessToken) {
+        $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
+        $oRequest = $this->_oFcpoHelper->getFactoryObject('fcporequest');
+
+        $aResponse = $oRequest->sendRequestGetAmazonOrderReferenceDetails($sAmazonReferenceId, $sAmazonLoginAccessToken);
+
+        if ($aResponse['status'] == 'OK') {
+            $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoAmazonWorkorderId');
+            $this->_oFcpoHelper->fcpoSetSessionVariable('fcpoAmazonWorkorderId', $aResponse['workorderid']);
+            $this->_oFcpoHelper->fcpoDeleteSessionVariable('paymentid');
+            $this->_oFcpoHelper->fcpoSetSessionVariable('paymentid', 'fcpoamazonpay');
+        } else {
+            $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+            $sShopUrl = $oConfig->getShopUrl();
+            $oUtils->redirect($sShopUrl."index.php?cl=basket");
+        }
+    }
+
     /**
      * Performs a precheck for payolution installment
      * 
@@ -79,7 +134,7 @@ class fcpayone_ajax extends oxBase {
      * @return bool
      */
     public function fcpoTriggerPrecheck($sPaymentId, $sParamsJson) {
-        $oPaymentController = oxNew('payment');
+        $oPaymentController = $this->_oFcpoHelper->getFactoryObject('payment');
         $oPaymentController->setPayolutionAjaxParams(json_decode($sParamsJson, true));
         $mPreCheckResult =  $oPaymentController->fcpoPayolutionPreCheck($sPaymentId);
         $sReturn = ($mPreCheckResult === true) ? 'SUCCESS': $mPreCheckResult;
@@ -93,8 +148,8 @@ class fcpayone_ajax extends oxBase {
      * @param type $sPaymentId
      * @return mixed
      */
-    public function fcpoTriggerInstallmentCalculation() {
-        $oPaymentController = oxNew('payment');
+    public function fcpoTriggerInstallmentCalculation($sPaymentId) {
+        $oPaymentController = $this->_oFcpoHelper->getFactoryObject('payment');
 
         $oPaymentController->fcpoPerformInstallmentCalculation($sPaymentId);
         $mResult = $oPaymentController->fcpoGetInstallments();
@@ -112,11 +167,11 @@ class fcpayone_ajax extends oxBase {
      */
     public function fcpoParseCalculation2Html($aCalculation) {
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
-        
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+
         $sTranslateInstallmentSelection = utf8_encode($oLang->translateString('FCPO_PAYOLUTION_INSTALLMENT_SELECTION'));
         $sTranslateSelectInstallment = utf8_encode($oLang->translateString('FCPO_PAYOLUTION_SELECT_INSTALLMENT'));
-        
-        $oConfig = $this->getConfig();
+
         $sHtml = '
             <div class="content">
                 <p id="payolution_installment_calculation_headline" class="payolution_installment_box_headline">2. '.$sTranslateInstallmentSelection.'</p>
@@ -127,7 +182,7 @@ class fcpayone_ajax extends oxBase {
         $sHtml .= '<fieldset>';
         foreach ($aCalculation as $sKey=>$aCurrentInstallment) {
             $sHtml .= $this->_fcpoGetInsterestHiddenFields($sKey, $aCurrentInstallment);
-            $sHtml .= $this->_fcpoGetInsterestRadio($sKey, $aCurrentInstallment);
+            $sHtml .= $this->_fcpoGetInsterestRadio($sKey);
             $sHtml .= $this->_fcpoGetInsterestLabel($sKey, $aCurrentInstallment);
             $sHtml .= '<br>';
         }
@@ -171,7 +226,7 @@ class fcpayone_ajax extends oxBase {
      * @return string
      */
     public function fcpoReturnErrorMessage($sMessage) {
-        $oConfig = $this->getConfig();
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         if (!$oConfig->isUtf()) {
             $sMessage = utf8_encode($sMessage);
         }
@@ -224,11 +279,10 @@ class fcpayone_ajax extends oxBase {
      * Returns a html radio button for current installment offer
      * 
      * @param string $sKey
-     * @param array $aCurrentInstallment
      * @return string
      */
-    protected function _fcpoGetInsterestRadio($sKey, $aCurrentInstallment) {
-        $sHtml .= '<input type="radio" id="payolution_installment_offer_'.$sKey.'" name="payolution_installment_selection" value="'.$sKey.'">';
+    protected function _fcpoGetInsterestRadio($sKey) {
+        $sHtml = '<input type="radio" id="payolution_installment_offer_'.$sKey.'" name="payolution_installment_selection" value="'.$sKey.'">';
         
         return $sHtml;
     }
@@ -282,10 +336,14 @@ if ($sPaymentId) {
     }
     
     if ($sAction == 'calculation') {
-        $mResult = $oPayoneAjax->fcpoTriggerInstallmentCalculation();
+        $mResult = $oPayoneAjax->fcpoTriggerInstallmentCalculation($sPaymentId);
         if (is_array($mResult) && count($mResult) > 0) {
             // we have got a calculation result. Parse it to needed html
             echo $oPayoneAjax->fcpoParseCalculation2Html($mResult);
         }
+    }
+
+    if ($sAction == 'get_amazon_reference_details' && $sPaymentId == 'fcpoamazonpay') {
+        $oPayoneAjax->fcpoGetAmazonReferenceId($sParamsJson);
     }
 }

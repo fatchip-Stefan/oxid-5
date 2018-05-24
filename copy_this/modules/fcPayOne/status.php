@@ -54,7 +54,7 @@ if(array_search($sRemoteIp, $aWhitelist) === false) {
             }
         }
     }
-    
+
     if($blMatch === false) {
         echo 'Access denied';
         exit;
@@ -103,7 +103,18 @@ if(file_exists(dirname(__FILE__)."/../../bootstrap.php")) {
 class fcPayOneTransactionStatusHandler extends oxBase {
 
     protected $_aShopList = null;
-    
+
+
+    protected $_oFcpoHelper = null;
+
+    protected $_oFcViewConf = null;
+
+    public function __construct() {
+        parent::__construct();
+        $this->_oFcpoHelper = oxNew('fcpohelper');
+        $this->_oFcViewConf = $this->_oFcpoHelper->getFactoryObject('oxViewConfig');
+    }
+
     /**
      * Check and return post parameter
      * 
@@ -289,6 +300,8 @@ class fcPayOneTransactionStatusHandler extends oxBase {
                 }
 
                 $this->_handleMapping($oOrder);
+                $this->_handleNotification($oOrder);
+                $this->_handleOrderPostTrigger($oOrder);
             }
             $this->_handleForwarding();
 
@@ -296,6 +309,182 @@ class fcPayOneTransactionStatusHandler extends oxBase {
         } else {
             echo 'Key wrong or missing!';
         }
+    }
+
+    protected function _handleOrderPostTrigger($oOrder) {
+        $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
+        $sTxAction = $this->fcGetPostParam('txaction');
+        $sTxStatus = $this->fcGetPostParam('transaction_status');
+
+        $blIsAmazonRecover = (
+            $sPaymentId == 'fcpoamazonpay' &&
+            $sTxAction == 'appointed' &&
+            $sTxStatus == 'completed'
+        );
+
+        $blIsAmazonOrderFailed = (
+            $sPaymentId == 'fcpoamazonpay' &&
+            $sTxAction == 'failed'
+        );
+
+        if ($blIsAmazonRecover) {
+            $this->_fcpoRecoverOrder($oOrder);
+        }
+
+        if ($blIsAmazonOrderFailed) {
+            $this->_fcpoCancelOrder($oOrder);
+        }
+    }
+
+    protected function _fcpoRecoverOrder($oOrder) {
+        $oOrder->oxorder__oxfolder = new oxField('ORDERFOLDER_NEW');
+        $oOrder->oxorder__oxtransstatus = new oxField('OK');
+        $oOrder->save();
+    }
+
+    protected function _fcpoCancelOrder($oOrder) {
+        $oOrder->cancelOrder();
+    }
+
+    protected function _handleNotification($oOrder) {
+        $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
+
+        $sNotificationType = $this->_fcpoDetermineNotificationType($sPaymentId);
+
+        switch ($sNotificationType) {
+            case 'email_amazonpay_failed':
+                $this->_fcpoSendAmazonDeclinedProblemMail($oOrder);
+                break;
+        }
+    }
+
+    protected function _fcpoSendAmazonDeclinedProblemMail($oOrder) {
+        $oEmail = oxNew('oxemail');
+        $sPrefixedCustomerEmail = $oOrder->oxorder__oxbillemail->value;
+        $sCustomerEmail = $this->_oFcViewConf->fcpoAmazonEmailDecode($sPrefixedCustomerEmail);
+
+        $sSubject = $this->_fcpoGetAmazonDeclinedSubject($oOrder);
+        $sBody = $this->_fcpoGetAmazonDeclinedBody($oOrder);
+        $oEmail->sendEmail($sCustomerEmail, $sSubject, $sBody);
+    }
+
+
+    protected function _fcpoGetAmazonDeclinedSubject($oOrder) {
+        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $sSubjectRaw = $oLang->translateString('FCPO_MAIL_AMZ_DECLINED_SUBJECT');
+        $sOrderNr = $oOrder->oxorder__oxordernr->value;
+        $sSubject = sprintf($sSubjectRaw, $sOrderNr);
+
+        return $sSubject;
+    }
+
+    protected function _fcpoGetAmazonDeclinedBody($oOrder) {
+        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $sBodyRaw = $oLang->translateString('FCPO_MAIL_AMZ_DECLINED_BODY');
+        if (!$sBodyRaw) {
+            $sBodyRaw = $this->fcpoGetFallbackText('FCPO_MAIL_AMZ_DECLINED_BODY');
+        }
+        $oShop = oxNew('oxShop');
+        $oShop->load($oOrder->oxorder__oxshopid->value);
+        $sShopname = $oShop->oxshops__oxname->value;
+
+        $sBody = sprintf($sBodyRaw, $sShopname, $sShopname);
+
+        return $sBody;
+    }
+
+    protected function fcpoGetFallbackText($sIdent) {
+        $aTexts = array(
+            'FCPO_MAIL_AMZ_DECLINED_BODY'=>"Valued customer,\n\nThank you very much for your order at %s.\nAmazon Pay was not able to process your payment.\nPlease go to https://pay.amazon.com/uk/ and update the payment information for your order. Afterwards we will automatically request payment again from Amazon Pay and you will receive a confirmation email.\n\nKind regards,\n\n%s",
+        );
+
+        $sReturn = (isset($aTexts[$sIdent])) ? $aTexts[$sIdent] : 'Text is missing';
+
+        return $sReturn;
+    }
+
+    protected function _fcpoSendGenericProblemMail($oOrder) {
+        $oEmail = oxNew('oxemail');
+        $sCustomerEmail = $oOrder->oxorder__oxbillemail->value;
+        $sCustomerEmail = $this->_oFcViewConf->fcpoAmazonEmailDecode($sCustomerEmail);
+        $sSubject = $this->_fcpoGetGenericProblemMailSubject($oOrder);
+        $sBody = $this->_fcpoGetGenericProblemMailBody($oOrder);
+        $oEmail->sendEmail($sCustomerEmail, $sSubject, $sBody);
+    }
+
+    protected function _fcpoGetGenericProblemMailSubject($oOrder) {
+        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $sSubjectRaw = $oLang->translateString('FCPO_MAIL_SUBJECT_FAILED');
+        $sOrderNr = $oOrder->oxorder__oxordernr->value;
+        $sSubject = sprintf($sSubjectRaw, $sOrderNr);
+
+        return $sSubject;
+    }
+
+    protected function _fcpoGetGenericProblemMailBody($oOrder) {
+        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $sBodyRaw = $oLang->translateString('FCPO_MAIL_BODY_FAILED');
+        $blIsMale = $this->_fcIsMale($oOrder);
+
+        // salutation
+        $sSalutation = $oLang->translateString('FCPO_MAIL_SALUTATION_INFORMAL');
+        if ($blIsMale === true) {
+            $sSalutation = $oLang->translateString('FCPO_MAIL_SALUTATION_MALE');
+        } else if ($blIsMale === false) {
+            $sSalutation = $oLang->translateString('FCPO_MAIL_SALUTATION_FEMALE');
+        }
+
+        $sCustomerName = $oOrder->oxorder__oxbilllname->value;
+        if ($blIsMale === null) {
+            $sCustomerName = $oOrder->oxorder__oxbillfname->value." ".$oOrder->oxorder__oxbilllname->value;
+        }
+
+        $sOrderNr = $oOrder->oxorder__oxordernr->value;
+        $oShop = oxNew('oxShop');
+        $oShop->load($oOrder->oxorder__oxshopid->value);
+        $sResponseEmail = $oShop->oxshops__oxorderemail->value;
+
+        $sBody = sprintf($sBodyRaw, $sSalutation, $sCustomerName, $sOrderNr, $sResponseEmail);
+
+        return $sBody;
+    }
+
+    protected function _fcIsMale($oOrder) {
+        $sBillSalutation = $oOrder->oxorder__oxbillsal->value;
+        $blReturn = null;
+        if ($sBillSalutation == 'MR') {
+            $blReturn = true;
+        } elseif ($sBillSalutation == 'MRS') {
+            $blReturn = false;
+        }
+
+        return $blReturn;
+    }
+
+    protected function _fcpoDetermineNotificationType($sPaymentId) {
+        $sTxAction = $this->fcGetPostParam('txaction');
+        $sTxStatus = $this->fcGetPostParam('transaction_status');
+        $sFailedCause = $this->fcGetPostParam('failedcause');
+        $sReasonCode = $this->fcGetPostParam('reasoncode');
+
+
+        switch($sPaymentId) {
+            case 'fcpoamazonpay':
+                $blSendAmazonProblemMail = (
+                    $sTxAction == 'appointed' &&
+                    $sTxStatus == 'pending' &&
+                    $sReasonCode == '981'
+                );
+
+                if ($blSendAmazonProblemMail) {
+                    $sReturn = 'email_amazonpay_failed';
+                }
+                break;
+            default:
+                $sReturn = 'none';
+        }
+
+        return $sReturn;
     }
     
     /**

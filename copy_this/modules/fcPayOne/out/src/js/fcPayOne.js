@@ -445,7 +445,34 @@ function startELVRequest() {
         oForm['dynvalue[fcpo_payolution_bic]'].value = getCleanedNumberIBAN(oForm['dynvalue[fcpo_payolution_bic]'].value);
     }
 
-    if(oForm['dynvalue[fcpo_elv_iban]'].value == '' && oForm['dynvalue[fcpo_elv_bic]'].value == '' && (!oForm['dynvalue[fcpo_elv_blz]'] || oForm['dynvalue[fcpo_elv_blz]'].value == '') && (!oForm['dynvalue[fcpo_elv_ktonr]'] || oForm['dynvalue[fcpo_elv_ktonr]'].value == '')) {
+    if(oForm['dynvalue[fcpo_elv_bic]']) {
+        var blShowWrongIbanMessage = (
+            oForm['dynvalue[fcpo_elv_iban]'].value == '' &&
+            oForm['dynvalue[fcpo_elv_bic]'].value == '' &&
+            (
+                !oForm['dynvalue[fcpo_elv_blz]'] ||
+                oForm['dynvalue[fcpo_elv_blz]'].value == ''
+            ) &&
+            (
+                !oForm['dynvalue[fcpo_elv_ktonr]'] ||
+                oForm['dynvalue[fcpo_elv_ktonr]'].value == ''
+            )
+        );
+    } else {
+        var blShowWrongIbanMessage = (
+            oForm['dynvalue[fcpo_elv_iban]'].value == '' &&
+            (
+                !oForm['dynvalue[fcpo_elv_blz]'] ||
+                oForm['dynvalue[fcpo_elv_blz]'].value == ''
+            ) &&
+            (
+                !oForm['dynvalue[fcpo_elv_ktonr]'] ||
+                oForm['dynvalue[fcpo_elv_ktonr]'].value == ''
+            )
+        );
+    }
+
+    if(blShowWrongIbanMessage) {
         document.getElementById('fcpo_elv_iban_invalid').style.display = 'block';
         return false;
     }

@@ -1,5 +1,5 @@
 <?php
-/** 
+/**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -17,16 +17,16 @@
  * @copyright (C) Payone GmbH
  * @version   OXID eShop CE
  */
- 
-class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_common extends OxidTestCase {
-    
+
+class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_adminview extends OxidTestCase {
+
     /**
      * Call protected/private method of a class.
      *
      * @param object &$object    Instantiated object that we will run method on.
      * @param string $methodName Method name to call
      * @param array  $parameters Array of parameters to pass into method.
-     *
+     * @throws exception
      * @return mixed Method return.
      */
     public function invokeMethod(&$object, $methodName, array $parameters = array()) {
@@ -35,15 +35,15 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_common extends OxidTe
         $method->setAccessible(true);
 
         return $method->invokeArgs($object, $parameters);
-    }    
-    
+    }
+
     /**
      * Set protected/private attribute value
      *
      * @param object &$object    Instantiated object that we will run method on.
      * @param string $propertyName property that shall be set
      * @param array  $value value to be set
-     *
+     * @throws exception
      * @return mixed Method return.
      */
     public function invokeSetAttribute(&$object, $propertyName, $value) {
@@ -52,112 +52,94 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_common extends OxidTe
         $property->setAccessible(true);
 
         $property->setValue($object, $value);
-    }    
-    
+    }
 
     /**
-     * Testing fcpoGetVersion for coverage
-     * 
+     * Testing fcGetAdminSeperator for coverage
+     *
      * @param void
      * @return void
+     * @throws exception
      */
-    public function test_fcpoGetVersion_Coverage() {
-        $oTestObject    = oxNew('fcpayone_common');
-        
-        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
-        $oHelper->expects($this->any())->method('fcpoGetModuleVersion')->will($this->returnValue('12.0'));
-        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
-        
-        $sExpect = '12.0';
-        $this->assertEquals($sExpect, $oTestObject->fcpoGetVersion());
-    }
-    
-    
-    /**
-     * Testing fcpoGetMerchantId for coverage
-     * 
-     * @param void
-     * @return void
-     */
-    public function test_fcpoGetMerchantId_Coverage() {
-        $oTestObject    = oxNew('fcpayone_common');
-        
-        $oMockConfig = $this->getMockBuilder('oxConfig')->disableOriginalConstructor()->getMock();
-        $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue('12345'));
-        
-        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
-        $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));
-        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
-        
-        $sExpect = '12345';
-        $this->assertEquals($sExpect, $this->invokeMethod($oTestObject, 'fcpoGetMerchantId'));
-    }
-    
-    
-    /**
-     * Testing fcpoGetIntegratorId for coverage
-     * 
-     * @param void
-     * @return void
-     */
-    public function test_fcpoGetIntegratorId_Coverage() {
-        $oTestObject = $this->getMock('fcpayone_common', array('getIntegratorId'));
-        $oTestObject->method('getIntegratorId')->will( $this->returnValue('someValue'));
-        
-        $this->assertEquals('someValue',$oTestObject->fcpoGetIntegratorId());
-    }
-    
-    
-    /**
-     * Testing getIntegratorId for coverage
-     * 
-     * @param void
-     * @return void
-     */
-    public function test_getIntegratorId_Coverage_EE() {
-        $oTestObject = $this->getMock('fcpayone_common', array('getShopEdition'));
-        $oTestObject->method('getShopEdition')->will( $this->returnValue('EE'));
-        
-        $this->assertEquals('2029000',$this->invokeMethod($oTestObject, 'getIntegratorId'));
-    }
-    
-    
-    /**
-     * Testing getIntegratorId for coverage
-     * 
-     * @param void
-     * @return void
-     */
-    public function test_getIntegratorId_Coverage_CE() {
-        $oTestObject = $this->getMock('fcpayone_common', array('getShopEdition'));
-        $oTestObject->method('getShopEdition')->will( $this->returnValue('CE'));
-        
-        $this->assertEquals('2027000',$this->invokeMethod($oTestObject, 'getIntegratorId'));
-    }
-    
+    public function test_fcGetAdminSeperator_Coverage() {
+        $oTestObject = oxNew('fcpayone_adminview');
 
-    /**
-     * Testing getIntegratorId for coverage
-     * 
-     * @param void
-     * @return void
-     */
-    public function test_getIntegratorId_Coverage_PE() {
-        $oTestObject = $this->getMock('fcpayone_common', array('getShopEdition'));
-        $oTestObject->method('getShopEdition')->will( $this->returnValue('PE'));
-        
-        $this->assertEquals('2028000',$this->invokeMethod($oTestObject, 'getIntegratorId'));
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetIntShopVersion')->will($this->returnValue(4200));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $sExpect = '?';
+        $this->assertEquals($sExpect, $oTestObject->fcGetAdminSeperator());
     }
-    
 
     /**
      * Testing getViewId for coverage
-     * 
+     *
      * @param void
      * @return void
+     * @throws exception
      */
     public function test_getViewId_Coverage() {
-        $oTestObject    = oxNew('fcpayone_common');
-        $this->assertEquals('dyn_fcpayone',$this->invokeMethod($oTestObject, 'getViewId'));
+        $oTestObject = oxNew('fcpayone_adminview');
+        $this->assertEquals('dyn_fcpayone', $oTestObject->getViewId());
+    }
+
+    /**
+     * Testing fcpoGetVersion for coverage
+     *
+     * @param void
+     * @return void
+     * @throws
+     */
+    public function test_fcpoGetVersion_Coverage() {
+        $oTestObject = oxNew('fcpayone_adminview');
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetModuleVersion')->will($this->returnValue('12.0'));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $sExpect = '12.0';
+        $this->assertEquals($sExpect, $oTestObject->fcpoGetVersion());
+    }
+
+
+    /**
+     * Testing fcpoGetMerchantId for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test_fcpoGetMerchantId_Coverage() {
+        $oTestObject = oxNew('fcpayone_adminview');
+
+        $oMockConfig = $this->getMockBuilder('oxConfig')->disableOriginalConstructor()->getMock();
+        $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue('12345'));
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetConfig')->will($this->returnValue($oMockConfig));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $sExpect = '12345';
+        $this->assertEquals($sExpect, $oTestObject->fcpoGetMerchantId());
+    }
+
+
+    /**
+     * Testing fcpoGetIntegratorId for coverage
+     *
+     * @param void
+     * @return void
+     * @throws exception
+     */
+    public function test_fcpoGetIntegratorId_Coverage() {
+        $oTestObject = oxNew('fcpayone_adminview');
+
+        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
+        $oHelper->expects($this->any())->method('fcpoGetIntegratorId')->will($this->returnValue('someValue'));
+        $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
+
+        $sExpect = 'someValue';
+        $this->assertEquals($sExpect, $oTestObject->fcpoGetIntegratorId());
     }
 }
