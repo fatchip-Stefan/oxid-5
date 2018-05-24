@@ -257,7 +257,6 @@ class fcpayone_boni_main extends fcpayone_admindetails {
     protected function _fcpoValidateAddresscheckBasic() {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $aConfStrs = $this->_oFcpoHelper->fcpoGetRequestParameter("confstrs");
-        $iValidateCode = 0;
         $aMatchingBoniChecks = array('IH', 'IA', 'IB');
         $aMatchingAddressChecks = array('BB');
         $blSwitchToBasic = (
@@ -270,8 +269,6 @@ class fcpayone_boni_main extends fcpayone_admindetails {
             $this->_aValidationCodes[] = 5;
             $oConfig->saveShopConfVar("str", 'sFCPOConsumerAddresscheck', 'BA');
         }
-
-        return $iValidateCode;
     }
 
     /**
@@ -284,7 +281,6 @@ class fcpayone_boni_main extends fcpayone_admindetails {
     protected function _fcpoValidateAddresscheckPerson() {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $aConfStrs = $this->_oFcpoHelper->fcpoGetRequestParameter("confstrs");
-        $iValidateCode = 0;
         $aMatchingBoniChecks = array('IH', 'IA', 'IB');
         $aMatchingAddressChecks = array('PB');
 
@@ -299,8 +295,6 @@ class fcpayone_boni_main extends fcpayone_admindetails {
             $this->_aValidationCodes[] = 6;
             $oConfig->saveShopConfVar("str", 'sFCPOConsumerAddresscheck', 'PE');
         }
-
-        return $iValidateCode;
     }
 
     /**
