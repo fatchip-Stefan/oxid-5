@@ -145,6 +145,4 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
 
         $this->assertEquals(null, $oTestObject->_fcpoDisplayMessage($iMockValidateCode));
     }
-
-
 }
