@@ -2106,7 +2106,7 @@ class fcpoRequest extends oxSuperCfg {
         $blIpExists = isset($this->_aParameters['ip']);
         if ($blIpExists) {
             $sIp = $this->_aParameters['ip'];
-            $sIp = preg_replace('~(\d+)\.(\d+)\.(\d+)\.(\d+)~', "$1.$2.X.X", $sIp);
+            $sIp = preg_replace('~[^\.:]~', "X", $sIp);
             $this->_aParameters['ip'] = $sIp;
         }
     }
