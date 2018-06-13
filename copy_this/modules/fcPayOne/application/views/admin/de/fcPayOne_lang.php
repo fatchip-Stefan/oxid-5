@@ -464,6 +464,9 @@ $aLang = array(
     'FCPO_CONFIG_GROUP_PAYDIREKT'               => 'Paydirekt',
     'FCPO_PAYDIREKT_OVERCAPTURE'                => 'Overcapture erlauben?',
     'FCPO_HELP_PAYDIREKT_OVERCAPTURE'           => 'Erlaubt den Einzug eines um 10% höheren Betrags basierend auf der vorautorisierten Summe.<br><b>Bitte aktivieren Sie diese Option nur in Absprache mit Paydirekt!</b>',
+    'FCPO_CONFIG_GROUP_SECINVOICE'              => 'Gesicherter Rechnungskauf (rec/POV)',
+    'FCPO_SECINVOICE_PORTAL_ID'                 => 'PAYONE Portal ID (für Zahlart Gesicherter Rechnungskauf)',
+    'FCPO_SECINVOICE_PORTAL_KEY'                => 'PAYONE Portal Key (für Zahlart Gesicherter Rechnungskauf)',
 );
 
 /*

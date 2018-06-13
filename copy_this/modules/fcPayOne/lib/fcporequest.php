@@ -166,7 +166,7 @@ class fcpoRequest extends oxSuperCfg {
     }
 
     /**
-     * Add parameter to request
+     * Add/Overwrites parameter to request
      * 
      * @param string $sKey parameter key
      * @param string $sValue parameter value
@@ -175,9 +175,14 @@ class fcpoRequest extends oxSuperCfg {
      * @return null
      */
     public function addParameter($sKey, $sValue, $blAddAsNullIfEmpty = false) {
-        if ($blAddAsNullIfEmpty === true && empty($sValue)) {
+        $blSetNullForEmpty = (
+            $blAddAsNullIfEmpty === true &&
+            empty($sValue)
+        );
+        if ($blSetNullForEmpty) {
             $sValue = 'NULL';
         }
+
         $this->_aParameters[$sKey] = $sValue;
     }
 
@@ -498,13 +503,29 @@ class fcpoRequest extends oxSuperCfg {
      * @return  void
      */
     protected function _fcpoAddSecInvoiceParameters($oOrder) {
+        $oConfig = $this->getConfig();
+
+        $sSecinvoicePortalId = $oConfig->getConfigParam('sFCPOSecinvoicePortalId');
+        $sSecinvoicePortalKeyHash = md5($oConfig->getConfigParam('sFCPOSecinvoicePortalKey'));
+        $this->addParameter('portalid', $sSecinvoicePortalId);
+        $this->addParameter('key', $sSecinvoicePortalKeyHash);
+
         $this->addParameter('clearingtype', 'rec');
         $this->addParameter('clearingsubtype', 'POV');
+
         $blIsB2B = $this->_fcpoIsOrderB2B($oOrder);
         $sBusinessRelation = ($blIsB2B) ? 'b2b' : 'b2c';
         $this->addParameter('businessrelation', $sBusinessRelation);
     }
 
+    /**
+     * Adding redirect urls
+     *
+     * @param string $sAbortClass
+     * @param string $sRefNr
+     * @param bool $blIsPayPalExpress
+     * @return void
+     */
     protected function _addRedirectUrls($sAbortClass, $sRefNr = false, $blIsPayPalExpress = false) {
         $oConfig = $this->getConfig();
         $oSession = $this->_oFcpoHelper->fcpoGetSession();
