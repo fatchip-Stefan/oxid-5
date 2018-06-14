@@ -1813,7 +1813,7 @@ class fcpoRequest extends oxSuperCfg {
         if ($oUser->oxuser__oxcompany->value != '') {
             $this->addParameter('company', $oUser->oxuser__oxcompany->value);
         }
-        $this->addParameter('street', trim($oUser->oxuser__oxstreet->value . ' ' . $oUser->oxuser__oxstreetnr->value));
+        $this->addParameter('street', trim($oUser->oxuser__oxstreet->rawValue . ' ' . $oUser->oxuser__oxstreetnr->value));
         $this->addParameter('zip', $oUser->oxuser__oxzip->value);
         $this->addParameter('city', $oUser->oxuser__oxcity->value);
         $this->addParameter('country', $oCountry->oxcountry__oxisoalpha2->value);
