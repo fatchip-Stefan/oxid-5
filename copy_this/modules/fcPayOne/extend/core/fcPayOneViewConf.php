@@ -506,6 +506,51 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
     }
 
     /**
+     * Template getter for rece
+     *
+     * @param void
+     * @return string
+     */
+    public function fcpoGetMasterPassButtonImg() {
+        $sUrl = 'https://masterpass.com/dyn/img/btn/global/mp_chk_btn_147x034px.svg';
+
+        return $sUrl;
+    }
+
+    /**
+     * Returns url of masterpass js library depending on set mode
+     *
+     * @param void
+     * @return string
+     */
+    public function fcpoGetMasterPassJsLibUrl() {
+        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
+        $oPayment->load('fcpomasterpass');
+        $blIsLive = $oPayment->oxpayments__fcpolivemode->value;
+
+        $sUrl = "https://sandbox.masterpass.com/integration/merchant.js";
+        if ($blIsLive) {
+            $sUrl = "https://masterpass.com/integration/merchant.js";
+        }
+
+        return $sUrl;
+    }
+
+    /**
+     * Template getter for deciding if masterpass button can be shown
+     *
+     * @param void
+     * @return void
+     */
+    public function fcpoCanDisplayMasterpassButton() {
+        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
+        $oPayment->load('fcpomasterpass');
+        $blIsActive = $oPayment->oxpayments__oxactive->value;
+
+        return $blIsActive;
+    }
+
+    /**
      * Returns the expected amount of amazon buttons on current page
      *
      * @param void
@@ -528,6 +573,32 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
         return $iAmountExpectedButtons;
     }
 
+    /**
+     * Template getter for returning ajax controller url
+     *
+     * @param void
+     * @return string
+     * @todo class has to be moved into controller folder instead of models
+     */
+    public function fcpoGetAjaxControllerUrl() {
+        $oConfig = $this->getConfig();
+        $sShopUrl = $oConfig->getShopUrl();
+        $sPath = "modules/fcPayOne/application/models/fcpayone_ajax.php";
+        $sControllerPath = $sShopUrl.$sPath;
 
+        return $sControllerPath;
+    }
 
+    /**
+     * Template getter for returning shopurl
+     *
+     * @param void
+     * @return string
+     */
+    public function fcpoGetShopUrl() {
+        $oConfig = $this->getConfig();
+        $sShopUrl = $oConfig->getShopUrl();
+
+        return $sShopUrl;
+    }
 }

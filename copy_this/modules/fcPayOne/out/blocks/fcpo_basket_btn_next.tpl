@@ -1,4 +1,5 @@
 [{$smarty.block.parent}]
+[{assign var="sFcPoTemplatePath" value=$oViewConf->fcpoGetActiveThemePath()}]
 [{if $oView->fcpoGetPayPalExpressPic()}]
     <form autocomplete="off" action="[{$oViewConf->getSslSelfLink()}]" method="post">
         [{$oViewConf->getHiddenSid()}]
@@ -8,11 +9,16 @@
     </form>
 [{/if}]
 [{if $oViewConf->fcpoCanDisplayAmazonPayButton()}]
-    [{assign var="sFcPoTemplatePath" value=$oViewConf->fcpoGetActiveThemePath()}]
     [{assign var="sFcPoTemplatePath" value=$sFcPoTemplatePath|cat:'/fcpayone_amazon_paybutton.tpl'}]
     [{include
         file=$oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePath)
         sAmazonButtonId='LoginWithAmazonButtonUp'
         sAmazonButtonClass='payone_basket_amazon_btn_flow pull-right'
+    }]
+[{/if}]
+[{if $oViewConf->fcpoCanDisplayMasterpassButton()}]
+    [{assign var="sFcPoTemplatePath" value=$sFcPoTemplatePath|cat:'/fcpayone_masterpass_button.tpl'}]
+    [{include
+        file=$oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePath)
     }]
 [{/if}]

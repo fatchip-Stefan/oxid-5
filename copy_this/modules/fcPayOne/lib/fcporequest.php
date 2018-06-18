@@ -1750,6 +1750,43 @@ class fcpoRequest extends oxSuperCfg {
         return $aResponse;
     }
 
+    /**
+     * Sending setcheckout call for initializing masterpass
+     * lightbox button solution.
+     *
+     * @param void
+     * @return string
+     */
+    public function fcpoSendRequestMasterpassSetcheckout() {
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oSession = $this->getSession();
+        $oBasket = $oSession->getBasket();
+        $oPrice = $oBasket->getPrice();
+        $sShopUrl = $oConfig->getShopUrl();
+        $sOriginUrl = $sBackUrl = $sShopUrl."/index.php?cl=basket";
+        $sErrorUrl = $sOriginUrl."&fcpoerror=FCPO_ERROR_MP_SETCHECKOUT";
+        $sSuccessUrl = $sShopUrl."/index.php?cl=payment&fcpopaymentmode=masterpass";
+
+        $this->addParameter('request', 'genericpayment'); //Request method
+        $this->addParameter('mode', $this->getOperationMode('fcpomasterpass')); //PayOne Portal Operation Mode (live or test)
+        $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID')); //ID of PayOne Sub-Account
+        $this->addParameter('amount', number_format($oPrice->getBruttoPrice(), 2, '.', '') * 100);
+
+        $this->addParameter('clearingtype', 'wlt');
+        $this->addParameter('wallettype', 'MPA');
+
+        $this->addParameter('add_paydata[action]', 'setcheckout');
+        $this->addParameter('add_paydata[originURL]', $sOriginUrl);
+        $this->addParameter('add_paydata[backurl]', $sBackUrl);
+        $this->addParameter('add_paydata[errorurl]', $sErrorUrl);
+        $this->addParameter('add_paydata[successurl]', $sSuccessUrl);
+
+        $oCurr = $oConfig->getActShopCurrencyObject();
+        $this->addParameter('currency', $oCurr->name);
+
+        return $this->send();
+    }
+
     protected function _stateNeeded($sIso2Country) {
         if (array_search($sIso2Country, $this->_aStateNeededCountries) !== false) {
             return true;

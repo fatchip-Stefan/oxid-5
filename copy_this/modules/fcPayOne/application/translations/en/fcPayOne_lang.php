@@ -191,6 +191,7 @@ $aLang = array(
     'FCPO_BIRTHDATE_INVALID' => 'Your birthday data is not valid.',
     'FCPO_COMPANYDATA_INVALID' => 'Your company data is not complete. For ordering as a business entering either company name and VatId is mandatory.',
     'FCPO_RATEPAY_REJECTED_401' => 'Ratepay payment is faded currently. Please add text here.',
+    'FCPO_ERROR_MP_SETCHECKOUT'                     => "Due to technical reasons Masterpass can't be used currently. Please use another payment method. We apologize for any inconvienience.",
 );
 
 /*
