@@ -1913,42 +1913,118 @@ class fcpoRequest extends oxSuperCfg {
         $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID')); //ID of PayOne Sub-Account
         $sAddresschecktype = $this->_fcpoGetAddressCheckType();
         $this->addParameter('addresschecktype', $sAddresschecktype);
+        $this->addParameter('language', $this->_oFcpoHelper->fcpoGetLang()->getLanguageAbbr());
 
-        if ($sAddresschecktype == 'PE' && $this->getCountryIso2($oUser->oxuser__oxcountryid->value) != 'DE') {
-            //AddressCheck Person nur in Deutschland
-            //Erfolgreichen Check simulieren
+        $blAddressCountryCheck = $this->_fcpaValidateAddresscheckAgainstCountry($oUser);
+        if (!$blAddressCountryCheck) {
+            // simulate successful check
             return array('fcWrongCountry' => true);
-        } elseif ($sAddresschecktype == 'BA' && array_search($this->getCountryIso2($oUser->oxuser__oxcountryid->value), $this->_aValidCountrys) === false) {
-            //AddressCheck Basic nur in bestimmten L?ndern
-            //Erfolgreichen Check simulieren
-            return array('fcWrongCountry' => true);
-        } else {
-            $oAddress = oxNew('oxaddress');
-            if ($blCheckDeliveryAddress === true) {
-                $sDeliveryAddressId = $oUser->getSelectedAddressId();
-                if ($sDeliveryAddressId) {
-                    $oAddress->load($sDeliveryAddressId);
-                } else {
-                    return false;
-                }
-                $this->addAddressParamsByAddress($oAddress);
-            } else {
-                $this->addAddressParamsByUser($oUser);
-            }
-
-            $this->addParameter('language', $this->_oFcpoHelper->fcpoGetLang()->getLanguageAbbr());
-
-            if ($this->_wasAddressCheckedBefore() === false) {
-                $aResponse = $this->send();
-
-                if ($this->_fcpoCheckAddressCanBeSaved($aResponse)) {
-                    $this->_saveCheckedAddress($aResponse);
-                }
-
-                return $aResponse;
-            }
-            return true;
         }
+
+        $blSuccess = $this->_fcpoSetAddresscheckAddressParams($oUser, $blCheckDeliveryAddress);
+        if (!$blSuccess) return false;
+
+        $mResponse = $this->_fcpoSendRequestStandardAddressCheck();
+
+        return $mResponse;
+    }
+
+    /**
+     * Checks if addresscheck has been performed before and trigger
+     * calling the api. Save request result for later calls
+     *
+     * @param void
+     * @return mixed array|bool
+     */
+    protected function _fcpoSendRequestStandardAddressCheck() {
+        if ($this->_wasAddressCheckedBefore() === false) {
+            $aResponse = $this->send();
+
+            if ($this->_fcpoCheckAddressCanBeSaved($aResponse)) {
+                $this->_saveCheckedAddress($aResponse);
+            }
+
+            return $aResponse;
+        }
+        return true;
+    }
+
+    /**
+     * Checks if boniaddresscheck has been performed before and trigger
+     * calling the api. Save request result for later calls
+     *
+     * @param oxUser $oUser
+     * @return mixed bool|array
+     */
+    protected function _fcpoSendRequestConsumerScore($oUser) {
+        if ($this->_wasAddressCheckedBefore() === false) {
+            $aResponse = $this->send();
+            $aResponse = $this->_fcpoCheckUseFallbackBoniversum($aResponse);
+            $this->setPayoneMalus($oUser, $aResponse);
+
+            if ($this->_fcpoCheckAddressCanBeSaved($aResponse)) {
+                $this->_saveCheckedAddress($aResponse);
+            }
+
+            return $aResponse;
+        }
+        return true;
+    }
+
+    /**
+     * Handles the setting of address params depending on the kind of order
+     *
+     * @param $oUser
+     * @param $blCheckDeliveryAddress
+     * @return bool
+     */
+    protected function _fcpoSetAddresscheckAddressParams($oUser, $blCheckDeliveryAddress) {
+        $blReturn = false;
+        $oAddress = oxNew('oxaddress');
+
+        if ($blCheckDeliveryAddress === true) {
+            $sDeliveryAddressId = $oUser->getSelectedAddressId();
+            if ($sDeliveryAddressId) {
+                $oAddress->load($sDeliveryAddressId);
+                $this->addAddressParamsByAddress($oAddress);
+                $blReturn = true;
+            }
+        } else {
+            $this->addAddressParamsByUser($oUser);
+            $blReturn = true;
+        }
+
+        return $blReturn;
+    }
+
+    /**
+     * Process addresscheck related validations against users country
+     * and addresschecktype combo
+     *
+     * @param $oUser
+     * @return bool
+     */
+    protected function _fcpaValidateAddresscheckAgainstCountry($oUser) {
+        $sAddresschecktype = $this->_fcpoGetAddressCheckType();
+
+        $sCountryIso = $this->getCountryIso2($oUser->oxuser__oxcountryid->value);
+
+        $blAddresscheckPEOnlyGermany = (
+            $sAddresschecktype == 'PE' &&
+            $sCountryIso != 'DE'
+        );
+
+        $blAddresscheckBasicOnlyInCertainCountries = (
+            $sAddresschecktype == 'BA' &&
+            array_search($sCountryIso, $this->_aValidCountrys) === false
+        );
+
+        $blValid = (
+            !$blAddresscheckPEOnlyGermany &&
+            !$blAddresscheckBasicOnlyInCertainCountries
+        );
+
+        return $blValid;
     }
 
     /**
@@ -1960,7 +2036,7 @@ class fcpoRequest extends oxSuperCfg {
     protected function _fcpoCheckUseFallbackBoniversum($aResponse) {
         $oConfig = $this->getConfig();
         $sScore = $aResponse['score'];
-        $sAddresscheckType = $this->_fcpoGetAddressCheckType();
+        $sAddresscheckType = $this->_fcpoGetBoniAddresscheckType();
 
         $blUseFallBack = (
             $sScore == 'U' &&
@@ -1981,11 +2057,26 @@ class fcpoRequest extends oxSuperCfg {
     /**
      * Check, correct and return addresschecktype
      *
+     * @param void
+     * @return string
      */
     protected function _fcpoGetAddressCheckType() {
         $oConfig = $this->getConfig();
-        $sBoniCheckType = $oConfig->getConfigParam('sFCPOBonicheck');
         $sAddressCheckType = $oConfig->getConfigParam('sFCPOAddresscheck');
+
+        return $sAddressCheckType;
+    }
+
+    /**
+     * Check, correct and return addresschecktype
+     *
+     * @param void
+     * @return string
+     */
+    protected function _fcpoGetBoniAddresscheckType() {
+        $oConfig = $this->getConfig();
+        $sBoniCheckType = $oConfig->getConfigParam('sFCPOBonicheck');
+        $sAddressCheckType = $oConfig->getConfigParam('sFCPOConsumerAddresscheck');
 
         if ($sBoniCheckType == 'CE') {
             $sAddressCheckType = 'PB';
@@ -2131,13 +2222,18 @@ class fcpoRequest extends oxSuperCfg {
      */
     public function sendRequestConsumerscore($oUser) {
         // Consumerscore only allowed in germany
-        if ($this->getCountryIso2($oUser->oxuser__oxcountryid->value) == 'DE') {
+        $sCountryIso = $this->getCountryIso2($oUser->oxuser__oxcountryid->value);
+        $blCountryValid = (
+            $sCountryIso == 'DE'
+        );
+
+        if ($blCountryValid) {
             $oConfig = $this->getConfig();
             $this->addParameter('request', 'consumerscore');
             $this->addParameter('mode', $oConfig->getConfigParam('sFCPOBoniOpMode')); //Operationmode live or test
             $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID')); //ID of PayOne Sub-Account
 
-            $this->addParameter('addresschecktype', $oConfig->getConfigParam('sFCPOAddresscheck'));
+            $this->addParameter('addresschecktype', $oConfig->getConfigParam('sFCPOConsumerAddresscheck'));
             $this->addParameter('consumerscoretype', $oConfig->getConfigParam('sFCPOBonicheck'));
 
             $this->addAddressParamsByUser($oUser);
@@ -2148,8 +2244,7 @@ class fcpoRequest extends oxSuperCfg {
 
             $this->addParameter('language', $this->_oFcpoHelper->fcpoGetLang()->getLanguageAbbr());
 
-            $aResponse = $this->send();
-            $aResponse = $this->_fcpoCheckUseFallbackBoniversum($aResponse);
+            $aResponse = $this->_fcpoSendRequestConsumerscore($oUser);
 
             return $aResponse;
         } else {

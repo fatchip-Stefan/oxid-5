@@ -34,7 +34,6 @@ function loadLang(obj) {
     [{oxmultilang ident="FCPO_BONICHECK_CONFIG_INFOTEXT_SMALL"}]<br><br>
 
     <table border="0" width="98%">
-
         <tr>
             <td class="edittext" width="150">[{oxmultilang ident="FCPO_BONI_OPERATION_MODE"}]</td>
             <td class="edittext" width="250"><input type="radio" name="confstrs[sFCPOBoniOpMode]" value="live" [{if $confstrs.sFCPOBoniOpMode == 'live'}]checked[{/if}]> <strong>[{oxmultilang ident="FCPO_LIVE_MODE"}]</strong></td>
@@ -72,7 +71,34 @@ function loadLang(obj) {
             <td class="edittext"><input type="radio" name="confstrs[sFCPOBonicheck]" value="CE" [{if $confstrs.sFCPOBonicheck == 'CE'}]checked[{/if}]> [{oxmultilang ident="FCPO_BONIVERSUM_SCORE_BONICHECK"}]</td>
             <td class="edittext">[{oxinputhelp ident="FCPO_HELP_BONIVERSUM_SCORE_BONICHECK"}]<br></td>
         </tr>
-        <tr><td colspan="3">&nbsp;</td></tr>        
+        <tr>
+            <td class="edittext"></td>
+            <td class="edittext" colspan="2">
+                <table border="0" width="30%">
+                    <tr>
+                        <td class="edittext">[{oxmultilang ident="FCPO_ADDRESSCHECKTYPE"}]</td>
+                        <td class="edittext"><input type="radio" name="confstrs[sFCPOConsumerAddresscheck]" value="BA" [{if $confstrs.sFCPOConsumerAddresscheck == 'BA'}]checked[{/if}]> [{oxmultilang ident="FCPO_BASIC_ADDRESSCHECK"}]</td>
+                        <td class="edittext">[{oxinputhelp ident="FCPO_HELP_BASIC_ADDRESSCHECK"}]</td>
+                    </tr>
+                    <tr>
+                        <td class="edittext"></td>
+                        <td class="edittext"><input type="radio" name="confstrs[sFCPOConsumerAddresscheck]" value="PE" [{if $confstrs.sFCPOConsumerAddresscheck == 'PE'}]checked[{/if}]> [{oxmultilang ident="FCPO_PERSON_ADDRESSCHECK"}]</td>
+                        <td class="edittext">[{oxinputhelp ident="FCPO_HELP_PERSON_ADDRESSCHECK"}]<br></td>
+                    </tr>
+                    <tr>
+                        <td class="edittext"></td>
+                        <td class="edittext"><input type="radio" name="confstrs[sFCPOConsumerAddresscheck]" value="BB" [{if $confstrs.sFCPOConsumerAddresscheck == 'BB'}]checked[{/if}]> [{oxmultilang ident="FCPO_BONIVERSUM_BASIC_ADDRESSCHECK"}]</td>
+                        <td class="edittext">[{oxinputhelp ident="FCPO_HELP_BONIVERSUM_BASIC_ADDRESSCHECK"}]<br></td>
+                    </tr>
+                    <tr>
+                        <td class="edittext"></td>
+                        <td class="edittext"><input type="radio" name="confstrs[sFCPOConsumerAddresscheck]" value="PB" [{if $confstrs.sFCPOConsumerAddresscheck == 'PB'}]checked[{/if}]> [{oxmultilang ident="FCPO_BONIVERSUM_PERSON_ADDRESSCHECK"}]</td>
+                        <td class="edittext">[{oxinputhelp ident="FCPO_BONIVERSUM_HELP_PERSON_ADDRESSCHECK"}]<br></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr><td colspan="3">&nbsp;</td></tr>
         <tr valign="top">
             <td class="edittext" >
                 [{oxmultilang ident="FCPO_CONSUMERSCORE_MOMENT"}]
@@ -100,32 +126,40 @@ function loadLang(obj) {
             <td class="edittext">[{oxinputhelp ident="FCPO_HELP_DEFAULT_BONI"}]<br></td>
         </tr>
         <tr><td colspan="3">&nbsp;</td></tr>
-
-        <tr>
-            <td class="edittext">[{oxmultilang ident="FCPO_ADDRESSCHECKTYPE"}]</td>
-            <td class="edittext"><input type="radio" name="confstrs[sFCPOAddresscheck]" value="NO" [{if $confstrs.sFCPOAddresscheck == 'NO'}]checked[{/if}]> [{oxmultilang ident="FCPO_NO_ADDRESSCHECK"}]</td>
-            <td class="edittext">[{oxinputhelp ident="FCPO_HELP_NO_ADDRESSCHECK"}]<br></td>
-        </tr>
-        <tr>
-            <td class="edittext"></td>
-            <td class="edittext"><input type="radio" name="confstrs[sFCPOAddresscheck]" value="BA" [{if $confstrs.sFCPOAddresscheck == 'BA'}]checked[{/if}]> [{oxmultilang ident="FCPO_BASIC_ADDRESSCHECK"}]</td>
-            <td class="edittext">[{oxinputhelp ident="FCPO_HELP_BASIC_ADDRESSCHECK"}]</td>
-        </tr>
-        <tr>
-            <td class="edittext"></td>
-            <td class="edittext"><input type="radio" name="confstrs[sFCPOAddresscheck]" value="PE" [{if $confstrs.sFCPOAddresscheck == 'PE'}]checked[{/if}]> [{oxmultilang ident="FCPO_PERSON_ADDRESSCHECK"}]</td>
-            <td class="edittext">[{oxinputhelp ident="FCPO_HELP_PERSON_ADDRESSCHECK"}]<br></td>
-        </tr>
-        <tr>
-            <td class="edittext"></td>
-            <td class="edittext"><input type="radio" name="confstrs[sFCPOAddresscheck]" value="BB" [{if $confstrs.sFCPOAddresscheck == 'BB'}]checked[{/if}]> [{oxmultilang ident="FCPO_BONIVERSUM_BASIC_ADDRESSCHECK"}]</td>
-            <td class="edittext">[{oxinputhelp ident="FCPO_HELP_BONIVERSUM_BASIC_ADDRESSCHECK"}]<br></td>
-        </tr>
-        <tr>
-            <td class="edittext"></td>
-            <td class="edittext"><input type="radio" name="confstrs[sFCPOAddresscheck]" value="PB" [{if $confstrs.sFCPOAddresscheck == 'PB'}]checked[{/if}]> [{oxmultilang ident="FCPO_BONIVERSUM_PERSON_ADDRESSCHECK"}]</td>
-            <td class="edittext">[{oxinputhelp ident="FCPO_BONIVERSUM_HELP_PERSON_ADDRESSCHECK"}]<br></td>
-        </tr>
+        [{if $oView->fcpoShowRegularAddresscheck()}]
+            <tr>
+                <td class="edittext">[{oxmultilang ident="FCPO_ADDRESSCHECKTYPE"}]</td>
+                <td class="edittext"><input type="radio" name="confstrs[sFCPOAddresscheck]" value="NO" [{if $confstrs.sFCPOAddresscheck == 'NO'}]checked[{/if}]> [{oxmultilang ident="FCPO_NO_ADDRESSCHECK"}]</td>
+                <td class="edittext">[{oxinputhelp ident="FCPO_HELP_NO_ADDRESSCHECK"}]<br></td>
+            </tr>
+            <tr>
+                <td class="edittext"></td>
+                <td class="edittext"><input type="radio" name="confstrs[sFCPOAddresscheck]" value="BA" [{if $confstrs.sFCPOAddresscheck == 'BA'}]checked[{/if}]> [{oxmultilang ident="FCPO_BASIC_ADDRESSCHECK"}]</td>
+                <td class="edittext">[{oxinputhelp ident="FCPO_HELP_BASIC_ADDRESSCHECK"}]</td>
+            </tr>
+            <tr>
+                <td class="edittext"></td>
+                <td class="edittext"><input type="radio" name="confstrs[sFCPOAddresscheck]" value="PE" [{if $confstrs.sFCPOAddresscheck == 'PE'}]checked[{/if}]> [{oxmultilang ident="FCPO_PERSON_ADDRESSCHECK"}]</td>
+                <td class="edittext">[{oxinputhelp ident="FCPO_HELP_PERSON_ADDRESSCHECK"}]<br></td>
+            </tr>
+            <tr>
+                <td class="edittext"></td>
+                <td class="edittext"><input type="radio" name="confstrs[sFCPOAddresscheck]" value="BB" [{if $confstrs.sFCPOAddresscheck == 'BB'}]checked[{/if}]> [{oxmultilang ident="FCPO_BONIVERSUM_BASIC_ADDRESSCHECK"}]</td>
+                <td class="edittext">[{oxinputhelp ident="FCPO_HELP_BONIVERSUM_BASIC_ADDRESSCHECK"}]<br></td>
+            </tr>
+            <tr>
+                <td class="edittext"></td>
+                <td class="edittext"><input type="radio" name="confstrs[sFCPOAddresscheck]" value="PB" [{if $confstrs.sFCPOAddresscheck == 'PB'}]checked[{/if}]> [{oxmultilang ident="FCPO_BONIVERSUM_PERSON_ADDRESSCHECK"}]</td>
+                <td class="edittext">[{oxinputhelp ident="FCPO_BONIVERSUM_HELP_PERSON_ADDRESSCHECK"}]<br></td>
+            </tr>
+        [{else}]
+            <tr>
+                <td class="edittext">[{oxmultilang ident="FCPO_ADDRESSCHECKTYPE"}]</td>
+                <td class="edittext" colspan="2">
+                    <span style="font-style: italic;color: lightcoral;">[{oxmultilang ident="FCPO_ADDRESSCHECKTYPE_REGULAR_SET_INACTIVE"}]</span>
+                </td>
+            </tr>
+        [{/if}]
         <tr valign="top">
             <td class="edittext" >
                 [{oxmultilang ident="FCPO_MALUSHANDLING"}]
