@@ -2476,10 +2476,44 @@ class fcpoRequest extends oxSuperCfg {
         return $aOutput;
     }
 
+    /**
+     * Anonimization of ip address param
+     *
+     * @param void
+     * @return void
+     */
+    protected function _anonymizeIP() {
+        $blIpExists = isset($this->_aParameters['ip']);
+        if ($blIpExists) {
+            $sIp = $this->_aParameters['ip'];
+            $sIp = preg_replace('~[^\.:]~', "X", $sIp);
+            $this->_aParameters['ip'] = $sIp;
+        }
+    }
+
+    /**
+     * Takes care of parameter anonymizing
+     *
+     * @param void
+     * @return void
+     */
+    protected function _anonymizeParameters() {
+        $this->_anonymizeIP();
+    }
+
+    /**
+     * Logs a request and its result for later checking
+     *
+     * @param $sResponse
+     * @param string $sStatus
+     */
     protected function _logRequest($sResponse, $sStatus = '') {
         $oConfig = $this->getConfig();
         $oDb = oxDb::getDb();
+
+        $this->_anonymizeParameters();
         $sRequest = serialize($this->_aParameters);
+
         $sQuery = " INSERT INTO fcporequestlog (
                         FCPO_REFNR, FCPO_REQUESTTYPE, FCPO_RESPONSESTATUS, FCPO_REQUEST, FCPO_RESPONSE, FCPO_PORTALID, FCPO_AID
                     ) VALUES (
