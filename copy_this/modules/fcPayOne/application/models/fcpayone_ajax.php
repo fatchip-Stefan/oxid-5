@@ -78,7 +78,6 @@ class fcpayone_ajax extends oxBase {
         $this->_oFcpoHelper->fcpoDeleteSessionVariable('paymentid');
         $this->_oFcpoHelper->fcpoSetSessionVariable('paymentid', 'fcpomasterpass');
         $sJson = $this->_fcpoFetchMasterpassInitDataAsJson($aResponse);
-
         return $sJson;
     }
 
@@ -97,7 +96,7 @@ class fcpayone_ajax extends oxBase {
             'version'=>$aResponse['add_paydata[version]'],
         );
 
-        $sJson = json_encode($aJson);
+        $sJson = json_encode($aJson, JSON_UNESCAPED_SLASHES);
 
         return $sJson;
     }
@@ -391,6 +390,6 @@ if ($sPaymentId) {
     }
 
     if ($sAction == 'setcheckout' && $sPaymentId == 'fcpomasterpass') {
-        $oPayoneAjax->fcpoMasterpassSetcheckout();
+        echo $oPayoneAjax->fcpoMasterpassSetcheckout();
     }
 }

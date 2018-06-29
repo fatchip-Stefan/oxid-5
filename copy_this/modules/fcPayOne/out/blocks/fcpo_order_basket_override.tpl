@@ -1,7 +1,7 @@
 [{$smarty.block.parent}]
 [{assign var="payment" value=$oView->getPayment()}]
-[{assign var="sMandateText" value=$payment->fcpoGetMandateText()}]
 [{if $payment && method_exists($payment, 'fcpoGetMandateText') && $payment->fcpoGetMandateText()}]
+    [{assign var="sMandateText" value=$payment->fcpoGetMandateText()}]
     [{oxscript include=$oViewConf->fcpoGetModuleJsPath('fcPayOne.js')}]
     [{oxscript include=$oViewConf->fcpoGetModuleCssPath('fcpayone.css')}]
     <div id="fcpoSEPAMandate">

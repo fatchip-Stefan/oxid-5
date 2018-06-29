@@ -506,7 +506,7 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
     }
 
     /**
-     * Template getter for rece
+     * Template getter for receiving masterpass button url
      *
      * @param void
      * @return string
@@ -528,9 +528,9 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
         $oPayment->load('fcpomasterpass');
         $blIsLive = $oPayment->oxpayments__fcpolivemode->value;
 
-        $sUrl = "https://sandbox.masterpass.com/integration/merchant.js";
+        $sUrl = "https://sandbox.masterpass.com/lightbox/Switch/integration/MasterPass.client.js";
         if ($blIsLive) {
-            $sUrl = "https://masterpass.com/integration/merchant.js";
+            $sUrl = "https://www.masterpass.com/lightbox/Switch/integration/MasterPass.client.js";
         }
 
         return $sUrl;

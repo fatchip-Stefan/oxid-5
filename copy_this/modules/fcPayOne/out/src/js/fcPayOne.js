@@ -906,6 +906,7 @@ $('#fcpo_masterpass_button').click(function(){
         data: { paymentid: "fcpomasterpass", action: "setcheckout" },
         success: function(Response) {
             var data = $.parseJSON(Response);
+            console.log(data);
             MasterPass.client.checkout({
                 "requestToken": data.token,
                 "merchantCheckoutId": data.merchantCheckoutId,
