@@ -80,7 +80,7 @@ class fcPayOneUser extends fcPayOneUser_parent {
             $this->load($sUserOxid);
         }
 
-        $this->_fcpoAddDeliveryAddress($aResponse, $sUserOxid);
+        $this->_fcpoAddDeliveryAddress($aResponse, $sUserOxid, true);
         $this->_fcpoLogMeIn();
 
         return true;
@@ -280,15 +280,26 @@ class fcPayOneUser extends fcPayOneUser_parent {
      * @param string $sUserOxid
      * @return void
      */
-    protected function _fcpoAddDeliveryAddress($aResponse, $sUserOxid) {
+    protected function _fcpoAddDeliveryAddress($aResponse, $sUserOxid, $blFixUtf8=false) {
+        if ($blFixUtf8) {
+            $aResponse = array_map('utf8_decode', $aResponse);
+        }
         $aStreetParts = $this->_fcpoSplitStreetAndStreetNr($aResponse['add_paydata[shipping_street]']);
         $sCountryId = $this->_fcpoGetCountryIdByIso2($aResponse['add_paydata[shipping_country]']);
+        $sFirstName = trim($aResponse['add_paydata[shipping_firstname]']);
+        $sLastName = trim($aResponse['add_paydata[shipping_lastname]']);
+
+        if (empty($sLastName)) {
+            $aNameParts = $this->_fcpoSplitNameParts($sFirstName);
+            $sFirstName = $aNameParts['firstname'];
+            $sLastName = $aNameParts['lastname'];
+        }
 
         $oAddress = $this->_oFcpoHelper->getFactoryObject('oxaddress');
         $oAddress->oxaddress__oxuserid = new oxField($sUserOxid);
         $oAddress->oxaddress__oxaddressuserid = new oxField($sUserOxid);
-        $oAddress->oxaddress__oxfname = new oxField(trim($aResponse['add_paydata[shipping_firstname]']));
-        $oAddress->oxaddress__oxlname = new oxField(trim($aResponse['add_paydata[shipping_lastname]']));
+        $oAddress->oxaddress__oxfname = new oxField($sFirstName);
+        $oAddress->oxaddress__oxlname = new oxField($sLastName);
         $oAddress->oxaddress__oxstreet = new oxField($aStreetParts['street']);
         $oAddress->oxaddress__oxstreetnr = new oxField($aStreetParts['streetnr']);
         $oAddress->oxaddress__oxfon = new oxField($aResponse['add_paydata[shipping_telephonenumber]']);
@@ -308,6 +319,25 @@ class fcPayOneUser extends fcPayOneUser_parent {
         }
 
         $this->_oFcpoHelper->fcpoSetSessionVariable('deladrid', $sEncodedDeliveryAddress);
+    }
+
+    /**
+     * Takes a complete name string and seperates into first and lastname
+     *
+     * @param $sSingleNameString
+     * @return array
+     */
+    protected function _fcpoSplitNameParts($sSingleNameString) {
+        $aParts = explode(' ', $sSingleNameString);
+        $sLastName = array_pop($aParts);
+        $sFirstName = implode(' ', $aParts);
+
+        $aReturn['firstname'] = $sFirstName;
+        $aReturn['lastname'] = $sLastName;
+
+        $aReturn = array_map('trim', $aReturn);
+
+        return $aReturn;
     }
 
     /**
