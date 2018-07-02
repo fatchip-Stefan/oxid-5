@@ -562,12 +562,12 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
      * Template getter for deciding if masterpass button can be shown
      *
      * @param void
-     * @return void
+     * @return bool
      */
     public function fcpoCanDisplayMasterpassButton() {
         $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
         $oPayment->load('fcpomasterpass');
-        $blIsActive = $oPayment->oxpayments__oxactive->value;
+        $blIsActive = (bool) $oPayment->oxpayments__oxactive->value;
 
         return $blIsActive;
     }
