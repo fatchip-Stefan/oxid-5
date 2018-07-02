@@ -224,6 +224,28 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
     }
 
     /**
+     * Returns if a complete set of salutations is available
+     *
+     * @param void
+     * @return bool
+     */
+    public function fcpoUserHasSalutation() {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oUser = $oBasket->getBasketUser();
+        $oAddress = $oUser->getSelectedAddress();
+        $sSalutation = $oUser->oxuser__oxsal->value;
+        $sSalutationDelAddress = $oAddress->oxaddress__oxsal->value;
+
+        $blHasSalutation = (
+            $sSalutation &&
+            $sSalutationDelAddress
+        );
+
+        return $blHasSalutation;
+    }
+
+    /**
      * Returns if amazonpay is active and though button can be displayed
      *
      * @param void
