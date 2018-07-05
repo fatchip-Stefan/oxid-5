@@ -15,7 +15,7 @@
                     <h3 class="panel-title">
                         [{oxmultilang ident="BILLING_ADDRESS"}]
                         <button type="submit" class="btn btn-xs btn-warning pull-right submitButton largeButton" title="[{oxmultilang ident="EDIT"}]">
-                            <i class="fa fa-pencil"></i>
+                            <i class="fa fa-pencil">[{oxmultilang ident="EDIT"}]</i>
                         </button>
                     </h3>
                 </div>
@@ -38,7 +38,7 @@
                     <h3 class="panel-title">
                         [{oxmultilang ident="SHIPPING_ADDRESS"}]
                         <button type="submit" class="btn btn-xs btn-warning pull-right submitButton largeButton" title="[{oxmultilang ident="EDIT"}]">
-                            <i class="fa fa-pencil"></i>
+                            <i class="fa fa-pencil">[{oxmultilang ident="EDIT"}]</i>
                         </button>
                     </h3>
                 </div>
