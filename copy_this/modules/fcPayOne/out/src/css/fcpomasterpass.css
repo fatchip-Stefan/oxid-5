@@ -1,4 +1,5 @@
 .payone_basket_masterpass_btn_flow {
     padding-right: 12px;
     cursor: pointer;
+    float: right;
 }
