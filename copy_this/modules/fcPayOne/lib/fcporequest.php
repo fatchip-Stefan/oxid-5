@@ -1813,7 +1813,7 @@ class fcpoRequest extends oxSuperCfg {
         if ($oUser->oxuser__oxcompany->value != '') {
             $this->addParameter('company', $oUser->oxuser__oxcompany->value);
         }
-        $this->addParameter('street', trim($oUser->oxuser__oxstreet->value . ' ' . $oUser->oxuser__oxstreetnr->value));
+        $this->addParameter('street', trim($oUser->oxuser__oxstreet->rawValue . ' ' . $oUser->oxuser__oxstreetnr->value));
         $this->addParameter('zip', $oUser->oxuser__oxzip->value);
         $this->addParameter('city', $oUser->oxuser__oxcity->value);
         $this->addParameter('country', $oCountry->oxcountry__oxisoalpha2->value);
@@ -2138,8 +2138,6 @@ class fcpoRequest extends oxSuperCfg {
      * @return string
      */
     protected function _getAddressHash($aResponse = false) {
-        $sHash = false;
-
         $aAddressParameters = array(
             'firstname',
             'lastname',
@@ -2182,7 +2180,7 @@ class fcpoRequest extends oxSuperCfg {
         $blCorrectAddressParam = (
             $aResponse !== false &&
             array_key_exists($sParamKey, $aResponse) !== false &&
-            $aResponse[$sParamKey] != $sParamValue
+            stripslashes($aResponse[$sParamKey]) != $sParamValue
         );
 
         return $blCorrectAddressParam;
@@ -2191,7 +2189,8 @@ class fcpoRequest extends oxSuperCfg {
     /**
      * Check and return if this exact address has been checked before
      * 
-     * @return bool 
+     * @return bool
+     * @throws exception
      */
     protected function _wasAddressCheckedBefore() {
         $sCheckHash = $this->_getAddressHash();
@@ -2207,6 +2206,7 @@ class fcpoRequest extends oxSuperCfg {
      * Save the hash of a concatenated string with all address information to the DB table fcpocheckedaddresses
      * 
      * @param array $aResponse response from the address-check request
+     * @throws exception
      */
     protected function _saveCheckedAddress($aResponse) {
         $sCheckHash = $this->_getAddressHash($aResponse);
