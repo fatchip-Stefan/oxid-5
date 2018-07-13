@@ -340,9 +340,9 @@ class fcpayone_events
         'fcpoklarna' => 'Klarna Rechnung',
         'fcpobarzahlen' => 'Barzahlen',
         'fcpopaydirekt' => 'Paydirekt',
-        'fcpopo_bill' => 'Payolution Rechnung',
-        'fcpopo_debitnote' => 'Payolution Lastschrift',
-        'fcpopo_installment' => 'Payolution Ratenkauf',
+        'fcpopo_bill' => 'Paysafe Pay Later™ Rechnungskauf',
+        'fcpopo_debitnote' => 'Paysafe Pay Later™ Lastschrift',
+        'fcpopo_installment' => 'Paysafe Pay Later™ Ratenkauf',
         'fcporp_bill' => 'Ratepay Rechnungskauf',
         'fcpo_secinvoice' => 'Gesicherter Rechnungskauf',
     );
