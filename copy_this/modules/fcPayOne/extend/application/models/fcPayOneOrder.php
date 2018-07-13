@@ -539,8 +539,19 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
     protected function _fcpoHandleBasket($blSaveAfterRedirect, $oBasket) {
         $sGetChallenge = $this->_oFcpoHelper->fcpoGetSessionVariable('sess_challenge');
         $oConfig = $this->getConfig();
+
         $blFCPOPresaveOrder = $oConfig->getConfigParam('blFCPOPresaveOrder');
-        if ($blFCPOPresaveOrder === false || $blSaveAfterRedirect === false) {
+        $blOrderExists = (bool) $this->_checkOrderExist($sGetChallenge);
+
+        $blLoadFromBasket = (
+            !$blOrderExists &&
+            (
+                $blFCPOPresaveOrder === false ||
+                $blSaveAfterRedirect === false
+            )
+        );
+
+        if ($blLoadFromBasket) {
             $this->_loadFromBasket($oBasket);
         } else {
             $this->load($sGetChallenge);
@@ -1520,7 +1531,15 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         $iOrderNotChecked = $this->_fcpoGetOrderNotChecked();
         $this->fcpoCreateShadowBasket();
 
-        $blPresaveOrder = (bool) $oConfig->getConfigParam('blFCPOPresaveOrder');
+        $blPresaveOrderConfigured = (bool) $oConfig->getConfigParam('blFCPOPresaveOrder');
+        $sGetChallenge = $this->_oFcpoHelper->fcpoGetSessionVariable('sess_challenge');
+        $blOrderExists = (bool) $this->_checkOrderExist($sGetChallenge);
+
+        $blPresaveOrder = (
+            $blPresaveOrderConfigured &&
+            !$blOrderExists
+        );
+
         if ($blPresaveOrder === true) {
             $this->save(false);
         }
