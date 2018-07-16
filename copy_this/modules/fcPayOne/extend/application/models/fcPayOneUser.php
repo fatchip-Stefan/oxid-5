@@ -112,9 +112,9 @@ class fcPayOneUser extends fcPayOneUser_parent {
             $this->_fcpoSplitStreetAndStreetNr($aResponse['add_paydata[street]']);
 
         $this->oxuser__oxusername = new oxField($aResponse['add_paydata[email]']);
-        $this->oxuser__oxfname = new oxField($aResponse['add_paydata[email]']);
-        $this->oxuser__oxlname = new oxField($aResponse['add_paydata[email]']);
-        $this->oxuser__oxzip = new oxField($aResponse['add_paydata[email]']);
+        $this->oxuser__oxfname = new oxField($aResponse['add_paydata[firstname]']);
+        $this->oxuser__oxlname = new oxField($aResponse['add_paydata[lastname]']);
+        $this->oxuser__oxzip = new oxField($aResponse['add_paydata[zip]']);
         $this->oxuser__oxcity = new oxField($aResponse['add_paydata[city]']);
         $this->oxuser__oxstreet = new oxField($aAddressParts['street']);
         $this->oxuser__oxstreetnr = new oxField($aAddressParts['streetnr']);
