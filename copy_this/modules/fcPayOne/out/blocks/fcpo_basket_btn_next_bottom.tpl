@@ -21,7 +21,7 @@
     [{assign var="sFcPoTemplatePath" value=$oViewConf->fcpoGetActiveThemePath()}]
     [{assign var="sFcPoTemplatePathMasterpass" value=$sFcPoTemplatePath|cat:'/fcpayone_masterpass_button.tpl'}]
     [{include
-file=$oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePathMasterpass)
-sMasterpassButtonId='LoginWithMasterpassBottom'
-}]
+        file=$oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePathMasterpass)
+        sMasterpassButtonId='LoginWithMasterpassBottom'
+    }]
 [{/if}]

@@ -4,7 +4,6 @@
         <div class="status error">[{ $oView->getPaymentErrorText() }]</div>
     [{/if}]
 
-    [{oxscript include=$oViewConf->fcpoGetModuleJsPath('fcPayOne.js')}]
     <script type="text/javascript" src="https://secure.pay1.de/client-api/js/ajax.js"></script>
     <style type="text/css">
         .fcpo_check_error, #fcpo_elv_error, #fcpo_elv_error_blocked, #fcpo_cc_error, #fcpo_ou_error {
