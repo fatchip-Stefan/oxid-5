@@ -16,9 +16,11 @@
         sAmazonButtonClass='payone_basket_amazon_btn_flow pull-right'
     }]
 [{/if}]
+
 [{if $oViewConf->fcpoCanDisplayMasterpassButton()}]
     [{assign var="sFcPoTemplatePathMasterpass" value=$sFcPoTemplatePath|cat:'/fcpayone_masterpass_button.tpl'}]
     [{include
         file=$oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePathMasterpass)
+        sMasterpassButtonId='LoginWithMasterpassTop'
     }]
 [{/if}]

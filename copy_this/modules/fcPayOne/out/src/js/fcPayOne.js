@@ -892,6 +892,134 @@ $('#payolution_installment_check_availability').click(function(){
 
 /**
  * Triggers setcheckoutcall on button click
+ * used by flow theme
+ *
+ * @param void
+ */
+$('#modalLoginWithMasterpassMiniBasket1').click(function(){
+    var ajax_controller_url = $('#fcpo_ajax_controller_url').val();
+    var shop_url = $('#fcpo_ajax_shopurl').val();
+    $.ajax({
+        url: ajax_controller_url,
+        method: 'POST',
+        type: 'POST',
+        dataType: 'text',
+        data: { paymentid: "fcpomasterpass", action: "setcheckout" },
+        success: function(Response) {
+            var data = $.parseJSON(Response);
+            console.log(data);
+            MasterPass.client.checkout({
+                "requestToken": data.token,
+                "merchantCheckoutId": data.merchantCheckoutId,
+                "callbackUrl": data.callbackUrl,
+                "allowedCardTypes": data.allowedCardTypes,
+                "version": data.version
+            });
+        },
+        error: function() {
+            window.location = shop_url + 'index.php?cl=basket&fcpoerror=FCPO_ERROR_MP_SETCHECKOUT';
+        }
+    });
+});
+
+/**
+ * Triggers setcheckoutcall on button click
+ * used by flow theme
+ *
+ * @param void
+ */
+$('#LoginWithMasterpassMiniBasket1').click(function(){
+    var ajax_controller_url = $('#fcpo_ajax_controller_url').val();
+    var shop_url = $('#fcpo_ajax_shopurl').val();
+    $.ajax({
+        url: ajax_controller_url,
+        method: 'POST',
+        type: 'POST',
+        dataType: 'text',
+        data: { paymentid: "fcpomasterpass", action: "setcheckout" },
+        success: function(Response) {
+            var data = $.parseJSON(Response);
+            console.log(data);
+            MasterPass.client.checkout({
+                "requestToken": data.token,
+                "merchantCheckoutId": data.merchantCheckoutId,
+                "callbackUrl": data.callbackUrl,
+                "allowedCardTypes": data.allowedCardTypes,
+                "version": data.version
+            });
+        },
+        error: function() {
+            window.location = shop_url + 'index.php?cl=basket&fcpoerror=FCPO_ERROR_MP_SETCHECKOUT';
+        }
+    });
+});
+
+/**
+ * Triggers setcheckoutcall on button click
+ * used by flow theme
+ *
+ * @param void
+ */
+$('#LoginWithMasterpassTop1').click(function(){
+    var ajax_controller_url = $('#fcpo_ajax_controller_url').val();
+    var shop_url = $('#fcpo_ajax_shopurl').val();
+    $.ajax({
+        url: ajax_controller_url,
+        method: 'POST',
+        type: 'POST',
+        dataType: 'text',
+        data: { paymentid: "fcpomasterpass", action: "setcheckout" },
+        success: function(Response) {
+            var data = $.parseJSON(Response);
+            console.log(data);
+            MasterPass.client.checkout({
+                "requestToken": data.token,
+                "merchantCheckoutId": data.merchantCheckoutId,
+                "callbackUrl": data.callbackUrl,
+                "allowedCardTypes": data.allowedCardTypes,
+                "version": data.version
+            });
+        },
+        error: function() {
+            window.location = shop_url + 'index.php?cl=basket&fcpoerror=FCPO_ERROR_MP_SETCHECKOUT';
+        }
+    });
+});
+
+/**
+ * Triggers setcheckoutcall on button click
+ * used by flow theme
+ *
+ * @param void
+ */
+$('#LoginWithMasterpassBottom1').click(function(){
+    var ajax_controller_url = $('#fcpo_ajax_controller_url').val();
+    var shop_url = $('#fcpo_ajax_shopurl').val();
+    $.ajax({
+        url: ajax_controller_url,
+        method: 'POST',
+        type: 'POST',
+        dataType: 'text',
+        data: { paymentid: "fcpomasterpass", action: "setcheckout" },
+        success: function(Response) {
+            var data = $.parseJSON(Response);
+            console.log(data);
+            MasterPass.client.checkout({
+                "requestToken": data.token,
+                "merchantCheckoutId": data.merchantCheckoutId,
+                "callbackUrl": data.callbackUrl,
+                "allowedCardTypes": data.allowedCardTypes,
+                "version": data.version
+            });
+        },
+        error: function() {
+            window.location = shop_url + 'index.php?cl=basket&fcpoerror=FCPO_ERROR_MP_SETCHECKOUT';
+        }
+    });
+});
+
+/**
+ * Triggers setcheckoutcall on button click
  *
  * @param void
  */

@@ -62,6 +62,12 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
     protected $_sCurrentAmazonButtonId = null;
 
     /**
+     * Determines the source of a button include
+     * @var string|null
+     */
+    protected $_sCurrentMasterpassButtonId = null;
+
+    /**
      * Initializing needed things
      */
     public function __construct() {
@@ -533,7 +539,7 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
      * @param void
      * @return string
      */
-    public function fcpoGetMasterPassButtonImg() {
+    public function fcpoGetMasterpassButtonImg() {
         $sUrl = 'https://masterpass.com/dyn/img/btn/global/mp_chk_btn_147x034px.svg';
 
         return $sUrl;
@@ -545,7 +551,7 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
      * @param void
      * @return string
      */
-    public function fcpoGetMasterPassJsLibUrl() {
+    public function fcpoGetMasterpassJsLibUrl() {
         $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
         $oPayment->load('fcpomasterpass');
         $blIsLive = $oPayment->oxpayments__fcpolivemode->value;
@@ -570,6 +576,17 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
         $blIsActive = (bool) $oPayment->oxpayments__oxactive->value;
 
         return $blIsActive;
+    }
+
+    /**
+     * References current button id set in template
+     * for determine the last masterpass button on current page
+     *
+     * @param string $sButtonId
+     * @return void
+     */
+    public function fcpoSetCurrentMasterpassButtonId($sButtonId) {
+        $this->_sCurrentMasterpassButtonId = $sButtonId;
     }
 
     /**
