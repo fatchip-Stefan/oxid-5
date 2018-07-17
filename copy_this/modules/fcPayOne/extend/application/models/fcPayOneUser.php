@@ -366,16 +366,20 @@ class fcPayOneUser extends fcPayOneUser_parent {
         /**
          * @todo currently very basic by simply splitting of space
          */
-        $aReturn = array();
-        $aParts = explode(' ', $sStreetAndStreetNr);
-        foreach ($aParts as $iIndex=>$sPart) {
-            if ($iIndex==(count($aParts)-1)) {
-                $aReturn['streetnr'] = $sPart;
-            } else {
-                $aStreetNames[] = $sPart;
-            }
+        $aStreetParts = explode(' ', $sStreetAndStreetNr);
+        $blReturnDefault = (
+            !is_array($aStreetParts) ||
+            count($aStreetParts) <= 1
+        );
+
+        if ($blReturnDefault) {
+            $aReturn['street'] = $sStreetAndStreetNr;
+            $aReturn['streetnr'] = '';
+            return $aReturn;
         }
-        $aReturn['street'] = implode(' ', $aStreetNames);
+
+        $aReturn['streetnr'] = array_pop($aStreetParts);
+        $aReturn['street'] = implode(' ', $aStreetParts);
 
         return $aReturn;
     }
