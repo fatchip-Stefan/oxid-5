@@ -110,6 +110,7 @@ $aLang = array(
     'FCPO_KLS_CHOOSE_CAMPAIGN' => 'Please select a campaign',
     'FCPO_KLS_CAMPAIGN_INVALID' => 'You have to select a campaign.',
     'FCPO_KLS_NO_CAMPAIGN' => 'There are no installment-campaigns for your current combination of delivery-country, language and currency.<br>Please select another payment-type.',
+    'FCPO_MASTERPASS_LEARNMORE'                     => 'learn more',
 
     'FCPO_ORDER_MANDATE_HEADER' => 'SEPA direct debit',
     'FCPO_ORDER_MANDATE_INFOTEXT' => 'In order to debit the SEPA direct debit, we need a SEPA mandate from you.',

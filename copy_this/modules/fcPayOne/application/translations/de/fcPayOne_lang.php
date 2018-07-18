@@ -102,6 +102,7 @@ $aLang = array(
     'FCPO_KLS_CHOOSE_CAMPAIGN'                      => 'Bitte w&auml;hlen Sie die entsprechende Kampagne',
     'FCPO_KLS_CAMPAIGN_INVALID'                     => 'Sie m&uuml;ssen eine Kampagne ausw&auml;hlen.',
     'FCPO_KLS_NO_CAMPAIGN'                          => 'F&uuml;r Ihre aktuelle Kombination aus Lieferland, Sprache und W&auml;hrung gibt es keine Ratenkauf-Optionen.<br>Bitte w&auml;hlen Sie eine andere Zahlart.',
+    'FCPO_MASTERPASS_LEARNMORE'                     => 'Mehr erfahren',
 
     'FCPO_ORDER_MANDATE_HEADER'                     => 'SEPA-Lastschrift',
     'FCPO_ORDER_MANDATE_INFOTEXT'                   => 'Damit wir die SEPA-Lastschrift von Ihrem Konto einziehen kÃ¶nnen, benÃ¶tigen wir von Ihnen ein SEPA-Lastschriftmandat.',

@@ -18,5 +18,5 @@
          data-payone-masterpass-controller="[{$oViewConf->fcpoGetAjaxControllerUrl()}]"
          src="[{$oViewConf->fcpoGetMasterpassButtonImg()}]">
     <br>
-    <a href="https://www.mastercard.com/mc_us/wallet/learnmore/[{$oView->getActiveLangAbbr()}]/[{$oView->getActiveLangAbbr()|upper}]" target="_blank" style="margin-left: 35px;"><u>Mehr erfahren</u></a>
+    <a href="https://www.mastercard.com/mc_us/wallet/learnmore/[{$oView->getActiveLangAbbr()}]/[{$oView->getActiveLangAbbr()|upper}]" target="_blank" style="margin-left: 35px;"><u>[{oxmultilang ident="FCPO_MASTERPASS_LEARNMORE"}]</u></a>
 </div>
