@@ -1,9 +1,22 @@
-[{oxscript include=$oViewConf->fcpoGetModuleJsPath('fcPayOne.js')}]
-<link rel="stylesheet" type="text/css" href="[{$oViewConf->fcpoGetModuleCssPath('fcpomasterpass.css')}]">
-<script type="text/javascript" src="[{$oViewConf->fcpoGetMasterPassJsLibUrl()}]"></script>
+[{if $sMasterpassButtonId}]
+    [{assign var="iMasterpassButtonIncluded" value=$iMasterpassButtonIncluded+1}]
+    [{elseif !$iMasterpassButtonIncluded}]
+    [{assign var="iMasterpassButtonIncluded" value="0"}]
+    [{else}]
+    [{assign var="iMasterpassButtonIncluded" value=$iMasterpassButtonIncluded+1}]
+[{/if}]
 
-<div class="payone_basket_masterpass_btn_flow pull-right">
-    <input type="hidden" id="fcpo_ajax_controller_url" value="[{$oViewConf->fcpoGetAjaxControllerUrl()}]">
-    <input type="hidden" id="fcpo_ajax_shopurl" value="[{$oViewConf->fcpoGetShopUrl()}]">
-    <img id="fcpo_masterpass_button" src="[{$oViewConf->fcpoGetMasterPassButtonImg()}]">
+[{if !$sMasterpassButtonId}]
+    [{assign var="sMasterpassButtonId" value='LoginWithMasterpass'}]
+[{/if}]
+
+[{$oViewConf->fcpoSetCurrentMasterpassButtonId($sMasterpassButtonId)}]
+
+<div class="[{$sMasterpassButtonClass}]">
+    <img class="js-payone-masterpass"
+         data-payone-masterpass-shopurl="[{$oViewConf->fcpoGetShopUrl()}]"
+         data-payone-masterpass-controller="[{$oViewConf->fcpoGetAjaxControllerUrl()}]"
+         src="[{$oViewConf->fcpoGetMasterpassButtonImg()}]">
+    <br>
+    <a href="https://www.mastercard.com/mc_us/wallet/learnmore/[{$oView->getActiveLangAbbr()}]/[{$oView->getActiveLangAbbr()|upper}]" target="_blank" style="margin-left: 35px;"><u>Mehr erfahren</u></a>
 </div>

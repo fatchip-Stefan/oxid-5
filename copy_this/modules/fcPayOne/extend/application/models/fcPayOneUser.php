@@ -307,6 +307,9 @@ class fcPayOneUser extends fcPayOneUser_parent {
         $oAddress->oxaddress__oxcountry = new oxField($aResponse['add_paydata[shipping_country]']);
         $oAddress->oxaddress__oxcountryid = new oxField($sCountryId);
         $oAddress->oxaddress__oxzip = new oxField($aResponse['add_paydata[shipping_zip]']);
+        $oAddress->oxaddress__oxaddinfo = new oxField($aResponse['add_paydata[addressaddition]']);
+
+
 
         // check if address exists
         $sEncodedDeliveryAddress = $oAddress->getEncodedDeliveryAddress();

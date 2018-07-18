@@ -895,9 +895,9 @@ $('#payolution_installment_check_availability').click(function(){
  *
  * @param void
  */
-$('#fcpo_masterpass_button').click(function(){
-    var ajax_controller_url = $('#fcpo_ajax_controller_url').val();
-    var shop_url = $('#fcpo_ajax_shopurl').val();
+$('.js-payone-masterpass').on('click',function(){
+    var ajax_controller_url = $(this).data('payone-masterpass-controller');
+    var shop_url = $(this).data('payone-masterpass-shopurl');
     $.ajax({
         url: ajax_controller_url,
         method: 'POST',

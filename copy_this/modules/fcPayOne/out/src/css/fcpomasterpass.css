@@ -1,5 +1,10 @@
 .payone_basket_masterpass_btn_flow {
-    padding-right: 12px;
-    cursor: pointer;
-    float: right;
+    float:right;
+    margin-right: 10px;
+}
+
+.payone_basket_masterpass_btn_flow_minibasket {
+    float:right;
+    margin-right: 10px;
+    margin-bottom: 10px;
 }

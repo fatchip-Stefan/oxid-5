@@ -2,8 +2,6 @@
 [{assign var="payment" value=$oView->getPayment()}]
 [{if $payment && method_exists($payment, 'fcpoGetMandateText') && $payment->fcpoGetMandateText()}]
     [{assign var="sMandateText" value=$payment->fcpoGetMandateText()}]
-    [{oxscript include=$oViewConf->fcpoGetModuleJsPath('fcPayOne.js')}]
-    [{oxscript include=$oViewConf->fcpoGetModuleCssPath('fcpayone.css')}]
     <div id="fcpoSEPAMandate">
         [{if method_exists($oViewConf, 'getActiveTheme') && $oViewConf->getActiveTheme() == 'mobile'}]
             <h3 class="heading section-heading">
