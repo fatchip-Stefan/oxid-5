@@ -744,7 +744,6 @@ function startCCHostedRequest() { // Function called by submitting PAY-button
 }
 
 function processPayoneResponseCCHosted(response) {
-    console.debug(response);
     var validExpiration = validateCardExpireDate(response);
     if (response.status === "VALID" && validExpiration) {
         var oForm = getPaymentForm();
@@ -752,6 +751,10 @@ function processPayoneResponseCCHosted(response) {
         oForm["dynvalue[fcpo_ccmode]"].value = getOperationMode(fcpoGetCreditcardType());
         oForm["dynvalue[fcpo_kknumber]"].value = response.truncatedcardpan;
         oForm.submit();
+    } else if (!validExpiration) {
+        document.getElementById('errorOutput').innerHTML = "Verfallsdatum der Karte erreicht. Bitte nutzen Sie eine andere Karte.";
+    } else {
+        document.getElementById('errorOutput').innerHTML = response.errormessage;
     }
 }
 
@@ -762,24 +765,24 @@ function processPayoneResponseCCHosted(response) {
  * @returns bool
  */
 function validateCardExpireDate(response) {
-    // current year month string has to be set into format YYMM
-    var fullMonth = new Array("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12");
-    var currentDate = new Date();
-    var fullYear = currentDate.getFullYear(); // need to use full year because getYear() is broken due to Y2K-Bug
-    var month = currentDate.getMonth();
-    month = fullMonth[month];
-    var year = fullYear.toString();
-    year = year.substr(2,4);
-    
-    var currentYearMonth = year + month;
-    var responseYearMonth = response.cardexpiredate;
-    responseYearMonth = responseYearMonth.toString();
-    
     var expireDateValid = false;
-    if (responseYearMonth > currentYearMonth) {
-        expireDateValid = true;
+    if (response.status === "VALID") {
+        // current year month string has to be set into format YYMM
+        var fullMonth = new Array("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12");
+        var currentDate = new Date();
+        var fullYear = currentDate.getFullYear(); // need to use full year because getYear() is broken due to Y2K-Bug
+        var month = currentDate.getMonth();
+        month = fullMonth[month];
+        var year = fullYear.toString();
+        year = year.substr(2, 4);
+
+        var currentYearMonth = year + month;
+        var responseYearMonth = response.cardexpiredate;
+        responseYearMonth = responseYearMonth.toString();;
+        if (responseYearMonth > currentYearMonth) {
+            expireDateValid = true;
+        }
     }
-    
     return expireDateValid;
 }
 
@@ -930,11 +933,11 @@ function fcpoGetIsPaymentSelected(paymentId) {
         if(oForm["dynvalue[fcpo_elv_country]"]) {
             fcCheckDebitCountry(oForm["dynvalue[fcpo_elv_country]"]);
         }
-        oForm.onsubmit = function(e){
+        $(oForm).on('submit', function(e){
             if ( fcCheckPaymentSelection() == false ) {
                 e.preventDefault();
             }
-        };
+        });
     }
     setTimeout(function(){
         if(document.getElementById('fcpoCreditcard') && typeof PayoneRequest == 'function') {
