@@ -73,14 +73,17 @@ class fcPayOneUser extends fcPayOneUser_parent {
         $sEmail = $aResponse['add_paydata[email]'];
         $blUserExists = $this->_fcpoUserExists($sEmail);
         if (!$blUserExists) {
-            $this->_fcpoCreateMasterpassUserByResponse($aResponse);
-            $sUserOxid = $this->getId();
+            $oUser = $this->_fcpoCreateMasterpassUserByResponse($aResponse);
+            $sUserOxid  = $oUser->getId();
+            $this->load($sUserOxid );
         } else {
             $sUserOxid = $this->_fcpoGetUserOxidByEmail($sEmail);
             $this->load($sUserOxid);
         }
 
         $this->_fcpoAddDeliveryAddress($aResponse, $sUserOxid, true);
+        $this->_sSelAddressId = $this->_oFcpoHelper->fcpoGetSessionVariable('deladrid');
+        $this->_oFcpoHelper->fcpoSetSessionVariable('sShipSet', 'oxidstandard');
         $this->_fcpoLogMeIn();
 
         return true;
@@ -103,24 +106,28 @@ class fcPayOneUser extends fcPayOneUser_parent {
      * Creates userdata and save
      *
      * @param void
-     * @return void
+     * @return oxUser $oUser
      */
     protected function _fcpoCreateMasterpassUserByResponse($aResponse) {
+        $aResponse = array_map('utf8_decode', $aResponse);
         $sCountryId =
             $this->_fcpoGetCountryIdByIso2($aResponse['add_paydata[country]']);
         $aAddressParts =
             $this->_fcpoSplitStreetAndStreetNr($aResponse['add_paydata[street]']);
 
-        $this->oxuser__oxusername = new oxField($aResponse['add_paydata[email]']);
-        $this->oxuser__oxfname = new oxField($aResponse['add_paydata[firstname]']);
-        $this->oxuser__oxlname = new oxField($aResponse['add_paydata[lastname]']);
-        $this->oxuser__oxzip = new oxField($aResponse['add_paydata[zip]']);
-        $this->oxuser__oxcity = new oxField($aResponse['add_paydata[city]']);
-        $this->oxuser__oxstreet = new oxField($aAddressParts['street']);
-        $this->oxuser__oxstreetnr = new oxField($aAddressParts['streetnr']);
-        $this->oxuser__oxcountryid = new oxField($sCountryId);
-
-        $this->save();
+        $oUser = $this->_oFcpoHelper->getFactoryObject('oxUser');
+        $oUser->oxuser__oxusername = new oxField($aResponse['add_paydata[email]']);
+        $oUser->oxuser__oxfname = new oxField($aResponse['add_paydata[firstname]']);
+        $oUser->oxuser__oxlname = new oxField($aResponse['add_paydata[lastname]']);
+        $oUser->oxuser__oxzip = new oxField($aResponse['add_paydata[zip]']);
+        $oUser->oxuser__oxcity = new oxField($aResponse['add_paydata[city]']);
+        $oUser->oxuser__oxstreet = new oxField($aAddressParts['street']);
+        $oUser->oxuser__oxstreetnr = new oxField($aAddressParts['streetnr']);
+        $oUser->oxuser__oxcountryid = new oxField($sCountryId);
+        $oUser->save();
+        $oUser->addToGroup('oxidnotyetordered');
+        $oUser->save();
+        return $oUser;
     }
 
     /**
@@ -308,8 +315,6 @@ class fcPayOneUser extends fcPayOneUser_parent {
         $oAddress->oxaddress__oxcountryid = new oxField($sCountryId);
         $oAddress->oxaddress__oxzip = new oxField($aResponse['add_paydata[shipping_zip]']);
         $oAddress->oxaddress__oxaddinfo = new oxField($aResponse['add_paydata[addressaddition]']);
-
-
 
         // check if address exists
         $sEncodedDeliveryAddress = $oAddress->getEncodedDeliveryAddress();
