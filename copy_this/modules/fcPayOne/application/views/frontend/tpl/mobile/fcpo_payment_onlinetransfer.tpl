@@ -93,7 +93,6 @@
                         <li class="dropdown-option"><a tabindex="-1" data-selection-id="HRAC_OOS">Hypo Ober&ouml;sterreich</a></li>
                         <li class="dropdown-option"><a tabindex="-1" data-selection-id="HRAC_SLB">Hypo Salzburg</a></li>
                         <li class="dropdown-option"><a tabindex="-1" data-selection-id="HRAC_STM">Hypo Steiermark</a></li>
-
                         <li class="dropdown-option"><a tabindex="-1" data-selection-id="EPS_SCHEL">Bankhaus Schelhammer & Schattera AG</a></li>
                         <li class="dropdown-option"><a tabindex="-1" data-selection-id="EPS_OBAG">Oberbank AG</a></li>
                         <li class="dropdown-option"><a tabindex="-1" data-selection-id="EPS_SCHOELLER">Schoellerbank AG</a></li>
@@ -137,7 +136,7 @@
                         <li class="dropdown-option"><a tabindex="-1" data-selection-id="TRIODOS_BANK">Triodos Bank</a></li>
                         <li class="dropdown-option"><a tabindex="-1" data-selection-id="KNAB_BANK">Knab</a></li>
                         <li class="dropdown-option"><a tabindex="-1" data-selection-id="VAN_LANSCHOT_BANKIERS">van Lanschot</a></li>
-                        <li class="dropdown-option"><a tabindex="-1" data-selection-id="VAN_LANSCHOT_BANKIERS">van Lanschot</a></li>
+                        <li class="dropdown-option"><a tabindex="-1" data-selection-id="MONEYOU">Moneyou</a></li>
                     </ul>
                     [{if !empty($dynvalue.fcpo_so_bankgrouptype_idl)}]
                         [{oxscript add="$('#sFcpoSoBanktypeIdlSelected').val('"|cat:$dynvalue.fcpo_so_bankgrouptype_idl|cat:"');"}]
