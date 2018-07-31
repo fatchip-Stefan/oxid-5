@@ -191,11 +191,36 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         }
 
         // redirect for executing orderprocess
+        $this->fcSetPaymentId('fcpomasterpass');
+        $this->fcSetShipSet('oxidstandard');
         $oConfig = $this->getConfig();
         $sShopUrl = $oConfig->getShopUrl();
         $sOrderRedirectUrl = $sShopUrl."index.php?cl=order";
         $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
         $oUtils->redirect($sOrderRedirectUrl);
+    }
+
+    /**
+     * Set given ship set id
+     *
+     * @param $sShipSet
+     * @return void
+     */
+    public function fcSetShipSet($sShipSet) {
+        $this->_oFcpoHelper->fcpoSetSessionVariable('sShipSet', $sShipSet);
+    }
+
+    /**
+     * Make sure paymentid is set into environment
+     *
+     * @param $sPaymentId
+     * @return void
+     */
+    public function fcSetPaymentId($sPaymentId) {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oBasket->setPayment($sPaymentId);
+        $this->_oFcpoHelper->fcpoSetSessionVariable('paymentid', $sPaymentId);
     }
 
     /**
