@@ -306,7 +306,15 @@ class fcpoRequest extends oxSuperCfg {
 
         $blPaymentTypeKnown = $this->setPaymentParameters($oOrder, $aDynvalue, $sRefNr);
 
-        if ($oOrder->isDetailedProductInfoNeeded() || ($blIsPreauthorization === false && $this->getConfig()->getConfigParam('blFCPOSendArticlelist') === true)) {
+        $blAddProductInfo = (
+            $oOrder->isDetailedProductInfoNeeded() ||
+            (
+                $blIsPreauthorization === false &&
+                $this->getConfig()->getConfigParam('blFCPOSendArticlelist') === true
+            )
+        );
+
+        if ($blAddProductInfo) {
             $this->addProductInfo($oOrder);
         }
 
@@ -1657,7 +1665,15 @@ class fcpoRequest extends oxSuperCfg {
         }
 
         // Bedingung $amount == $oOrder->oxorder__oxorder__oxtotalordersum->value nur solange wie Artikelliste nicht f?r Multi-Capture m?glich
-        if ($oOrder->isDetailedProductInfoNeeded() || ($this->getConfig()->getConfigParam('blFCPOSendArticlelist') === true && $dAmount == $oOrder->oxorder__oxtotalordersum->value)) {
+        $blAddProductInfo = (
+            $oOrder->isDetailedProductInfoNeeded() ||
+            (
+                $this->getConfig()->getConfigParam('blFCPOSendArticlelist') === true &&
+                $dAmount == $oOrder->oxorder__oxtotalordersum->value
+            )
+        );
+
+        if ($blAddProductInfo) {
             $dAmount = $this->addProductInfo($oOrder, $aPositions);
             if ($aPositions !== false) {
                 //partial-amount
