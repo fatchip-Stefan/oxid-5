@@ -77,9 +77,9 @@ class fcPayOneUser extends fcPayOneUser_parent {
             $this->load($sUserOxid);
         }
 
-        $this->_fcpoCreateMasterpassUserByResponse($aResponse, true);
+        $this->_fcpoCreateMasterpassUserByResponse($aResponse);
         $sUserOxid = $this->getId();
-        $this->_fcpoAddDeliveryAddress($aResponse, $sUserOxid, true);
+        $this->_fcpoAddDeliveryAddress($aResponse, $sUserOxid);
         $this->_fcpoLogMeIn();
 
         return true;
