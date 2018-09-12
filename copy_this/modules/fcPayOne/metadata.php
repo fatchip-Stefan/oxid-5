@@ -69,7 +69,6 @@ $aModule = array(
         'fcpayone_boni'                     => 'fcPayOne/application/controllers/admin/fcpayone_boni.php',
         'fcpayone_boni_list'                => 'fcPayOne/application/controllers/admin/fcpayone_boni_list.php',
         'fcpayone_boni_main'                => 'fcPayOne/application/controllers/admin/fcpayone_boni_main.php',
-        'fcpayone_common'                   => 'fcPayOne/application/controllers/admin/fcpayone_common.php',
         'fcpayone_list'                     => 'fcPayOne/application/controllers/admin/fcpayone_list.php',
         'fcpayone_log'                      => 'fcPayOne/application/controllers/admin/fcpayone_log.php',
         'fcpayone_log_list'                 => 'fcPayOne/application/controllers/admin/fcpayone_log_list.php',
@@ -79,9 +78,6 @@ $aModule = array(
         'fcpayone_status_forwarding'        => 'fcPayOne/application/controllers/admin/fcpayone_status_forwarding.php',
         'fcpayone_status_mapping'           => 'fcPayOne/application/controllers/admin/fcpayone_status_mapping.php',
         'fcpayone_error_mapping'            => 'fcPayOne/application/controllers/admin/fcpayone_error_mapping.php',
-        'fcpayone_support'                  => 'fcPayOne/application/controllers/admin/fcpayone_support.php',
-        'fcpayone_support_list'             => 'fcPayOne/application/controllers/admin/fcpayone_support_list.php',
-        'fcpayone_support_main'             => 'fcPayOne/application/controllers/admin/fcpayone_support_main.php',
         // controllers
         'fcpayoneiframe'                    => 'fcPayOne/application/controllers/fcpayoneiframe.php',
         // models
@@ -116,7 +112,6 @@ $aModule = array(
         'fcpayone_boni_list.tpl'            => 'fcPayOne/application/views/admin/tpl/fcpayone_boni_list.tpl',
         'fcpayone_boni_main.tpl'            => 'fcPayOne/application/views/admin/tpl/fcpayone_boni_main.tpl',
         'fcpayone_cc_preview.tpl'           => 'fcPayOne/application/views/admin/tpl/fcpayone_cc_preview.tpl',
-        'fcpayone_common.tpl'               => 'fcPayOne/application/views/admin/tpl/fcpayone_common.tpl',
         'fcpayone_list.tpl'                 => 'fcPayOne/application/views/admin/tpl/fcpayone_list.tpl',
         'fcpayone_log.tpl'                  => 'fcPayOne/application/views/admin/tpl/fcpayone_log.tpl',
         'fcpayone_log_list.tpl'             => 'fcPayOne/application/views/admin/tpl/fcpayone_log_list.tpl',
@@ -126,9 +121,6 @@ $aModule = array(
         'fcpayone_status_forwarding.tpl'    => 'fcPayOne/application/views/admin/tpl/fcpayone_status_forwarding.tpl',
         'fcpayone_status_mapping.tpl'       => 'fcPayOne/application/views/admin/tpl/fcpayone_status_mapping.tpl',
         'fcpayone_error_mapping.tpl'        => 'fcPayOne/application/views/admin/tpl/fcpayone_error_mapping.tpl',
-        'fcpayone_support.tpl'              => 'fcPayOne/application/views/admin/tpl/fcpayone_support.tpl',
-        'fcpayone_support_list.tpl'         => 'fcPayOne/application/views/admin/tpl/fcpayone_support_list.tpl',
-        'fcpayone_support_main.tpl'         => 'fcPayOne/application/views/admin/tpl/fcpayone_support_main.tpl',
     ),
     'events'        => array(
         'onActivate'                        => 'fcpayone_events::onActivate',

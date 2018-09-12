@@ -78,7 +78,6 @@ Folder application/views/admin/de:
 * fcpayone_boni_list.tpl
 * fcpayone_boni_main.tpl
 * fcpayone_cc_preview.tpl
-* fcpayone_common.tpl
 * fcpayone_list.tpl
 * fcpayone_log.tpl
 * fcpayone_log_list.tpl
@@ -87,9 +86,6 @@ Folder application/views/admin/de:
 * fcpayone_protocol.tpl
 * fcpayone_status_forwarding.tpl
 * fcpayone_status_mapping.tpl
-* fcpayone_support.tpl
-* fcpayone_support_list.tpl
-* fcpayone_support_main.tpl
 
 #####Folder application/views/admin/tpl/popups:
 * fcpayone_main.tpl

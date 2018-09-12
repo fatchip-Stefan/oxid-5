@@ -404,6 +404,9 @@ $aLang = array(
     'FCPO_CONFIG_GROUP_PAYDIREKT'               => 'Paydirekt',
     'FCPO_PAYDIREKT_OVERCAPTURE'                => 'Allow overcapture?',
     'FCPO_HELP_PAYDIREKT_OVERCAPTURE'           => 'Let you capture a 10% higher amount based on the sum that has been preauthorized.<br><b>Please ONLY activate this option in confirmation with Paydirekt!</b>',
+    'FCPO_CONFIG_GROUP_SECINVOICE'              => 'Secure Invoice (rec/POV)',
+    'FCPO_SECINVOICE_PORTAL_ID'                 => 'PAYONE Portal ID (for payment Secure Invoice)',
+    'FCPO_SECINVOICE_PORTAL_KEY'                => 'PAYONE Portal Key (for payment Secure Invoice)',
 );
 
 /*

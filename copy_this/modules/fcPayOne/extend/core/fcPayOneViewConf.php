@@ -40,7 +40,7 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
     protected $_sFcPoHostedJsUrl = 'https://secure.pay1.de/client-api/js/v1/payone_hosted_min.js';
 
     /**
-     * List of handled themes
+     * List of handled themes and their belonging pathes
      * @var array
      */
     protected $_aSupportedThemes = array(
