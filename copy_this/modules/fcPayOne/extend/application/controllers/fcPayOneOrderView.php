@@ -94,8 +94,23 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
 
         return parent::execute();
     }
-    
-    
+
+    /**
+     * Returns currrent paymentobject based on id in session
+     * Added special handling handler
+     * @param void
+     * @return object
+     */
+    public function getPayment() {
+        $oPayment = $this->_fcpoGetPreparedPayment();
+
+        if ($oPayment) {
+            $this->_oPayment = $oPayment;
+        }
+
+        return parent::getPayment();
+    }
+
     /**
      * Handles paypal express
      * 
@@ -111,6 +126,89 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
             $oUtilsView->addErrorToDisplay($oExcp);
             return "basket";
         }
+    }
+
+    /**
+     * Loads payment from session and deligates to specific methods
+     * depending on paymentid
+     *
+     * @param void
+     * @return mixed false|object
+     */
+    protected function _fcpoGetPreparedPayment() {
+        $oBasket = $this->getBasket();
+        // payment is set ?
+        $sPaymentid = $oBasket->getPaymentId();
+
+        if (!$sPaymentid) return false;
+
+        $oPayment = oxNew('oxpayment');
+        $oPayment->load($sPaymentid);
+        $sCallMethod = "_fcpoPreparePayment_".$sPaymentid;
+
+        if (!method_exists($this,$sCallMethod)) return false;
+
+        $oPayment = $this->$sCallMethod($oPayment);
+
+        return $oPayment;
+    }
+
+    /**
+     * Adds needed data to payment object
+     *
+     * @param $oPayment
+     * @return object
+     */
+    protected function _fcpoPreparePayment_fcpomasterpass($oPayment) {
+        $sCurrentDesc = $oPayment->oxpayments__oxdesc->value;
+        $sAddDescription = $this->_fcpoGetMasterpassCCData();
+
+        $sNewDesc = $sCurrentDesc." (".$sAddDescription.")";
+
+        $oPayment->oxpayments__oxdesc = new oxField($sNewDesc);
+
+        return $oPayment;
+    }
+
+    /**
+     * Returns CC Data to be shown under payment info
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoGetMasterpassCCData() {
+        $sSessionString =
+            $this->_oFcpoHelper->fcpoGetSessionVariable('fcpompdata');
+
+        $aCCData = explode('|', $sSessionString);
+        $sCardTypeShort = $aCCData[0];
+        $sCardPan = $aCCData[1];
+
+        $sCardType = $this->_fcpoGetMasterpassCardType($sCardTypeShort);
+
+        $sCCData = $sCardType.", No.:".$sCardPan;
+
+        return $sCCData;
+    }
+
+    /**
+     * Returns full name by given card type shortcut
+     *
+     * @param $sCardTypeShort
+     * @return void
+     */
+    protected function _fcpoGetMasterpassCardType($sCardType) {
+        $aMap = array(
+            'M' => 'Mastercard',
+            'V' => 'Visa',
+        );
+
+        $blTranslate = isset($aMap[$sCardType]);
+        if ($blTranslate) {
+            $sCardType = $aMap[$sCardType];
+        }
+
+        return $sCardType;
     }
 
     /**

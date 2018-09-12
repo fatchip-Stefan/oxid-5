@@ -191,6 +191,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         }
 
         // redirect for executing orderprocess
+        $this->_fcpoSetMasterpassCCDataIntoSession($aResponse);
         $this->fcSetPaymentId('fcpomasterpass');
         $this->fcSetShipSet('oxidstandard');
         $oConfig = $this->getConfig();
@@ -198,6 +199,19 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         $sOrderRedirectUrl = $sShopUrl."index.php?cl=order";
         $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
         $oUtils->redirect($sOrderRedirectUrl);
+    }
+
+    /**
+     * Writes CC-DataString
+     *
+     * @param $aResponse
+     * @return void
+     */
+    protected function _fcpoSetMasterpassCCDataIntoSession($aResponse) {
+        $sSessionString  = $aResponse['add_paydata[cardtype]']."|";
+        $sSessionString .= $aResponse['add_paydata[truncatedcardpan]'];
+
+        $this->_oFcpoHelper->fcpoSetSessionVariable('fcpompdata', $sSessionString);
     }
 
     /**
