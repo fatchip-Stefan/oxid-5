@@ -55,6 +55,112 @@ class fcPayOneUser extends fcPayOneUser_parent {
     }
 
     /**
+     * Set/Create user for masterpass payment and returns
+     * if action has been successfull
+     *
+     * @param $aResponse
+     * @return bool
+     */
+    public function fcpoSetMasterpassUser($aResponse) {
+        $sMasterpassWorkorderId =
+            $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoMasterpassWorkorderId');
+        if (!$sMasterpassWorkorderId) return false;
+
+        $blValidUserData =
+            $this->_fcpoValidateMasterpassUserDataByResponse($aResponse);
+        if (!$blValidUserData) return false;
+
+        $sEmail = $aResponse['add_paydata[email]'];
+        $blUserExists = $this->_fcpoUserExists($sEmail);
+        if ($blUserExists) {
+            $sUserOxid = $this->_fcpoGetUserOxidByEmail($sEmail);
+            $this->load($sUserOxid);
+        }
+
+        $this->_fcpoCreateMasterpassUserByResponse($aResponse);
+        $sUserOxid = $this->getId();
+        $this->_fcpoAddDeliveryAddress($aResponse, $sUserOxid);
+        $this->_fcpoLogMeIn();
+
+        return true;
+    }
+
+    /**
+     * Logs user into session
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoLogMeIn($sUserId=null) {
+        if ($sUserId === null) {
+            $sUserId = $this->getId();
+        }
+        $this->_oFcpoHelper->fcpoSetSessionVariable('usr', $sUserId);
+    }
+
+    /**
+     * Creates/Overwrites userdata and save
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoCreateMasterpassUserByResponse($aResponse, $blFixUtf8=false) {
+        if ($blFixUtf8) {
+            $aResponse = array_map('utf8_decode', $aResponse);
+        }
+
+        $sCountryId =
+            $this->_fcpoGetCountryIdByIso2($aResponse['add_paydata[country]']);
+        $aAddressParts =
+            $this->_fcpoSplitStreetAndStreetNr($aResponse['add_paydata[street]']);
+
+        $this->oxuser__oxusername = new oxField($aResponse['add_paydata[email]']);
+        $this->oxuser__oxfname = new oxField($aResponse['add_paydata[firstname]']);
+        $this->oxuser__oxlname = new oxField($aResponse['add_paydata[lastname]']);
+        $this->oxuser__oxzip = new oxField($aResponse['add_paydata[zip]']);
+        $this->oxuser__oxcity = new oxField($aResponse['add_paydata[city]']);
+        $this->oxuser__oxstreet = new oxField($aAddressParts['street']);
+        $this->oxuser__oxstreetnr = new oxField($aAddressParts['streetnr']);
+        $this->oxuser__oxcountryid = new oxField($sCountryId);
+        $this->oxuser__oxaddinfo = new oxField($aResponse['add_paydata[addressaddition]']);
+        $this->save();
+
+        // adding to nessessary groups
+        $this->addToGroup('oxidnotyetordered');
+        $this->addToGroup('oxidcustomer');
+
+        $this->save();
+    }
+
+    /**
+     * Validates if getcheckoutdata is fulfills needs for creating a user
+     *
+     * @param $aResponse
+     * @return bool
+     */
+    protected function _fcpoValidateMasterpassUserDataByResponse($aResponse) {
+        $blValid = (
+            isset($aResponse['add_paydata[email]']) &&
+            isset($aResponse['add_paydata[firstname]']) &&
+            isset($aResponse['add_paydata[lastname]']) &&
+            isset($aResponse['add_paydata[country]']) &&
+            isset($aResponse['add_paydata[zip]']) &&
+            isset($aResponse['add_paydata[city]']) &&
+            isset($aResponse['add_paydata[street]'])
+        );
+
+        if (!$blValid) return false;
+
+        // set paymentid
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oBasket->setPayment('fcpomasterpass');
+        $this->_oFcpoHelper->fcpoSetSessionVariable('paymentid', 'fcpomasterpass');
+
+        return true;
+    }
+
+    /**
      * Method manages adding/merging userdata
      *
      * @param array $aResponse
@@ -107,7 +213,7 @@ class fcPayOneUser extends fcPayOneUser_parent {
             $sUserId = $this->_fcpoAddAmazonUser($aResponse);
         }
         // logoff and on again
-        $this->_oFcpoHelper->fcpoSetSessionVariable('usr', $sUserId);
+        $this->_fcpoLogMeIn($sUserId);
     }
 
     /**
@@ -136,7 +242,7 @@ class fcPayOneUser extends fcPayOneUser_parent {
         $oUser->save();
 
         // add and set deliveryaddress
-        $this->_fcpoAmazonAddDeliveryAddress($aResponse, $sUserOxid);
+        $this->_fcpoAddDeliveryAddress($aResponse, $sUserOxid);
 
         return $sUserOxid;
     }
@@ -172,7 +278,7 @@ class fcPayOneUser extends fcPayOneUser_parent {
         $oUser->save();
 
         // add and set deliveryaddress
-        $this->_fcpoAmazonAddDeliveryAddress($aResponse, $sUserOxid);
+        $this->_fcpoAddDeliveryAddress($aResponse, $sUserOxid);
 
         return $sUserOxid;
     }
@@ -184,15 +290,26 @@ class fcPayOneUser extends fcPayOneUser_parent {
      * @param string $sUserOxid
      * @return void
      */
-    protected function _fcpoAmazonAddDeliveryAddress($aResponse, $sUserOxid) {
+    protected function _fcpoAddDeliveryAddress($aResponse, $sUserOxid, $blFixUtf8=false) {
+        if ($blFixUtf8) {
+            $aResponse = array_map('utf8_decode', $aResponse);
+        }
         $aStreetParts = $this->_fcpoSplitStreetAndStreetNr($aResponse['add_paydata[shipping_street]']);
         $sCountryId = $this->_fcpoGetCountryIdByIso2($aResponse['add_paydata[shipping_country]']);
+        $sFirstName = trim($aResponse['add_paydata[shipping_firstname]']);
+        $sLastName = trim($aResponse['add_paydata[shipping_lastname]']);
+
+        if (empty($sLastName)) {
+            $aNameParts = $this->_fcpoSplitNameParts($sFirstName);
+            $sFirstName = $aNameParts['firstname'];
+            $sLastName = $aNameParts['lastname'];
+        }
 
         $oAddress = $this->_oFcpoHelper->getFactoryObject('oxaddress');
         $oAddress->oxaddress__oxuserid = new oxField($sUserOxid);
         $oAddress->oxaddress__oxaddressuserid = new oxField($sUserOxid);
-        $oAddress->oxaddress__oxfname = new oxField(trim($aResponse['add_paydata[shipping_firstname]']));
-        $oAddress->oxaddress__oxlname = new oxField(trim($aResponse['add_paydata[shipping_lastname]']));
+        $oAddress->oxaddress__oxfname = new oxField($sFirstName);
+        $oAddress->oxaddress__oxlname = new oxField($sLastName);
         $oAddress->oxaddress__oxstreet = new oxField($aStreetParts['street']);
         $oAddress->oxaddress__oxstreetnr = new oxField($aStreetParts['streetnr']);
         $oAddress->oxaddress__oxfon = new oxField($aResponse['add_paydata[shipping_telephonenumber]']);
@@ -200,6 +317,7 @@ class fcPayOneUser extends fcPayOneUser_parent {
         $oAddress->oxaddress__oxcountry = new oxField($aResponse['add_paydata[shipping_country]']);
         $oAddress->oxaddress__oxcountryid = new oxField($sCountryId);
         $oAddress->oxaddress__oxzip = new oxField($aResponse['add_paydata[shipping_zip]']);
+        $oAddress->oxaddress__oxaddinfo = new oxField($aResponse['add_paydata[shipping_addressaddition]']);
 
         // check if address exists
         $sEncodedDeliveryAddress = $oAddress->getEncodedDeliveryAddress();
@@ -212,6 +330,25 @@ class fcPayOneUser extends fcPayOneUser_parent {
         }
 
         $this->_oFcpoHelper->fcpoSetSessionVariable('deladrid', $sEncodedDeliveryAddress);
+    }
+
+    /**
+     * Takes a complete name string and seperates into first and lastname
+     *
+     * @param $sSingleNameString
+     * @return array
+     */
+    protected function _fcpoSplitNameParts($sSingleNameString) {
+        $aParts = explode(' ', $sSingleNameString);
+        $sLastName = array_pop($aParts);
+        $sFirstName = implode(' ', $aParts);
+
+        $aReturn['firstname'] = $sFirstName;
+        $aReturn['lastname'] = $sLastName;
+
+        $aReturn = array_map('trim', $aReturn);
+
+        return $aReturn;
     }
 
     /**
@@ -274,12 +411,13 @@ class fcPayOneUser extends fcPayOneUser_parent {
     /**
      * Method checks if a user WITH password exists using the given email-address
      *
-     * @param string $sAmazonEmailAddress
+     * @param string $sEmailAddress
+     * @param bool $blWithPasswd
      * @return bool
      */
-    protected function _fcpoUserExists($sAmazonEmailAddress, $blWithPasswd=false) {
+    protected function _fcpoUserExists($sEmailAddress, $blWithPasswd=false) {
         $blReturn = false;
-        $sUserOxid = $this->_fcpoGetUserOxidByEmail($sAmazonEmailAddress);
+        $sUserOxid = $this->_fcpoGetUserOxidByEmail($sEmailAddress);
         if ($sUserOxid && !$blWithPasswd) {
             $blReturn = true;
         } elseif ($sUserOxid && $blWithPasswd) {

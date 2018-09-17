@@ -167,6 +167,77 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     }
 
     /**
+     * Catches success return for validating and processing next steps
+     *
+     * @param void
+     * @return void
+     */
+    public function fcpoMasterpassSuccessReturn() {
+        $oRequest = $this->_oFcpoHelper->getFactoryObject('fcporequest');
+        $aResponse = $oRequest->fcpoSendRequestMasterpassGetCheckout();
+        $blError = ($aResponse['status'] == 'ERROR');
+
+        if ($blError) {
+            $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
+            return $this->render();
+        }
+
+        $oUser = $this->_oFcpoHelper->getFactoryObject('oxUser');
+        $blSuccess = $oUser->fcpoSetMasterpassUser($aResponse);
+
+        if (!$blSuccess) {
+            $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
+            return $this->render();
+        }
+
+        // redirect for executing orderprocess
+        $this->_fcpoSetMasterpassCCDataIntoSession($aResponse);
+        $this->fcSetPaymentId('fcpomasterpass');
+        $this->fcSetShipSet('oxidstandard');
+        $oConfig = $this->getConfig();
+        $sShopUrl = $oConfig->getShopUrl();
+        $sOrderRedirectUrl = $sShopUrl."index.php?cl=order";
+        $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
+        $oUtils->redirect($sOrderRedirectUrl);
+    }
+
+    /**
+     * Writes CC-DataString
+     *
+     * @param $aResponse
+     * @return void
+     */
+    protected function _fcpoSetMasterpassCCDataIntoSession($aResponse) {
+        $sSessionString  = $aResponse['add_paydata[cardtype]']."|";
+        $sSessionString .= $aResponse['add_paydata[truncatedcardpan]'];
+
+        $this->_oFcpoHelper->fcpoSetSessionVariable('fcpompdata', $sSessionString);
+    }
+
+    /**
+     * Set given ship set id
+     *
+     * @param $sShipSet
+     * @return void
+     */
+    public function fcSetShipSet($sShipSet) {
+        $this->_oFcpoHelper->fcpoSetSessionVariable('sShipSet', $sShipSet);
+    }
+
+    /**
+     * Make sure paymentid is set into environment
+     *
+     * @param $sPaymentId
+     * @return void
+     */
+    public function fcSetPaymentId($sPaymentId) {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oBasket->setPayment($sPaymentId);
+        $this->_oFcpoHelper->fcpoSetSessionVariable('paymentid', $sPaymentId);
+    }
+
+    /**
      * Returning error-text AND delete it from session
      *
      * @param void
