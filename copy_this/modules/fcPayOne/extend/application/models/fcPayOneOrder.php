@@ -1572,7 +1572,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
             } else {
                 $sRedirectUrl = $aResponse['redirecturl'];
             }
-            $oUtils->redirect($sRedirectUrl);
+            $oUtils->redirect($sRedirectUrl, false);
         }
     }
 
