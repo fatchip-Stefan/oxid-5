@@ -104,7 +104,6 @@ class fcpoRequest extends oxSuperCfg {
         'backurl',
         'clearingtype',
         'currency',
-        'customerid',
         'de',
         'encoding',
         'id',
@@ -2726,12 +2725,6 @@ class fcpoRequest extends oxSuperCfg {
         $oCountry->load($oOrder->oxorder__oxbillcountryid->value);
         $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
 
-        if ($blIsUpdateUser === false && $sPaymentId != 'fcpoamazonpay') {
-            /**
-             * TODO: check if that if condition is correctly as request updateuser doesn't have a customerid which is invalid, as said by Payone Technical Support
-             */
-            $this->addParameter('customerid', $oUser->oxuser__oxcustnr->value);
-        }
         $this->addParameter('salutation', ($oOrder->oxorder__oxbillsal->value == 'MR' ? 'Herr' : 'Frau'), $blIsUpdateUser);
         $this->addParameter('gender', ($oOrder->oxorder__oxbillsal->value == 'MR' ? 'm' : 'f'), $blIsUpdateUser);
         $this->addParameter('firstname', $oOrder->oxorder__oxbillfname->value, $blIsUpdateUser);
@@ -2801,7 +2794,6 @@ class fcpoRequest extends oxSuperCfg {
         $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID')); //ID of PayOne Sub-Account
         $this->addParameter('clearingtype', 'elv');
 
-        $this->addParameter('customerid', $oUser->oxuser__oxcustnr->value);
         $sPayOneUserId = $this->_getPayoneUserIdByCustNr($oUser->oxuser__oxcustnr->value);
         if ($sPayOneUserId) {
             $this->addParameter('userid', $sPayOneUserId);
