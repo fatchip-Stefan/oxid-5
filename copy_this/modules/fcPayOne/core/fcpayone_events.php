@@ -189,7 +189,7 @@ class fcpayone_events
         CREATE TABLE IF NOT EXISTS `fcposhadowbasket` (
           `FCPOSESSIONID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL DEFAULT '',
           `OXORDERID` char(32) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT '',
-          `FCPOBASKET` text NOT NULL,
+          `FCPOBASKET` mediumtext NOT NULL,
           `FCPOCREATED` datetime NOT NULL,
           `FCPOCHECKED` datetime DEFAULT NULL,
           PRIMARY KEY (`FCPOSESSIONID`),
