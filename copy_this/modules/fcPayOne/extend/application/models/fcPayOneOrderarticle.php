@@ -104,6 +104,8 @@ class fcPayOneOrderarticle extends fcPayOneOrderarticle_parent {
      * @return boolean
      */
     protected function _fcCheckReduceStockAfterRedirect($oOrder) {
+        if (isAdmin()) return false;
+
         $oSession = $this->_oFcpoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
         $sPaymentId = $oBasket->getPaymentId();
