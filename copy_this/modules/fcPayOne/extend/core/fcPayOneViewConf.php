@@ -640,4 +640,17 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
 
         return $sShopUrl;
     }
+
+    /**
+     * Returns if if given paymentid is of type payone
+     *
+     * @param $sPaymentId
+     * @return bool
+     */
+    public function fcpoIsPayonePayment($sPaymentId) {
+        $blIsPayOne =
+            (bool) fcPayOnePayment::fcIsPayOnePaymentType($sPaymentId);
+
+        return $blIsPayOne;
+    }
 }

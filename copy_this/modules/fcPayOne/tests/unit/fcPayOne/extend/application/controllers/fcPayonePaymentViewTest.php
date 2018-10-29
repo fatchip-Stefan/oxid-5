@@ -1972,6 +1972,112 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOnePaymentView extends O
     }
 
     /**
+     * Testing fcpoGetFormattedPaymentCosts for coverage
+     *
+     * @param void
+     * @return void
+     */
+    public function test_fcpoGetFormattedPaymentCosts_Coverage() {
+        $oTestObject = $this->getMock('fcPayOnePaymentView', array(
+            '_fcpoFormatCurrency'
+        ));
+        $oTestObject
+            ->expects($this->any())
+            ->method('_fcpoFormatCurrency')
+            ->will($this->returnValue("2,99 EUR"));
+
+        $oMockPaymentPrice = $this->getMock('oxPrice', array(
+            'getBruttoPrice',
+            'getVatValue',
+        ));
+        $oMockPaymentPrice
+            ->expects($this->any())
+            ->method('getBruttoPrice')
+            ->will($this->returnValue(10.0));
+        $oMockPaymentPrice
+            ->expects($this->any())
+            ->method('getVatValue')
+            ->will($this->returnValue(1.9));
+
+        $oMockPayment = $this->getMock('oxPayment', array(
+            'getPrice'
+        ));
+        $oMockPayment
+            ->expects($this->any())
+            ->method('getPrice')
+            ->will($this->returnValue($oMockPaymentPrice));
+
+
+        $oMockLang = $this->getMock('oxLang', array('translateString'));
+        $oMockLang
+            ->expects($this->any())
+            ->method('translateString')
+            ->will($this->returnValue('someTranslatedString'));
+
+        $oMockViewConfig = $this->getMock('oxViewConfig', array(
+            'isFunctionalityEnabled',
+        ));
+        $oMockViewConfig
+            ->expects($this->any())
+            ->method('isFunctionalityEnabled')
+            ->will($this->returnValue(true));
+
+        $oHelper =
+            $this->getMockBuilder('fcpohelper')
+                ->disableOriginalConstructor()
+                ->getMock();
+        $oHelper
+            ->expects($this->any())
+            ->method('fcpoGetViewConfig')
+            ->will($this->returnValue($oMockViewConfig));
+        $oHelper
+            ->expects($this->any())
+            ->method('fcpoGetLang')
+            ->will($this->returnValue($oMockLang));
+
+        $sExpect = "(2,99 EUR someTranslatedString 2,99 EUR)";
+
+        $this->assertEquals(
+            $sExpect,
+            $oTestObject->fcpoGetFormattedPaymentCosts($oMockPaymentPrice)
+        );
+    }
+
+    /**
+     * Testing _fcpoFormatCurrency for coverage
+     */
+    public function test__fcpoFormatCurrency_Coverage() {
+        $oMockCur = new stdClass();
+        $oMockCur->side = "";
+        $oMockCur->sign = "€";
+
+        $oTestObject = $this->getMock('fcPayOnePaymentView', array(
+            'getActCurrency'
+        ));
+        $oTestObject
+            ->expects($this->any())
+            ->method('getActCurrency')
+            ->will($this->returnValue($oMockCur));
+
+        $oMockLang = $this->getMock('oxLang', array('formatCurrency'));
+        $oMockLang
+            ->expects($this->any())
+            ->method('formatCurrency')
+            ->will($this->returnValue('2,99'));
+
+        $oHelper =
+            $this->getMockBuilder('fcpohelper')
+                ->disableOriginalConstructor()
+                ->getMock();
+        $oHelper
+            ->expects($this->any())
+            ->method('fcpoGetLang')
+            ->will($this->returnValue($oMockLang));
+
+        $this->assertEquals("2,99 EUR", $oTestObject->_fcpoFormatCurrency(2.99));
+    }
+
+    /**
      * Testing _fcCleanupSessionFragments for coverage
      * 
      * @param void
