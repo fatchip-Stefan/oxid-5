@@ -978,9 +978,7 @@ function fcpoGetIsPaymentSelected(paymentId) {
     setTimeout(function(){
         if(document.getElementById('fcpoCreditcard') && typeof PayoneRequest == 'function') {
             var blCCSelected = fcpoGetIsPaymentSelected('fcpocreditcard');
-            var blCCIframeSelected = fcpoGetIsPaymentSelected('fcpocreditcard_iframe');
-            var blSelected = (blCCSelected || blCCIframeSelected);
-            var sDisplayType = (blSelected) ? 'block': '';
+            var sDisplayType = (blCCSelected) ? 'block': '';
             document.getElementById('fcpoCreditcard').style.display = sDisplayType;
             // remove loading spinner
             var oSpinnerNode = document.getElementById('fcpoCreditcardSpinner');

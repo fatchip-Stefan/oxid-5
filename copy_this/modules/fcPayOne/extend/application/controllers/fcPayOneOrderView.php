@@ -646,17 +646,4 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
 
         return $mReturn;
     }
-    
-    /* Maybe needed for future payment-methods
-    protected function _getNextStep($iSuccess) {
-        $sNextStep = parent::_getNextStep($iSuccess);
-
-        // Check if Yapital was selected and if thankyou would be the next step
-        $sPaymentId = $this->_oFcpoHelper->fcpoGetSessionVariable('paymentid');
-        if (fcPayOnePayment::fcIsPayOneIframePaymentType($sPaymentId) && stripos($sNextStep, 'thankyou') !== false) {
-            return 'fcpayoneiframe';
-        }
-        return $sNextStep;
-    }*/
-    
 }

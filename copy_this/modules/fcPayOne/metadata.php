@@ -78,8 +78,6 @@ $aModule = array(
         'fcpayone_status_forwarding'        => 'fcPayOne/application/controllers/admin/fcpayone_status_forwarding.php',
         'fcpayone_status_mapping'           => 'fcPayOne/application/controllers/admin/fcpayone_status_mapping.php',
         'fcpayone_error_mapping'            => 'fcPayOne/application/controllers/admin/fcpayone_error_mapping.php',
-        // controllers
-        'fcpayoneiframe'                    => 'fcPayOne/application/controllers/fcpayoneiframe.php',
         // models
         'fcpouserflag'                      => 'fcPayOne/application/models/fcpouserflag.php',
         'fcporequestlog'                    => 'fcPayOne/application/models/fcporequestlog.php',
@@ -99,9 +97,6 @@ $aModule = array(
         'fcpayone_events'                   => 'fcPayOne/core/fcpayone_events.php',
     ),
     'templates' => array(
-        // frontend
-        'fcpayoneiframe.tpl'                => 'fcPayOne/application/views/frontend/tpl/fcpayoneiframe.tpl',
-
         // admin
         'fcpayone_popup_main.tpl'           => 'fcPayOne/application/views/admin/tpl/popups/fcpayone_popup_main.tpl',
         'fcpayone.tpl'                      => 'fcPayOne/application/views/admin/tpl/fcpayone.tpl',

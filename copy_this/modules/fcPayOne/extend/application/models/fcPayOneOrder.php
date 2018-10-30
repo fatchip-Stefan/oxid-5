@@ -130,19 +130,6 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
     }
 
     /**
-     * Method validates if given payment-type is an payone iframe payment
-     * 
-     * @param string $sPaymenttype
-     * @return bool
-     */
-    public function isPayOneIframePayment($sPaymenttype = null) {
-        if (!$sPaymenttype) {
-            $sPaymenttype = $this->oxorder__oxpaymenttype->value;
-        }
-        return $this->_fcpoIsPayonePaymentType($sPaymenttype, true);
-    }
-
-    /**
      * Checks if user already exists
      * 
      * @param string $sEmail
@@ -294,17 +281,11 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
     protected function _isRedirectAfterSave() {
         if ($this->_blIsRedirectAfterSave === null) {
             $this->_blIsRedirectAfterSave = false;
-            $oSession = $this->_oFcpoHelper->fcpoGetSession();
-            $oBasket = $oSession->getBasket();
-            $sPaymentId = $oBasket->getPaymentId();
 
             $blUseRedirectAfterSave = (
                 $this->_oFcpoHelper->fcpoGetRequestParameter('fcposuccess') &&
                 $this->_oFcpoHelper->fcpoGetRequestParameter('refnr') &&
-                (
-                    $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoTxid') ||
-                    $sPaymentId == 'fcpocreditcard_iframe'
-                )
+                $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoTxid')
             );
 
             if ($blUseRedirectAfterSave) {
@@ -923,20 +904,19 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
     /**
      * Check Txid against transactionstatus table and set resulting order values
      * 
-     * @param object $oBasket
+     * @param void
      * @return boolean
      */
-    protected function _fcpoCheckTxid($oBasket) {
+    protected function _fcpoCheckTxid() {
         $blAppointedError = false;
         $sTxid = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoTxid');
 
+        $sTestOxid = '';
         if ($sTxid) {
             $sQuery = "SELECT oxid FROM fcpotransactionstatus WHERE FCPO_TXACTION = 'appointed' AND fcpo_txid = '" . $sTxid . "'";
             $sTestOxid = $this->_oFcpoDb->getOne($sQuery);
-        } elseif ($oBasket->getPaymentId() == 'fcpocreditcard_iframe') {
-            $sQuery = "SELECT fcpo_txid FROM fcpotransactionstatus WHERE FCPO_TXACTION = 'appointed' AND fcpo_reference = " . oxDb::getDb()->quote($this->_oFcpoHelper->fcpoGetRequestParameter('refnr')) . " LIMIT 1";
-            $sTestOxid = $sTxid = $this->_oFcpoDb->getOne($sQuery);
         }
+
         if (!$sTestOxid) {
             $blAppointedError = true;
             $this->oxorder__oxfolder = new oxField('ORDERFOLDER_PROBLEMS', oxField::T_RAW);
@@ -1119,7 +1099,6 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         $blReturn = (
             $this->oxorder__oxpaymenttype->value == 'fcpobillsafe' ||
             $this->oxorder__oxpaymenttype->value == 'fcpoklarna' ||
-            $this->oxorder__oxpaymenttype->value == 'fcpocreditcard_iframe' ||
             $this->oxorder__oxpaymenttype->value == 'fcpo_secinvoice'
         );
 
@@ -1563,17 +1542,11 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
             $this->_fcpoCheckReduceBefore();
         }
 
-        if ($blReturnRedirectUrl === true) {
+        if ($blReturnRedirectUrl)
             return $aResponse['redirecturl'];
-        } else {
-            if ($this->isPayOneIframePayment()) {
-                $this->_oFcpoHelper->fcpoSetSessionVariable('fcpoRedirectUrl', $aResponse['redirecturl']);
-                $sRedirectUrl = $oConfig->getCurrentShopUrl() . 'index.php?cl=fcpayoneiframe';
-            } else {
-                $sRedirectUrl = $aResponse['redirecturl'];
-            }
-            $oUtils->redirect($sRedirectUrl, false);
-        }
+
+        $sRedirectUrl = $aResponse['redirecturl'];
+        $oUtils->redirect($sRedirectUrl, false);
     }
 
     /**
@@ -1791,15 +1764,10 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * Returns wether given paymentid is of payone type
      * 
      * @param string $sId
-     * @param bool $blIFrame
      * @return bool
      */
-    protected function _fcpoIsPayonePaymentType($sId, $blIFrame = false) {
-        if ($blIFrame) {
-            $blReturn = fcPayOnePayment::fcIsPayOneIframePaymentType($sId);
-        } else {
-            $blReturn = fcPayOnePayment::fcIsPayOnePaymentType($sId);
-        }
+    protected function _fcpoIsPayonePaymentType($sId) {
+        $blReturn = fcPayOnePayment::fcIsPayOnePaymentType($sId);
 
         return $blReturn;
     }

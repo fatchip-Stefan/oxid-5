@@ -42,7 +42,6 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         'fcpodebitnote',
         'fcpocashondel',
         'fcpocreditcard',
-        'fcpocreditcard_iframe',
         'fcpoonlineueberweisung',
         'fcpopaypal',
         'fcpopaypal_express',
@@ -69,22 +68,6 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         'fcpopaypal_express',
         'fcpoklarna',
         'fcpopaydirekt',
-    );
-
-    /**
-     * List of payment ids which are iframe payments
-     * @var array
-     */
-    protected static $_aIframePaymentTypes = array(
-        'fcpocreditcard_iframe',
-    );
-
-    /**
-     * List of frontend API payment types
-     * @var array
-     */
-    protected static $_aFrontendApiPaymentTypes = array(
-        'fcpocreditcard_iframe',
     );
 
     /**

@@ -426,10 +426,6 @@ class fcpoRequest extends oxSuperCfg {
             case 'fcpocreditcard':
                 $blAddRedirectUrls = $this->_setPaymentParamsCC($aDynvalue);
                 break;
-            case 'fcpocreditcard_iframe':
-                $this->addParameter('clearingtype', 'cc'); //Payment method
-                $blAddRedirectUrls = true;
-                break;
             case 'fcpocashondel':
                 $this->addParameter('clearingtype', 'cod'); //Payment method
                 $this->addParameter('shippingprovider', 'DHL');
@@ -794,9 +790,6 @@ class fcpoRequest extends oxSuperCfg {
 
         $blPayMethodIsKnown = $this->setAuthorizationParameters($oOrder, $oUser, $aDynvalue, $sRefNr, $blIsPreAuth);
         if ($blPayMethodIsKnown === true) {
-            if (fcPayOnePayment::fcIsPayOneFrontendApiPaymentType($oOrder->oxorder__oxpaymenttype->value)) {
-                return $this->_handleFrontendApiCall();
-            }
             $mOutput = $this->send();
             if ($oOrder->oxorder__oxpaymenttype->value == 'fcpoamazonpay') {
                 $mOutput = $this->_fcpoHandleAmazonAuthorizationResponse($mOutput);
@@ -940,17 +933,6 @@ class fcpoRequest extends oxSuperCfg {
 
         $this->_logRequest('NONE - Frontend API Call', 'Frontend API');
         return $sFrontendApiUrl;
-    }
-
-    protected function _handleFrontendApiCall() {
-        $sFrontendApiUrl = $this->_getFrontendApiUrl();
-
-        $aStatus = array(
-            'status' => 'REDIRECT',
-            'txid' => '',
-            'redirecturl' => $sFrontendApiUrl,
-        );
-        return $aStatus;
     }
 
     /**
