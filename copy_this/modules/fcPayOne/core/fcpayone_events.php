@@ -548,7 +548,7 @@ class fcpayone_events
         self::insertRowIfNotExists('fcpopayoneexpresslogos', array('OXID' => '1'), "INSERT INTO fcpopayoneexpresslogos (OXID, FCPO_ACTIVE, FCPO_LANGID, FCPO_LOGO, FCPO_DEFAULT) VALUES(1, 1, 0, 'btn_xpressCheckout_de.gif', 1);");
         self::insertRowIfNotExists('fcpopayoneexpresslogos', array('OXID' => '2'), "INSERT INTO fcpopayoneexpresslogos (OXID, FCPO_ACTIVE, FCPO_LANGID, FCPO_LOGO, FCPO_DEFAULT) VALUES(2, 1, 1, 'btn_xpressCheckout_en.gif', 0);");
         // add available user flags
-        self::insertRowIfNotExists('fcpouserflags', array('OXID' => '2'), "INSERT INTO fcpouserflags (OXID, FCPOCODE, FCPOEFFECT, FCPOFLAGDURATION, FCPONAME, FCPODESC) VALUES ('fcporatepayrejected', 307, 'RPR', 24, 'Ratepay Rejected', 'CUSTOM');");
+        self::insertRowIfNotExists('fcpouserflags', array('OXID' => 'fcporatepayrejected'), "INSERT INTO fcpouserflags (OXID, FCPOCODE, FCPOEFFECT, FCPOFLAGDURATION, FCPONAME, FCPODESC) VALUES ('fcporatepayrejected', 307, 'RPR', 24, 'Ratepay Rejected', 'CUSTOM');");
     }
 
     /**
@@ -599,16 +599,20 @@ class fcpayone_events
      */
     public static function insertRowIfNotExists($sTableName, $aKeyValue, $sQuery)
     {
+        $oDb = oxDb::getDb();
+
         $sWhere = '';
         foreach ($aKeyValue as $key => $value) {
             $sWhere .= " AND $key = '$value'";
         }
-        if (oxDb::getDb()->Execute("SELECT * FROM {$sTableName} WHERE 1" . $sWhere)->EOF) {
-            oxDb::getDb()->Execute($sQuery);
-            // echo 'In Tabelle '.$sTableName.' neuen Eintrag erstellt.<br>';
-            return true;
-        }
-        return false;
+
+        $sCheckQuery = "SELECT * FROM {$sTableName} WHERE 1" . $sWhere;
+        $mResult = $oDb->getOne($sCheckQuery);
+
+        if ($mResult !== false) return false;
+        $oDb->execute($sQuery);
+
+        return true;
     }
 
     /**
@@ -660,18 +664,20 @@ class fcpayone_events
      */
     public static function dropRowIfExists($sTableName, $aKeyValue, $sQuery)
     {
-        $blReturn = false;
-        $sWhere = '';
+        $oDb = oxDb::getDb();
 
+        $sWhere = '';
         foreach ($aKeyValue as $key => $value) {
             $sWhere .= " AND $key = '$value'";
         }
-        if (oxDb::getDb()->Execute("SELECT * FROM {$sTableName} WHERE 1" . $sWhere)->EOF) {
-            oxDb::getDb()->Execute($sQuery);
-            $blReturn = true;
-        }
 
-        return $blReturn;
+        $sCheckQuery = "SELECT * FROM {$sTableName} WHERE 1" . $sWhere;
+        $mResult = $oDb->getOne($sCheckQuery);
+
+        if ($mResult === false) return false;
+        $oDb->execute($sQuery);
+
+        return true;
     }
 
     /**
