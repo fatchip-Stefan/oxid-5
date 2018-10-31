@@ -74,7 +74,7 @@
                                 formParams += '"fcpoAmazonReferenceId":"' + orderReferenceId + '"';
                                 formParams += "}";
                         $.ajax({
-                            url: 'modules/fcPayOne/application/models/fcpayone_ajax.php',
+                            url: '[{$oViewConf->fcpoGetAjaxControllerUrl()}]',
                             method: 'POST',
                             type: 'POST',
                             dataType: 'text',

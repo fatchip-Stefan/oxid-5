@@ -53,7 +53,7 @@
                     console.log('triggered onPaymentSelect');
                     var formParams = '{"fcpoAmazonReferenceId":"[{$oViewConf->fcpoGetAmazonPayReferenceId()}]"}';
                     $.ajax({
-                        url: 'modules/fcPayOne/application/models/fcpayone_ajax.php',
+                        url: '[{$oViewConf->fcpoGetAjaxControllerUrl()}]',
                         method: 'POST',
                         type: 'POST',
                         dataType: 'text',
