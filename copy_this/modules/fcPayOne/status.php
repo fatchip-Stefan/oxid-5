@@ -179,26 +179,27 @@ class fcPayOneTransactionStatusHandler extends oxBase {
         }
         return false;
     }
-    
+
+    /**
+     * Returns order number of an available txid
+     *
+     * @return int
+     */
     protected function _getOrderNr() {
-        $sQuery = "SELECT oxordernr FROM oxorder WHERE fcpotxid = '".$this->fcGetPostParam('txid')."' LIMIT 1";
-        $iOrderNr = oxDb::getDb()->GetOne($sQuery);
+        $oDb = oxDb::getDb();
+        $sTxid = $this->fcGetPostParam('txid');
+
+        $sQuery = "
+            SELECT 
+                oxordernr 
+            FROM 
+                oxorder 
+            WHERE 
+                fcpotxid = ".$oDb->quote($sTxid)."
+            LIMIT 1                
+        ";
+        $iOrderNr = (int) $oDb->GetOne($sQuery);
         
-        if(!$iOrderNr && $this->fcGetPostParam('clearingtype') == 'cc') {// for fcpocreditcard_iframe
-            $sQuery = "SELECT oxid, oxordernr FROM oxorder WHERE fcporefnr = '".$this->fcGetPostParam('reference')."' AND oxpaymenttype = 'fcpocreditcard_iframe' LIMIT 1";
-            $oResult = oxDb::getDb()->Execute($sQuery);
-            if ($oResult != false && $oResult->recordCount() > 0) {
-                if(!$oResult->EOF) {
-                    $iOrderNr = $oResult->fields[1];
-                    $sOxid = $oResult->fields[0];
-                    $sQuery = "UPDATE oxorder SET fcpotxid = '".$this->fcGetPostParam('txid')."' WHERE oxid = '{$sOxid}'";
-                    oxDb::getDb()->Execute($sQuery);
-                }
-            }
-        }
-        if(!$iOrderNr) {
-            $iOrderNr = 0;
-        }
         return $iOrderNr;
     }
     

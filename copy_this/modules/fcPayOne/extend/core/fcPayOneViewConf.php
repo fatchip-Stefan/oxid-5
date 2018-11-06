@@ -617,12 +617,11 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
      *
      * @param void
      * @return string
-     * @todo class has to be moved into controller folder instead of models
      */
     public function fcpoGetAjaxControllerUrl() {
         $oConfig = $this->getConfig();
         $sShopUrl = $oConfig->getShopUrl();
-        $sPath = "modules/fcPayOne/application/models/fcpayone_ajax.php";
+        $sPath = "modules/fcPayOne/application/controllers/fcpayone_ajax.php";
         $sControllerPath = $sShopUrl.$sPath;
 
         return $sControllerPath;

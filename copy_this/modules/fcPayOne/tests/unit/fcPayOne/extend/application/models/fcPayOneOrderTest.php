@@ -282,16 +282,18 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     public function test__isRedirectAfterSave_Coverage() {
         $oTestObject = oxNew('fcPayOneOrder');
 
-        $oMockBasket = $this->getMock('oxBasket', array('getPaymentId'));
-        $oMockBasket->expects($this->any())->method('getPaymentId')->will($this->returnValue('fcpocreditcard_iframe'));
-
-        $oMockSession = $this->getMock('oxSession', array('getRemoteAccessToken'));
-        $oMockSession->expects($this->any())->method('getBasket')->will($this->returnValue($oMockBasket));
-
-        $oHelper = $this->getMockBuilder('fcpohelper')->disableOriginalConstructor()->getMock();
-        $oHelper->expects($this->any())->method('fcpoGetSession')->will($this->returnValue($oMockSession));
-        $oHelper->expects($this->any())->method('fcpoGetRequestParameter')->will($this->returnValue(true));
-        $oHelper->expects($this->any())->method('fcpoGetSessionVariable')->will($this->returnValue(false));
+        $oHelper =
+            $this->getMockBuilder('fcpohelper')
+                ->disableOriginalConstructor()
+                ->getMock();
+        $oHelper
+            ->expects($this->any())
+            ->method('fcpoGetRequestParameter')
+            ->will($this->returnValue(true));
+        $oHelper
+            ->expects($this->any())
+            ->method('fcpoGetSessionVariable')
+            ->will($this->returnValue(true));
 
         $this->invokeSetAttribute($oTestObject, '_blIsRedirectAfterSave', null);
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
@@ -820,7 +822,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $this->invokeSetAttribute($oTestObject, '_oFcpoHelper', $oHelper);
 
         $oMockBasket = $this->getMock('oxBasket', array('getPaymentId'));
-        $oMockBasket->expects($this->any())->method('getPaymentId')->will($this->returnValue('fcpocreditcard_iframe'));
+        $oMockBasket->expects($this->any())->method('getPaymentId')->will($this->returnValue('fcpocreditcard'));
 
         $blResponse = $this->invokeMethod($oTestObject, '_fcpoProcessOrder', array($oMockBasket, 'someTxid'));
 
@@ -1694,9 +1696,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oMockDatabase->expects($this->any())->method('Execute')->will($this->returnValue(true));
         $this->invokeSetAttribute($oTestObject, '_oFcpoDb', $oMockDatabase);
 
-        $oMockBasket = $this->getMock('oxBasket', array('getPaymentId'));
-        $oMockBasket->expects($this->any())->method('getPaymentId')->will($this->returnValue('fcpocreditcard_iframe'));
-
         $this->assertEquals(null, $this->invokeMethod($oTestObject, '_fcpoSaveOrderValues', array('someTxid', '1')));
     }
 
@@ -1709,9 +1708,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
     public function test__fcpoCheckTxid_TxidInSession() {
         $oTestObject = oxNew('fcPayOneOrder');
         $oTestObject->oxorder__oxremark = new oxField('');
-
-        $oMockBasket = $this->getMock('oxBasket', array('getPaymentId'));
-        $oMockBasket->expects($this->any())->method('getPaymentId')->will($this->returnValue('fcpocreditcard_iframe'));
 
         $oMockLang = $this->getMock('oxLang', array('translateString'));
         $oMockLang->expects($this->any())->method('translateString')->will($this->returnValue('someTranslatedString'));
@@ -1726,8 +1722,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oMockDatabase->expects($this->any())->method('getOne')->will($this->returnValue(false));
         $this->invokeSetAttribute($oTestObject, '_oFcpoDb', $oMockDatabase);
 
-        $blResponse = $this->invokeMethod($oTestObject, '_fcpoCheckTxid', array($oMockBasket));
-        //$blResponse = $oTestObject->_fcpoCheckTxid($oMockBasket);
+        $blResponse = $this->invokeMethod($oTestObject, '_fcpoCheckTxid');
 
         $this->assertEquals(true, $blResponse);
     }
@@ -1742,9 +1737,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oTestObject = oxNew('fcPayOneOrder');
         $oTestObject->oxorder__oxremark = new oxField('');
 
-        $oMockBasket = $this->getMock('oxBasket', array('getPaymentId'));
-        $oMockBasket->expects($this->any())->method('getPaymentId')->will($this->returnValue('fcpocreditcard_iframe'));
-
         $oMockLang = $this->getMock('oxLang', array('translateString'));
         $oMockLang->expects($this->any())->method('translateString')->will($this->returnValue('someTranslatedString'));
 
@@ -1758,8 +1750,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
         $oMockDatabase->expects($this->any())->method('getOne')->will($this->returnValue(false));
         $this->invokeSetAttribute($oTestObject, '_oFcpoDb', $oMockDatabase);
 
-        $blResponse = $this->invokeMethod($oTestObject, '_fcpoCheckTxid', array($oMockBasket));
-        //$blResponse = $oTestObject->_fcpoCheckTxid($oMockBasket);
+        $blResponse = $this->invokeMethod($oTestObject, '_fcpoCheckTxid');
 
         $this->assertEquals(true, $blResponse);
     }
@@ -2102,7 +2093,7 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
      */
     public function test_isDetailedProductInfoNeeded_Coverage() {
         $oTestObject = oxNew('fcPayOneOrder');
-        $oTestObject->oxorder__oxpaymenttype = new oxField('fcpocreditcard_iframe');
+        $oTestObject->oxorder__oxpaymenttype = new oxField('fcpobillsafe');
 
         $this->assertEquals(true, $oTestObject->isDetailedProductInfoNeeded());
     }
@@ -3026,17 +3017,6 @@ class Unit_fcPayOne_Extend_Application_Models_fcPayOneOrder extends OxidTestCase
             'FCPO_AMAZON_ERROR_900',
             $oTestObject->fcpoGetAmazonErrorTranslationString('FantasyIsEverything')
         );
-    }
-
-    /**
-     * Testing _fcpoIsPayonePaymentType with positive check on iframe
-     *
-     * @param void
-     * @return void
-     */
-    public function test__fcpoIsPayonePaymentType_Iframe() {
-        $oTestObject = oxNew('fcPayOneOrder');
-        $this->assertEquals(true, $oTestObject->_fcpoIsPayonePaymentType('fcpocreditcard_iframe', true));
     }
 
     /**
