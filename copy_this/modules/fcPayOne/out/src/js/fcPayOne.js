@@ -873,7 +873,6 @@ $('#payolution_installment_check_availability').click(function(){
             $('#payolution_installment_calculation_selection').html(Response);
             $('#payolution_installment_check_availability').attr('disabled', false);
             var numberOfInstallments = $('#payolution_no_installments').val();
-            $('#payolution_sum_number_installments').html(numberOfInstallments);
             $('input[name=payolution_installment_selection]').bind( 'change', function() {
                 // selected interest data will be set into summary box
                 var selectedInstallmentIndex = $('input[name=payolution_installment_selection]:checked').val();
@@ -882,10 +881,11 @@ $('#payolution_installment_check_availability').click(function(){
                     $('#payolution_rates_details_'+i).removeClass('payolution_rates_visible');
                     $('#payolution_rates_details_'+i).addClass('payolution_rates_invisible');
                 }
-                $('#payolution_rates_details_'+selectedInstallmentIndex).addClass('payolution_rates_visible');
-                $('#payolution_rates_details_'+selectedInstallmentIndex).removeClass('payolution_rates_invisible');
+                $('#payolution_rates_details_' + selectedInstallmentIndex).addClass('payolution_rates_visible');
+                $('#payolution_rates_details_' + selectedInstallmentIndex).removeClass('payolution_rates_invisible');
                 // set needed values to foreseen fields
-                $('#payolution_sum_number_installments').html(numberOfInstallments);
+                var selectedAmountOfRates = $("#payolution_installment_duration_" + selectedInstallmentIndex).val();
+                $('#payolution_sum_number_installments').html(selectedAmountOfRates);
                 $('#payolution_financing_sum').html($('#payolution_installment_total_amount_' + selectedInstallmentIndex).val());
                 $('#payolution_sum_interest_rate').html($('#payolution_installment_interest_rate_' + selectedInstallmentIndex).val());
                 $('#payolution_sum_eff_interest_rate').html($('#payolution_installment_eff_interest_rate_' + selectedInstallmentIndex).val());

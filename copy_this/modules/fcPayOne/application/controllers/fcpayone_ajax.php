@@ -211,8 +211,8 @@ class fcpayone_ajax extends oxBase {
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
 
-        $sTranslateInstallmentSelection = utf8_encode($oLang->translateString('FCPO_PAYOLUTION_INSTALLMENT_SELECTION'));
-        $sTranslateSelectInstallment = utf8_encode($oLang->translateString('FCPO_PAYOLUTION_SELECT_INSTALLMENT'));
+        $sTranslateInstallmentSelection = $oLang->translateString('FCPO_PAYOLUTION_INSTALLMENT_SELECTION');
+        $sTranslateSelectInstallment = $oLang->translateString('FCPO_PAYOLUTION_SELECT_INSTALLMENT');
 
         $sHtml = '
             <div class="content">
@@ -308,7 +308,7 @@ class fcpayone_ajax extends oxBase {
     protected function _fcpoGetInsterestMonthDetail($sMonth, $aRatesDetails) {
         $oLang = $this->_oFcpoHelper->fcpoGetLang();
         $sRateCaption = $oLang->translateString('FCPO_PAYOLUTION_INSTALLMENT_RATE');
-        $sDueCaption = utf8_encode($oLang->translateString('FCPO_PAYOLUTION_INSTALLMENT_DUE_AT'));
+        $sDueCaption = $oLang->translateString('FCPO_PAYOLUTION_INSTALLMENT_DUE_AT');
         $sDue = date('d.m.Y', strtotime($aRatesDetails['Due']));
         $sRate = str_replace('.', ',', $aRatesDetails['Amount']);
         

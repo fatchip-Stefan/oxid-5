@@ -57,7 +57,7 @@
                             <table>
                                 <tr>
                                     <td>[{oxmultilang ident="FCPO_PAYOLUTION_INSTALLMENTS_NUMBER"}]</td>
-                                    <td><span id="payolution_sum_number_installments"></span></td>
+                                    <td><span id="payolution_sum_number_installments">[{oxmultilang ident="FCPO_PAYOLUTION_INSTALLMENT_NOT_YET_SELECTED"}]</span></td>
                                 </tr>
                                 <tr>
                                     <td>[{oxmultilang ident="FCPO_PAYOLUTION_INSTALLMENT_FINANCING_AMOUNT"}]</td>
