@@ -337,7 +337,6 @@ class fcpayone_events
         'fcpoonlineueberweisung' => 'Online-Ueberweisung',
         'fcpopaypal' => 'PayPal',
         'fcpopaypal_express' => 'PayPal Express',
-        'fcpobillsafe' => 'BillSAFE',
         'fcpoklarna' => 'Klarna Rechnung',
         'fcpobarzahlen' => 'Barzahlen',
         'fcpopaydirekt' => 'Paydirekt',
