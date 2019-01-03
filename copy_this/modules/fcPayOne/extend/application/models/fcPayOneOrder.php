@@ -1614,6 +1614,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         $this->_fcpoSaveWorkorderId($sPaymentId, $aResponse);
         $this->_fcpoSaveClearingReference($sPaymentId, $aResponse);
         $this->_fcpoSaveProfileIdent($sPaymentId, $aResponse);
+        $this->save();
     }
 
     /**
