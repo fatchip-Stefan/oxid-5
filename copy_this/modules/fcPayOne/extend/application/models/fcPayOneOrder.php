@@ -1641,10 +1641,11 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      */
     protected function _fcpoSaveProfileIdent($sPaymentId, $aResponse) {
         if (in_array($sPaymentId, $this->_aPaymentsProfileIdentSave)) {
-            $sProfileIdent = (isset($aResponse['userid'])) ? $aResponse['userid'] : false;
-            if ($sProfileIdent) {
-                $this->oxorder__fcpoprofileident = new oxField($sProfileIdent, oxField::T_RAW);
-            }
+            $oRatePay = oxNew('fcporatepay');
+            $sProfileId = $this->_oFcpoHelper->fcpoGetSessionVariable('ratepayprofileid');
+            $aProfileData = $oRatePay->fcpoGetProfileData($sProfileId);
+            $sRatePayShopId = $aProfileData['shopid'];
+            $this->oxorder__fcpoprofileident = new oxField($sRatePayShopId, oxField::T_RAW);
         }
     }
 
