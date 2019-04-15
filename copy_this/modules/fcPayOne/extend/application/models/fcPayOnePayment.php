@@ -45,7 +45,6 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         'fcpoonlineueberweisung',
         'fcpopaypal',
         'fcpopaypal_express',
-        'fcpobillsafe',
         'fcpoklarna',
         'fcpobarzahlen',
         'fcpopaydirekt',
@@ -57,6 +56,12 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         'fcpo_secinvoice',
         'fcpomasterpass',
     );
+
+    /**
+     * OXID-222: empty array to fix error when checking for Iframe methods
+     * @var array
+     */
+    protected static $_aIframePaymentTypes = array();
 
     /**
      * List of payments that are always of type redirect

@@ -43,7 +43,8 @@ class fcpayone_events
         'fcpoyapital',
         'fcpocommerzfinanz',
         'fcpoklarna_installment',
-        'fcpocreditcard_iframe'
+        'fcpocreditcard_iframe',
+        'fcpobillsafe'
     );
 
     public static $sQueryTableFcporefnr = "
@@ -337,7 +338,6 @@ class fcpayone_events
         'fcpoonlineueberweisung' => 'Online-Ueberweisung',
         'fcpopaypal' => 'PayPal',
         'fcpopaypal_express' => 'PayPal Express',
-        'fcpobillsafe' => 'BillSAFE',
         'fcpoklarna' => 'Klarna Rechnung',
         'fcpobarzahlen' => 'Barzahlen',
         'fcpopaydirekt' => 'Paydirekt',

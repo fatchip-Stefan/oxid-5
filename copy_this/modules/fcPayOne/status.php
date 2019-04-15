@@ -170,7 +170,11 @@ class fcPayOneTransactionStatusHandler extends oxBase {
     protected function _isKeyValid() {
         $sKey = $this->fcGetPostParam('key');
         if($sKey) {
-            $aKeys = $this->_getConfigParams('sFCPOPortalKey');
+            $aKeys = array_merge(
+                array_values($this->_getConfigParams('sFCPOPortalKey')),
+                array_values($this->_getConfigParams('sFCPOSecinvoicePortalKey')) // OXID-228: Check also SecInvoice key
+            );
+
             foreach ($aKeys as $i => $sConfigKey) {
                 if(md5($sConfigKey) == $sKey) {
                     return true;
@@ -231,44 +235,31 @@ class fcPayOneTransactionStatusHandler extends oxBase {
         return $sParams;
     }
 
-    protected function _forwardRequest($sUrl, $iTimeout) {
-        if($iTimeout == 0) {
-            $iTimeout = 45;
-        }
-        
+    protected function _handleForwarding() {
+
         $sParams = '';
         foreach($_POST as $sKey => $mValue) {
             $sParams .= $this->_addParam($sKey, $mValue);
         }
 
         $sParams = substr($sParams,1);
+        $sBaseUrl = (empty($this->getConfig()->getShopUrl())) ? $this->getConfig()->getSslShopUrl() : $this->getConfig()->getShopUrl();
+        $sForwarderUrl = $sBaseUrl . 'modules/fcPayOne/statusforward.php';
 
-        $oCurl = curl_init($sUrl);
+        $oCurl = curl_init($sForwarderUrl);
         curl_setopt($oCurl, CURLOPT_POST, 1);
         curl_setopt($oCurl, CURLOPT_POSTFIELDS, $sParams);
 
         curl_setopt($oCurl, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($oCurl, CURLOPT_SSL_VERIFYHOST, false);
 
-        curl_setopt($oCurl, CURLOPT_RETURNTRANSFER, TRUE);
-        curl_setopt($oCurl, CURLOPT_TIMEOUT, $iTimeout);
+        curl_setopt($oCurl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($oCurl, CURLOPT_TIMEOUT_MS, 100);
 
         $oResult = curl_exec($oCurl);
 
         curl_close($oCurl);
-    }
 
-    protected function _handleForwarding() {
-        $sPayoneStatus = $this->fcGetPostParam('txaction');
-        
-        $sQuery = "SELECT fcpo_url, fcpo_timeout FROM fcpostatusforwarding WHERE fcpo_payonestatus = '{$sPayoneStatus}'";
-        $oResult = oxDb::getDb()->Execute($sQuery);
-        if ($oResult != false && $oResult->recordCount() > 0) {
-            while (!$oResult->EOF) {
-                $this->_forwardRequest($oResult->fields[0], $oResult->fields[1]);
-                $oResult->moveNext();
-            }
-        }
     }
     
     protected function _handleMapping($oOrder) {
@@ -487,7 +478,7 @@ class fcPayOneTransactionStatusHandler extends oxBase {
 
         return $sReturn;
     }
-    
+
     /**
      * Checks based on the transaction status received by PAYONE whether
      * the debit request is available for this order at the moment.

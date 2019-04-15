@@ -1,3 +1,22 @@
+==2.3.0==
+Release Date: 2018-12-10
+New Features
+
+* Masterpass
+* more useful error messages after credtcardcheck
+* addresschecktype during consumerscore can now be set individually
+
+Bugfixes
+
+*  fixed capturing of safe invoices
+*  various smaller fixes
+
+Maintenance
+
+* GDPR compliant Links for Ratepay
+* IP addresses get anonymized in the API log
+* customerid isn't sent anymore due to high potential of misuse and little value for the merchant
+
 ==2.2.1==
 Release date: 2018-05-15
 Bugfixes:
