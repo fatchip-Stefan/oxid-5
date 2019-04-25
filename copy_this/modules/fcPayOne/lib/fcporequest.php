@@ -1035,7 +1035,12 @@ class fcpoRequest extends oxSuperCfg {
             $iIndex++;
         }
 
-        $sDeliveryCosts = $oBasket->getCosts('oxdelivery')->getBruttoPrice();
+        $oDelivery = $oBasket->getCosts('oxdelivery');
+        if ($oDelivery === null) {
+            $sDeliveryCosts = 0.0;
+        } else {
+            $sDeliveryCosts = $oDelivery->getBruttoPrice();
+        }
         $dDelveryCosts = (double) str_replace(',', '.', $sDeliveryCosts);
         $this->addParameter('it[' . (string) $iIndex . ']', 'shipment');
         $this->addParameter('id[' . (string) $iIndex . ']', 'Standard Versand');
@@ -1698,7 +1703,7 @@ class fcpoRequest extends oxSuperCfg {
     protected function _fcpoAddCaptureRatePayParams($oOrder) {
         $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
         if (in_array($sPaymentId, $this->_aRatePayPayents)) {
-            $this->addParameter('add_paydata[shop_id]', $oOrder->oxorder__fcpoprofileid->value);
+            $this->addParameter('add_paydata[shop_id]', $oOrder->oxorder__fcpoprofileident->rawValue);
         }
     }
 
