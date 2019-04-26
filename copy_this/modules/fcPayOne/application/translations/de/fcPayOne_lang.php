@@ -194,6 +194,7 @@ $aLang = array(
     'FCPO_RATEPAY_ADD_TERMS2'                       => 'zusätzlichen Allgemeinen Geschäftsbedingungen und der Datenschutzhinweis ',
     'FCPO_RATEPAY_ADD_TERMS3'                       => 'der RatePAY GmbH.',
     'FCPO_SECINVOICE_BIRTHDATE'                     => 'Bitte geben Sie ihr Geburtsdatum an',
+    'FCPO_SECINVOICE_USTID'                         => 'Umsatzsteueridentifiationsnummer',
     'FCPO_NOT_ADULT'                                => 'Sie sind aufgrund Ihres Alters leider nicht berechtigt die gewählte Zahlart zu verwenden. Bitte wählen Sie eine andere Zahlart.',
     'FCPO_BIRTHDATE_INVALID'                        => 'Ihr Geburtsdatum wurde nicht korrekt eingegeben',
     'FCPO_COMPANYDATA_INVALID'                      => 'Ihre Firmendaten sind nicht vollständig. Für eine gewerbliche Bestellung ist die Angabe des Firmennamens und der UStId notwendig.',
