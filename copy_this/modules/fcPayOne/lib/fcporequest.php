@@ -930,17 +930,12 @@ class fcpoRequest extends oxSuperCfg {
 
     /**
      * Method that determines if order is B2B
-     * 
+     *
      * @param void
      * @return bool
      */
     protected function _fcpoIsOrderB2B($oOrder) {
-        $blReturn = ($oOrder->oxorder__oxbillcompany->value) ? true : false;
-        if ($blReturn) {
-            $blReturn = ($oOrder->oxorder__oxbillustid->value) ? true : false;
-        }
-
-        return $blReturn;
+        return ($oOrder->oxorder__oxbillcompany->value) ? true : false;
     }
 
     /**

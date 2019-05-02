@@ -2056,9 +2056,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return bool
      */
     protected function _fcValidateCompanyData($sPaymentId) {
-        $aPayments2Validate = array(
-            'fcpo_secinvoice',
-        );
+        $aPayments2Validate = array();
 
         $blDeeperValidationNeeded = in_array($sPaymentId, $aPayments2Validate);
         if (!$blDeeperValidationNeeded) {
@@ -2145,7 +2143,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
                 break;
             case 'fcpo_secinvoice':
                 $blValidBirthdateData = $this->_fcpoValidateSecInvoiceBirthdayData();
-                $blBirthdayRequired = $this->fcpoIsB2C();
+                $blBirthdayRequired = ! $this->fcpoIsB2BPov();
                 break;
         }
 
@@ -3167,6 +3165,17 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     }
 
     /**
+     * Generic method for determine if order is b2b
+     * Used by pov / rec
+     *
+     * @return bool
+     */
+    public function fcpoIsB2BPov() {
+        $oUser = $this->getUser();
+        return !empty($oUser->oxuser__oxcompany->value);
+    }
+
+    /**
      * Template getter for checking which kind of field should be shown
      * 
      * @param void
@@ -3415,5 +3424,4 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
 
         return $sLink;
     }
-
 }
