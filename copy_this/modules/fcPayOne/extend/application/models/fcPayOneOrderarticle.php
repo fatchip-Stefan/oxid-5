@@ -226,11 +226,7 @@ class fcPayOneOrderarticle extends fcPayOneOrderarticle_parent {
      * @return bool
      */
     protected function _fcpoIsPayonePaymentType($sId, $blIFrame = false) {
-        if ($blIFrame) {
-            $blReturn = fcPayOnePayment::fcIsPayOnePaymentType($sId);
-        } else {
-            $blReturn = fcPayOnePayment::fcIsPayOneIframePaymentType($sId);
-        }
+        $blReturn = fcPayOnePayment::fcIsPayOnePaymentType($sId);
 
         return $blReturn;
     }
