@@ -18,11 +18,5 @@
                 amazon.Login.logout();
             };
         </script>
-        [{if $oViewConf->fcpoIsAmazonAsyncMode()}]
-            <br><br>
-            <div>
-                [{oxmultilang ident="FCPO_AMAZON_THANKYOU_MESSAGE"}]
-            </div>
-        [{/if}]
     [{/if}]
 [{/if}]

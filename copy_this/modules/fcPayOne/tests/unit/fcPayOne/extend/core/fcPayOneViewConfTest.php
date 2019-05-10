@@ -434,23 +434,6 @@ class Unit_fcPayOne_Extend_Core_fcPayOneViewConf extends OxidTestCase {
     }
 
     /**
-     * Testing fcpoIsAmazonAsyncMode for coverage
-     *
-     * @param void
-     * @return void
-     * @throws exception
-     */
-    public function test_fcpoIsAmazonAsyncMode_Coverage() {
-        $oMockConfig = $this->getMock('oxConfig', array('getConfigParam'));
-        $oMockConfig->expects($this->any())->method('getConfigParam')->will($this->returnValue('alwaysasync'));
-
-        $oTestObject = $this->getMock('fcPayOneViewConf', array('getConfig'));
-        $oTestObject->method('getConfig')->will($this->returnValue($oMockConfig));
-
-        $this->assertEquals(true, $oTestObject->fcpoIsAmazonAsyncMode());
-    }
-
-    /**
      * Testing fcpoGetAmzPopup for setting popup
      *
      * @param void
