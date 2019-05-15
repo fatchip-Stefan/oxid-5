@@ -2725,7 +2725,7 @@ class fcpoRequest extends oxSuperCfg {
         $this->addParameter('email', $oUser->oxuser__oxusername->value);
         $this->addParameter('language', $this->_oFcpoHelper->fcpoGetLang()->getLanguageAbbr());
         $this->addParameter('bankcountry', $aDynvalue['fcpo_elv_country']);
-        if (isset($aDynvalue['fcpo_elv_iban']) && $aDynvalue['fcpo_elv_iban'] != '' && isset($aDynvalue['fcpo_elv_bic']) && $aDynvalue['fcpo_elv_bic'] != '') {
+        if (isset($aDynvalue['fcpo_elv_iban']) && $aDynvalue['fcpo_elv_iban'] != '') {
             $this->addParameter('iban', $aDynvalue['fcpo_elv_iban']);
             $this->addParameter('bic', $aDynvalue['fcpo_elv_bic']);
         } elseif (isset($aDynvalue['fcpo_elv_ktonr']) && $aDynvalue['fcpo_elv_ktonr'] != '' && isset($aDynvalue['fcpo_elv_blz']) && $aDynvalue['fcpo_elv_blz'] != '') {

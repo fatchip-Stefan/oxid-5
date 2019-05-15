@@ -1407,7 +1407,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         $this->_oFcpoHelper->fcpoSetSessionVariable('fcpoRefNr', $sRefNr);
 
         $aResponse = $oPORequest->sendRequestAuthorization($sAuthorizationType, $this, $this->getOrderUser(), $aDynvalue, $sRefNr);
-        $sMode = $oPayment->fcpoGetMode($aDynvalue);
+        $sMode = $oPayment->fcpoGetOperationMode();
         $mResult = $this->_fcpoHandleAuthorizationResponse($aResponse, $oPayGateway, $sRefNr, $sMode, $sAuthorizationType, $blReturnRedirectUrl);
 
         return $mResult;
@@ -1610,6 +1610,11 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         if ($sPaymentId == 'fcpobarzahlen' && isset($aResponse['add_paydata[instruction_notes]'])) {
             $sBarzahlenHtml = urldecode($aResponse['add_paydata[instruction_notes]']);
             $this->_oFcpoHelper->fcpoSetSessionVariable('sFcpoBarzahlenHtml', $sBarzahlenHtml);
+        }
+
+        if ($sPaymentId == 'fcpodebitnote' && isset($aResponse['mandate_identification'])) {
+            $aResponse['mode'] = $sMode;
+            $this->_oFcpoHelper->fcpoSetSessionVariable('fcpoMandate', $aResponse);
         }
 
         $this->_fcpoSaveWorkorderId($sPaymentId, $aResponse);
