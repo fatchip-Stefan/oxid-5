@@ -1638,6 +1638,7 @@ class fcpoRequest extends oxSuperCfg {
      * @return array
      */
     public function sendRequestCapture($oOrder, $dAmount, $blSettleAccount = true, $aPositions = false) {
+        $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
         $this->addParameter('request', 'capture'); //Request method
         $sMode = $oOrder->oxorder__fcpomode->value;
         if ($sMode == '') {
@@ -1682,6 +1683,10 @@ class fcpoRequest extends oxSuperCfg {
 
         $this->_fcpoAddCaptureRatePayParams($oOrder);
 
+        if ($sPaymentId == 'fcpo_secinvoice') {
+            $this->_fcpoAddSecInvoiceParameters($oOrder);
+        }
+
         $aResponse = $this->send();
 
         if ($aPositions && $aResponse && array_key_exists('status', $aResponse) !== false && $aResponse['status'] == 'APPROVED') {
@@ -1720,6 +1725,7 @@ class fcpoRequest extends oxSuperCfg {
      * @return array
      */
     public function sendRequestDebit($oOrder, $dAmount, $sBankCountry = false, $sBankAccount = false, $sBankCode = '', $sBankaccountholder = '', $aPositions = false) {
+        $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
         $this->addParameter('request', 'debit'); //Request method
         $sMode = $oOrder->oxorder__fcpomode->value;
         if ($sMode == '') {
@@ -1750,6 +1756,10 @@ class fcpoRequest extends oxSuperCfg {
                 //partial-amount
                 $this->addParameter('amount', number_format($dAmount, 2, '.', '') * 100); //Total order sum in smallest currency unit
             }
+        }
+
+        if ($sPaymentId == 'fcpo_secinvoice') {
+            $this->_fcpoAddSecInvoiceParameters($oOrder);
         }
 
         $aResponse = $this->send();
