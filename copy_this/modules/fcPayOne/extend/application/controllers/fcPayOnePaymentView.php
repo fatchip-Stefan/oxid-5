@@ -1971,13 +1971,43 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return mixed
      */
     protected function _fcpoSecInvoiceSaveRequestedValues($mReturn, $sPaymentId) {
+        if ($sPaymentId != 'fcpo_secinvoice') {
+            return $mReturn;
+        }
+
         $blSavedBirthdateData = $this->_fcpoSaveBirthdayData($sPaymentId);
-        if (!$blSavedBirthdateData) {
-            // could not save (required) birthdate => invalid
+        $blSavedCompanyData = $this->_fcpoSaveCompanyData($sPaymentId);
+
+        $blValid = (
+            $blSavedBirthdateData &&
+            $blSavedCompanyData
+        );
+
+        if (!$blValid) {
+            // could not save (required) birthdate or company data => invalid
             $mReturn = null;
         }
 
         return $mReturn;
+    }
+
+    /**
+     * Saving company related data if needed
+     *
+     * @param $sPaymentId
+     * @return bool
+     */
+    protected function _fcpoSaveCompanyData($sPaymentId)
+    {
+        $aBirthdayValidation = $this->_fcpoValidateBirthdayData($sPaymentId);
+        $blBirthdayRequired = $aBirthdayValidation['blBirthdayRequired'];
+
+        if (!$blBirthdayRequired) {
+            $blResult = $this->_fcpoUpdateCompanyData($sPaymentId);
+            return $blResult;
+        }
+
+        return true;
     }
 
     /**
@@ -2012,13 +2042,55 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     protected function _fcpoSaveBirthdayData($sPaymentId) {
         $aBirthdayValidation = $this->_fcpoValidateBirthdayData($sPaymentId);
         $blBirthdayRequired = $aBirthdayValidation['blBirthdayRequired'];
-        if (!$blBirthdayRequired) {
-            $blResult = $this->_fcValidateCompanyData($sPaymentId);
-        } else {
+
+        if ($blBirthdayRequired) {
             $blResult = $this->_fcpoUpdateBirthdayData($aBirthdayValidation);
+            return $blResult;
         }
 
-        return $blResult;
+        return true;
+    }
+
+    /**
+     * Updates company data and checks userdata finally
+     *
+     * @param $sPaymentId
+     * @return bool
+     */
+    protected function _fcpoUpdateCompanyData($sPaymentId) {
+        $sUstId = $this->_fcpoFetchUstid($sPaymentId);
+
+        if ($sUstId) {
+            $oUser = $this->_fcpoGetUserFromSession();
+            $oUser->oxuser__oxustid = new oxField($sUstId, oxField::T_RAW);
+            $oUser->save();
+        }
+
+        $blValidCompanyData = $this->_fcValidateCompanyData($sPaymentId);
+
+        return $blValidCompanyData;
+    }
+
+    /**
+     * Fetches Ustid from dynpayment form on payment page
+     *
+     * @param $sPaymentId
+     * @return string
+     */
+    protected function _fcpoFetchUstid($sPaymentId)
+    {
+        $aRequestedValues = $this->_fcpoGetRequestedValues();
+
+        $blCompleteDataSecInvoice = (
+            $sPaymentId == 'fcpo_secinvoice' &&
+            isset($aRequestedValues['fcpo_secinvoice_ustid'])
+        );
+
+        if ($blCompleteDataSecInvoice) {
+            return (string) $aRequestedValues['fcpo_secinvoice_ustid'];
+        }
+
+        return '';
     }
 
 
@@ -2056,7 +2128,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return bool
      */
     protected function _fcValidateCompanyData($sPaymentId) {
-        $aPayments2Validate = array();
+        $aPayments2Validate = array('fcpo_secinvoice');
 
         $blDeeperValidationNeeded = in_array($sPaymentId, $aPayments2Validate);
         if (!$blDeeperValidationNeeded) {
