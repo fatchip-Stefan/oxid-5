@@ -2135,7 +2135,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
             return true;
         }
 
-        $blReturn = $this->fcpoIsB2B(true);
+        $blReturn = $this->fcpoIsB2B();
 
         if (!$blReturn) {
             $oLang = $this->_oFcpoHelper->fcpoGetLang();
