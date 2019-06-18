@@ -140,28 +140,6 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
     }
 
     /**
-     * Returns if given paymentid is an iframe payent
-     *
-     * @param $sPaymentId
-     * @return bool
-     */
-    public static function fcIsPayOneIframePaymentType($sPaymentId) {
-        $blReturn = (array_search($sPaymentId, self::$_aIframePaymentTypes) !== false) ? true : false;
-        return $blReturn;
-    }
-
-    /**
-     * Returns if given paymentid is of type frontend api
-     *
-     * @param $sPaymentId
-     * @return bool
-     */
-    public static function fcIsPayOneFrontendApiPaymentType($sPaymentId) {
-        $blReturn = (array_search($sPaymentId, self::$_aFrontendApiPaymentTypes) !== false) ? true : false;
-        return $blReturn;
-    }
-
-    /**
      * Determines the operation mode ( live or test ) used in this order based on the payment (sub) method
      *
      * @param string $sType payment subtype ( Visa, MC, etc.). Default is ''

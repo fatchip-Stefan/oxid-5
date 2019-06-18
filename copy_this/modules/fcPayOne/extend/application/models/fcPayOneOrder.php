@@ -320,11 +320,28 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * @extend finalizeOrder
      */
     public function finalizeOrder(oxBasket $oBasket, $oUser, $blRecalculatingOrder = false) {
-        // Use standard method if payment type does not belong to PAYONE
-        if ($this->isPayOnePaymentType($oBasket->getPaymentId()) === false) {
-            return parent::finalizeOrder($oBasket, $oUser, $blRecalculatingOrder);
+        $sPaymentId = $oBasket->getPaymentId();
+        $blPayonePayment = $this->isPayOnePaymentType($sPaymentId);
+
+        // OXID-219 If payone method, the order will be completed by this method
+        // If overloading is needed, the _fcpoFinalizeOrder have to be overloaded
+        // Otherwise, the execution goes over, to the normal flow from parent class
+        if ($blPayonePayment) {
+            return $this->_fcpoFinalizeOrder($oBasket, $oUser, $blRecalculatingOrder);
         }
 
+        return parent::finalizeOrder($oBasket, $oUser, $blRecalculatingOrder);
+    }
+
+    /**
+     * Payone handling on finalizing order
+     *
+     * @param $oBasket
+     * @param $oUser
+     * @param $blRecalculatingOrder
+     * @return bool|int
+     */
+    protected function _fcpoFinalizeOrder($oBasket, $oUser, $blRecalculatingOrder) {
         $this->_sFcpoPaymentId = $oBasket->getPaymentId();
 
         $blSaveAfterRedirect = $this->_isRedirectAfterSave();
@@ -400,6 +417,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         $iRet = $this->_fcpoFinishOrder($blRecalculatingOrder, $oUser, $oBasket, $oUserPayment);
 
         return $iRet;
+
     }
 
 
@@ -1597,6 +1615,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         $this->_fcpoSaveWorkorderId($sPaymentId, $aResponse);
         $this->_fcpoSaveClearingReference($sPaymentId, $aResponse);
         $this->_fcpoSaveProfileIdent($sPaymentId, $aResponse);
+        $this->save();
     }
 
     /**
