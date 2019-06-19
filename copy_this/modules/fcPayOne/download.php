@@ -99,7 +99,7 @@ class fcPayOneMandateDownload extends oxUBase {
         $sOrderId = $this->_oFcpoHelper->fcpoGetRequestParameter('id');
         $sUserId = $this->_oFcpoHelper->fcpoGetRequestParameter('uid');
         $sPath = false;
-        $oDb = oxDb::getDb(1);
+        $oDb = oxDb::getDb();
         
         $oUser = $this->getUser();
         if($oUser) {
@@ -137,9 +137,9 @@ class fcPayOneMandateDownload extends oxUBase {
             }
             $oResult = $oDb->Execute($sQuery);
             if ($oResult != false && $oResult->recordCount() > 0) {
-                $sFilename = $oResult->fields['fcpo_filename'];
-                $sOrderId = $oResult->fields['oxid'];
-                $sMode = $oResult->fields['fcpomode'];
+                $sFilename = $oResult->fields[0];
+                $sOrderId = $oResult->fields[1];
+                $sMode = $oResult->fields[2];
             }
             if($sFilename) {
                 $sPath = getShopBasePath().'modules/fcPayOne/mandates/'.$sFilename;
