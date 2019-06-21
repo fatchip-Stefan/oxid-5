@@ -930,17 +930,12 @@ class fcpoRequest extends oxSuperCfg {
 
     /**
      * Method that determines if order is B2B
-     * 
+     *
      * @param void
      * @return bool
      */
     protected function _fcpoIsOrderB2B($oOrder) {
-        $blReturn = ($oOrder->oxorder__oxbillcompany->value) ? true : false;
-        if ($blReturn) {
-            $blReturn = ($oOrder->oxorder__oxbillustid->value) ? true : false;
-        }
-
-        return $blReturn;
+        return ($oOrder->oxorder__oxbillcompany->value) ? true : false;
     }
 
     /**
@@ -1638,7 +1633,7 @@ class fcpoRequest extends oxSuperCfg {
      * @return array
      */
     public function sendRequestCapture($oOrder, $dAmount, $blSettleAccount = true, $aPositions = false) {
-        $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
+        $this->_fcpoSetPortal($oOrder);
         $this->addParameter('request', 'capture'); //Request method
         $sMode = $oOrder->oxorder__fcpomode->value;
         if ($sMode == '') {
@@ -1683,10 +1678,6 @@ class fcpoRequest extends oxSuperCfg {
 
         $this->_fcpoAddCaptureRatePayParams($oOrder);
 
-        if ($sPaymentId == 'fcpo_secinvoice') {
-            $this->_fcpoAddSecInvoiceParameters($oOrder);
-        }
-
         $aResponse = $this->send();
 
         if ($aPositions && $aResponse && array_key_exists('status', $aResponse) !== false && $aResponse['status'] == 'APPROVED') {
@@ -1697,19 +1688,6 @@ class fcpoRequest extends oxSuperCfg {
         }
 
         return $aResponse;
-    }
-    
-    /**
-     * Adds RatePay specific parameters
-     * 
-     * @param type $oOrder
-     * @return void
-     */
-    protected function _fcpoAddCaptureRatePayParams($oOrder) {
-        $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
-        if (in_array($sPaymentId, $this->_aRatePayPayents)) {
-            $this->addParameter('add_paydata[shop_id]', $oOrder->oxorder__fcpoprofileident->rawValue);
-        }
     }
 
     /**
@@ -1725,7 +1703,7 @@ class fcpoRequest extends oxSuperCfg {
      * @return array
      */
     public function sendRequestDebit($oOrder, $dAmount, $sBankCountry = false, $sBankAccount = false, $sBankCode = '', $sBankaccountholder = '', $aPositions = false) {
-        $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
+        $this->_fcpoSetPortal($oOrder);
         $this->addParameter('request', 'debit'); //Request method
         $sMode = $oOrder->oxorder__fcpomode->value;
         if ($sMode == '') {
@@ -1756,10 +1734,6 @@ class fcpoRequest extends oxSuperCfg {
                 //partial-amount
                 $this->addParameter('amount', number_format($dAmount, 2, '.', '') * 100); //Total order sum in smallest currency unit
             }
-        }
-
-        if ($sPaymentId == 'fcpo_secinvoice') {
-            $this->_fcpoAddSecInvoiceParameters($oOrder);
         }
 
         $aResponse = $this->send();
@@ -1869,11 +1843,68 @@ class fcpoRequest extends oxSuperCfg {
     }
 
 
-    protected function _stateNeeded($sIso2Country) {
-        if (array_search($sIso2Country, $this->_aStateNeededCountries) !== false) {
-            return true;
+    /**
+     * Method takes care for eventually other payment protal for fulfilling process
+     *
+     * @param $oOrder
+     * @return void
+     */
+    protected function _fcpoSetPortal($oOrder)
+    {
+        $this->_fcpoSetSecurePayPortal($oOrder);
+    }
+
+    /**
+     * If payment is Secure Invoice (rec/POV) other portal data
+     * has to be set for upcoming call
+     *
+     * @param $oOrder
+     * @return void
+     */
+    protected function _fcpoSetSecurePayPortal($oOrder)
+    {
+        $sPaymentId =
+            (string) $oOrder->oxorder__oxpaymenttype->value;
+        $blPaymentMatches = ($sPaymentId === 'fcpo_secinvoice');
+
+        if (!$blPaymentMatches) return;
+
+        $oConfig = $this->getConfig();
+        $sFCPOSecinvoicePortalKey =
+            $oConfig->getConfigParam('sFCPOSecinvoicePortalKey');
+        $sFCPOSecinvoicePortalId =
+            $oConfig->getConfigParam('sFCPOSecinvoicePortalId');
+
+        $this->addParameter('portalid', $sFCPOSecinvoicePortalId);
+        $this->addParameter('key', md5($sFCPOSecinvoicePortalKey));
+    }
+
+    /**
+     * Adds RatePay specific parameters
+     *
+     * @param type $oOrder
+     * @return void
+     */
+    protected function _fcpoAddCaptureRatePayParams($oOrder) {
+        $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
+        if (in_array($sPaymentId, $this->_aRatePayPayents)) {
+            $this->addParameter('add_paydata[shop_id]', $oOrder->oxorder__fcpoprofileident->rawValue);
         }
-        return false;
+    }
+
+    /**
+     * Check is state is needed for country
+     *
+     * @param $sIso2Country
+     * @return bool
+     */
+    protected function _stateNeeded($sIso2Country) {
+        $blResult = (bool) array_search(
+            $sIso2Country,
+            $this->_aStateNeededCountries
+        );
+
+        return $blResult;
     }
 
     /**

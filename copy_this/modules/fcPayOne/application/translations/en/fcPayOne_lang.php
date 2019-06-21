@@ -188,6 +188,8 @@ $aLang = array(
     'FCPO_MAIL_AMZ_DECLINED_SUBJECT'                => "Please update your payment information",
     'FCPO_MAIL_AMZ_DECLINED_BODY'                   => "Valued customer,\n\nThank you very much for your order at %s.\nAmazon Pay was not able to process your payment.\nPlease go to https://pay.amazon.com/uk/ and update the payment information for your order. Afterwards we will automatically request payment again from Amazon Pay and you will receive a confirmation email.\n\nKind regards,\n\n%s",
     'FCPO_SECINVOICE_BIRTHDATE' => 'Please enter your birthday',
+    'FCPO_SECINVOICE_USTID' => 'Tax Identification Number',
+    'FCPO_SECINVOICE_NO_COMPANY' => 'Not a company? Click <a href="index.php?cl=account_user" style="color:green;">here</a> for changing your address.',
     'FCPO_NOT_ADULT' => 'Due to your age you are not allowed to use this payment. Please select another payment method',
     'FCPO_BIRTHDATE_INVALID' => 'Your birthday data is not valid.',
     'FCPO_COMPANYDATA_INVALID' => 'Your company data is not complete. For ordering as a business entering either company name and VatId is mandatory.',
