@@ -137,9 +137,9 @@ class fcPayOneMandateDownload extends oxUBase {
             }
             $oResult = $oDb->Execute($sQuery);
             if ($oResult != false && $oResult->recordCount() > 0) {
-                $sFilename = $oResult->fields[fcpo_filename];
-                $sOrderId = $oResult->fields[oxid];
-                $sMode = $oResult->fields[fcpomode];
+                $sFilename = $oResult->fields['fcpo_filename'];
+                $sOrderId = $oResult->fields['oxid'];
+                $sMode = $oResult->fields['fcpomode'];
             }
             if($sFilename) {
                 $sPath = getShopBasePath().'modules/fcPayOne/mandates/'.$sFilename;
