@@ -69,6 +69,7 @@ $aLang = array(
     'FCPO_BANK_ACCOUNT_NUMBER' => 'Account number:',
     'FCPO_BANK_ACCOUNT_HOLDER' => 'Account holder:',
     'FCPO_CREDITCARD' => "Credit card:",
+    'FCPO_CREDITCARD_CHOOSE' => "Please select",
     'FCPO_CARD_VISA' => "Visa",
     'FCPO_CARD_MASTERCARD' => "Mastercard",
     'FCPO_NUMBER' => "Number:",
@@ -195,6 +196,9 @@ $aLang = array(
     'FCPO_COMPANYDATA_INVALID' => 'Your company data is not complete. For ordering as a business entering either company name and VatId is mandatory.',
     'FCPO_RATEPAY_REJECTED_401' => 'Ratepay payment is faded currently. Please add text here.',
     'FCPO_ERROR_MP_SETCHECKOUT'                     => "Due to technical reasons Masterpass can't be used currently. Please use another payment method. We apologize for any inconvienience.",
+    'FCPO_CC_HOSTED_ERROR_CARDTYPE'                 => 'Please select a cardtype',
+    'FCPO_CC_HOSTED_ERROR_CVC'                      => 'Please check CVC',
+    'FCPO_CC_HOSTED_ERROR_INCOMPLETE'               => 'Input incomplete'
 );
 
 /*

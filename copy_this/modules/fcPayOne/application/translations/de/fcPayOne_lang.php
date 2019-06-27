@@ -70,6 +70,7 @@ $aLang = array(
     'FCPO_BANK_ACCOUNT_NUMBER'                      => 'Kto.Nr.:',
     'FCPO_BANK_GER_OLD'                             => 'oder bezahlen Sie wie gewohnt mit Ihren bekannten Kontodaten<br>(nur für Deutsche Kontoverbindungen).',
     'FCPO_CREDITCARD'                               => "Karte:",
+    'FCPO_CREDITCARD_CHOOSE'                        => "Bitte wählen",
     'FCPO_CARD_VISA'                                => "Visa",
     'FCPO_CARD_MASTERCARD'                          => "Mastercard",
     'FCPO_NUMBER'                                   => "Nummer:",
@@ -200,6 +201,9 @@ $aLang = array(
     'FCPO_BIRTHDATE_INVALID'                        => 'Ihr Geburtsdatum wurde nicht korrekt eingegeben',
     'FCPO_COMPANYDATA_INVALID'                      => 'Ihre Firmendaten sind nicht vollständig. Für eine gewerbliche Bestellung ist die Angabe des Firmennamens und der UStId notwendig.',
     'FCPO_ERROR_MP_SETCHECKOUT'                     => 'Aufgrund eines technischen Fehlers, kann die Zahlart Masterpass aktuell nicht verwendet werden. Bitte verwenden Sie eine andere Zahlart. Wir bitten um Verzeihung.',
+    'FCPO_CC_HOSTED_ERROR_CARDTYPE'                 => 'Bitte wählen Sie einen Kartentyp',
+    'FCPO_CC_HOSTED_ERROR_CVC'                      => 'Bitte CVC-Eingabe überprüfen',
+    'FCPO_CC_HOSTED_ERROR_INCOMPLETE'               => 'Eingaben unvollständig'
 );
 
 /*
