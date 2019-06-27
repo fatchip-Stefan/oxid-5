@@ -46,7 +46,6 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
     protected $_aSupportedThemes = array(
         'flow' => 'flow',
         'azure' => 'azure',
-        'mobile' => 'mobile',
     );
 
     /**
