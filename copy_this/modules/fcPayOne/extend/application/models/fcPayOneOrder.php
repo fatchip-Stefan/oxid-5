@@ -1334,8 +1334,12 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * @param void
      * @return mixed
      */
-    public function fcpoGetMandateFilename() {
-        $sOxid = $this->getId();
+    public function fcpoGetMandateFilename($sOXID = null) {
+        if ($sOXID) {
+            $sOxid = $sOXID;
+        } else {
+            $sOxid = $this->getId();
+        }
         $sQuery = "SELECT fcpo_filename FROM fcpopdfmandates WHERE oxorderid = '{$sOxid}'";
         $sFile = $this->_oFcpoDb->GetOne($sQuery);
 
