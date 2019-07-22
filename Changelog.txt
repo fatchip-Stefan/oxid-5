@@ -1,3 +1,26 @@
+﻿==2.3.1==
+Release Date: 2019-07-23
+New Features 
+
+* b2b order with BS PAYONE safe invoice 
+
+Bugfixes 
+
+* prevent creditcard payment without cvc2 
+* removed some rogue updateuser calls to the PAYONE API 
+* various fixes for Ratepay 
+
+Maintenance 
+
+* dropped support for mobile theme.⚠
+* removed deprecated payment method Billsafe 
+* added iDeal Handelsbanken 
+
+## Warning 
+
+* be sure to clear the complete module directory before use to prevent errors
+* since we've dropped support for the mobile theme, please make sure to use a newer responsive theme like Flow
+
 ==2.3.0==
 Release Date: 2018-12-10
 New Features
