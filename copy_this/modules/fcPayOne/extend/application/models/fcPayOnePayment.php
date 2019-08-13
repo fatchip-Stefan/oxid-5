@@ -76,6 +76,18 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
     );
 
     /**
+     * List of payments that are not foreseen to be shown as regular payment
+     * selection
+     *
+     * @var array
+     */
+    protected $_aExpressPayments = array(
+        'fcpomasterpass',
+        'fcpoamazonpay',
+        'fcpopaydirekt_express'
+    );
+
+    /**
      * List of payments which are not allowed for authorization calls (preauth only)
      * @var array
      */
@@ -138,6 +150,23 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         }
         return $blReturn;
     }
+
+    /**
+     * Checks if this payment is foreseen to be shown as standard
+     * payment selection
+     *
+     * @param void
+     * @return bool
+     */
+    public function fcpoShowAsRegularPaymentSelection()
+    {
+        $sPaymentId = $this->getId();
+        $blPaymentAllowedInSelection =
+            !in_array($sPaymentId, $this->_aExpressPayments);
+
+        return $blPaymentAllowedInSelection;
+    }
+
 
     /**
      * Determines the operation mode ( live or test ) used in this order based on the payment (sub) method
