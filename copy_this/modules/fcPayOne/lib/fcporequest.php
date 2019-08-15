@@ -2909,33 +2909,39 @@ class fcpoRequest extends oxSuperCfg {
 
     /**
      * Get the next reference number for the upcoming PAYONE transaction
-     * 
+     *
+     * @param bool $blAddPrefixToSession
      * @param object $oOrder order object
-     * 
      * @return string
      */
-    public function getRefNr($oOrder = false) {
-        $oDb = oxDb::getDb();
+    public function getRefNr($oOrder = false, $blAddPrefixToSession = false) {
         $sRawPrefix = (string) $this->getConfig()->getConfigParam('sFCPORefPrefix');
-        $sRefNrInSession = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoRefNr');
+        $sSessionRefNr = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoRefNr');
+        $blUseSessionRefNr = ($sSessionRefNr && !$oOrder);
+        if ($blUseSessionRefNr) {
+            $sRefNrComplete = ($blAddPrefixToSession) ?
+                $sRawPrefix . $sSessionRefNr : $sSessionRefNr;
+            return $sRefNrComplete;
+        }
+
+        $oDb = oxDb::getDb();
         $sPrefix = $oDb->quote($sRawPrefix);
 
-        if ($sRefNrInSession) {
-            // there is a reference nr in the air, which indicates there have been
-            // former fails on order submission. We gonna use it again
-            $sRefNr = $sRefNrInSession;
-        } elseif ($oOrder && !empty($oOrder->oxorder__oxordernr->value)) {
-            $sRefNr = $sRawPrefix . $oOrder->oxorder__oxordernr->value;
+        if ($oOrder && !empty($oOrder->oxorder__oxordernr->value)) {
+            $sRefNr = $oOrder->oxorder__oxordernr->value;
         } else {
             $sQuery = "SELECT MAX(fcpo_refnr) FROM fcporefnr WHERE fcpo_refprefix = {$sPrefix}";
             $iMaxRefNr = $oDb->GetOne($sQuery);
             $sRefNr = (int) $iMaxRefNr + 1;
-            $sRefNr = (string) $sRawPrefix . $sRefNr;
             $sQuery = "INSERT INTO fcporefnr (fcpo_refnr, fcpo_txid, fcpo_refprefix)  VALUES ('{$sRefNr}', '', {$sPrefix})";
+
             $oDb->Execute($sQuery);
         }
 
-        return $sRefNr;
+        $sRefNrComplete = $sRawPrefix . $sRefNr;
+        $this->_oFcpoHelper->fcpoSetSessionVariable('fcpoRefNr', $sRefNr);
+
+        return $sRefNrComplete;
     }
 
 }
