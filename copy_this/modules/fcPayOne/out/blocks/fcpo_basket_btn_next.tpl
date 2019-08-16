@@ -25,3 +25,10 @@
         sMasterpassButtonClass='payone_basket_masterpass_btn_flow'
     }]
 [{/if}]
+
+[{if $oViewConf->fcpoCanDisplayPaydirektExpressButton()}]
+    [{assign var="sFcPoTemplatePathPaydirektExpress" value=$sFcPoTemplatePath|cat:'/fcpayone_paydirekt_express_button.tpl'}]
+    [{include
+        file=$oViewConf->fcpoGetAbsModuleTemplateFrontendPath($sFcPoTemplatePathPaydirektExpress)
+    }]
+[{/if}]

@@ -263,7 +263,7 @@ class fcpoRequest extends oxSuperCfg {
                 $oOrder->oxorder__oxpaymenttype->value == 'fcpopaydirekt' ||
                 $oOrder->fcIsPayPalOrder() === true &&
                 $this->getConfig()->getConfigParam('blFCPOPayPalDelAddress') === true
-                );
+        );
 
         if ($oOrder->oxorder__oxdellname->value != '') {
             $oDelCountry = oxNew('oxcountry');
@@ -539,18 +539,15 @@ class fcpoRequest extends oxSuperCfg {
      *
      * @param string $sAbortClass
      * @param string $sRefNr
-     * @param bool $blIsPayPalExpress
+     * @param mixed $mRedirectFunction
      * @return void
      */
-    protected function _addRedirectUrls($sAbortClass, $sRefNr = false, $blIsPayPalExpress = false) {
+    protected function _addRedirectUrls($sAbortClass, $sRefNr = false, $mRedirectFunction = false) {
         $oConfig = $this->getConfig();
         $oSession = $this->_oFcpoHelper->fcpoGetSession();
         $sShopURL = $oConfig->getCurrentShopUrl();
 
-        $sRToken = '';
-        if ($this->_oFcpoHelper->fcpoGetIntShopVersion() >= 4310) {
-            $sRToken = '&rtoken=' . $oSession->getRemoteAccessToken();
-        }
+        $sRToken = '&rtoken=' . $oSession->getRemoteAccessToken();
 
         $sSid = $oSession->sid(true);
         if ($sSid != '') {
@@ -563,8 +560,8 @@ class fcpoRequest extends oxSuperCfg {
             $sAddParams .= '&refnr=' . $sRefNr;
         }
 
-        if ($blIsPayPalExpress === true) {
-            $sAddParams .= '&fnc=fcpoHandlePayPalExpress';
+        if (is_string($mRedirectFunction)) {
+            $sAddParams .= '&fnc='.$mRedirectFunction;
         } else {
             $sAddParams .= '&fnc=execute';
         }
@@ -1014,13 +1011,30 @@ class fcpoRequest extends oxSuperCfg {
         $this->addParameter('shipping_city', $sShippingCity);
         $this->addParameter('shipping_country', strtoupper($sShippingCountry));
 
-        // basket handling
+        $this->_fcpoAddBasketItemsFromSession();
+        $this->_fcpoAddShippingCostsFromSession();
+
+        return false;
+    }
+
+    /**
+     * Adding products from basket session into call
+     *
+     * @param void
+     * @return void
+     */
+    protected function _fcpoAddBasketItemsFromSession()
+    {
+        $oSession = $this->getSession();
         $oBasket = $oSession->getBasket();
         $iIndex = 1;
         foreach ($oBasket->getContents() as $oBasketItem) {
             $oArticle = $oBasketItem->getArticle();
-            $sArticleIdent = ($oArticle->oxarticles__oxean->value) ? $oArticle->oxarticles__oxean->value : $oArticle->oxarticles__oxartnum->value;
-                
+            $sArticleIdent =
+                ($oArticle->oxarticles__oxean->value) ?
+                    $oArticle->oxarticles__oxean->value :
+                    $oArticle->oxarticles__oxartnum->value;
+
             $this->addParameter('it[' . (string) $iIndex . ']', 'goods');
             $this->addParameter('id[' . (string) $iIndex . ']', $sArticleIdent);
             $this->addParameter('pr[' . (string) $iIndex . ']', $this->_fcpoGetCentPrice($oBasketItem));
@@ -1029,13 +1043,16 @@ class fcpoRequest extends oxSuperCfg {
             $this->addParameter('va[' . (string) $iIndex . ']', $this->_fcpoGetCentPrice($oBasketItem->getPrice()->getVat()));
             $iIndex++;
         }
+    }
 
-        $oDelivery = $oBasket->getCosts('oxdelivery');
-        if ($oDelivery === null) {
-            $sDeliveryCosts = 0.0;
-        } else {
-            $sDeliveryCosts = $oDelivery->getBruttoPrice();
-        }
+
+    protected function _fcpoAddShippingCostsFromSession()
+    {
+        $oSession = $this->getSession();
+        $oBasket = $oSession->getBasket();
+        $sDeliveryCosts =
+            $this->_fcpoFetchDeliveryCostsFromBasket($oBasket);
+
         $dDelveryCosts = (double) str_replace(',', '.', $sDeliveryCosts);
         $this->addParameter('it[' . (string) $iIndex . ']', 'shipment');
         $this->addParameter('id[' . (string) $iIndex . ']', 'Standard Versand');
@@ -1043,7 +1060,22 @@ class fcpoRequest extends oxSuperCfg {
         $this->addParameter('no[' . (string) $iIndex . ']', '1');
         $this->addParameter('de[' . (string) $iIndex . ']', 'Standard Versand');
 
-        return false;
+    }
+
+    /**
+     * Returns delivery costs of given basket object
+     *
+     * @param $oBasket
+     * @return mixed float|string
+     */
+    protected function _fcpoFetchDeliveryCostsFromBasket($oBasket)
+    {
+        $oDelivery = $oBasket->getCosts('oxdelivery');
+        if ($oDelivery === null) return 0.0;
+
+        $sDeliveryCosts = $oDelivery->getBruttoPrice();
+
+        return $sDeliveryCosts;
     }
 
     /**
@@ -1586,6 +1618,100 @@ class fcpoRequest extends oxSuperCfg {
 
 
     /**
+     * Sends request for paydirekt checkout
+     *
+     * @param bool $blGetStatus
+     * @return array
+     */
+    public function sendRequestPaydirektCheckout($sWorkorderId) {
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oSession = $this->getSession();
+        $oBasket = $oSession->getBasket();
+        $oPrice = $oBasket->getPrice();
+        $sOperationMode = $this->getOperationMode('fcpoamazonpay');
+        $sSubAccountId = $oConfig->getConfigParam('sFCPOSubAccountID');
+
+        $this->addParameter('request', 'genericpayment');
+        $this->addParameter('mode', $sOperationMode);
+        $this->addParameter('aid', $sSubAccountId);
+
+        $this->addParameter('clearingtype', 'wlt');
+        $this->addParameter('wallettype', 'PDT');
+
+        $this->addParameter('add_paydata[action]', 'checkout');
+        $this->addParameter('add_paydata[type]',$this->_fcpoGetPaydirektCheckoutType());
+        $this->addParameter(
+            'add_paydata[web_url_shipping_terms]',
+            $this->_fcpoGetPaydirektShippingTermsUrl()
+        );
+
+        $iAmount =
+            number_format($oPrice->getBruttoPrice(), 2, '.', '') * 100;
+        $this->addParameter('amount', $iAmount);
+
+        $oCurr = $oConfig->getActShopCurrencyObject();
+        $this->addParameter('currency', $oCurr->name);
+
+        $this->_fcpoAddBasketItemsFromSession();
+        $this->_addRedirectUrls('basket', false, 'fcpoHandlePaydirektExpress');
+
+        if ($sWorkorderId) {
+            $this->_fcpoAddPaydirektGetStatusParams($sWorkorderId);
+        }
+
+        return $this->send();
+    }
+
+    /**
+     * Adding params for getting status
+     *
+     * @param $sWorkorderId
+     * @return void
+     */
+    public function _fcpoAddPaydirektGetStatusParams($sWorkorderId)
+    {
+        $this->addParameter('add_paydata[action]', 'getstatus');
+        $this->addParameter('workorderid', $sWorkorderId);
+    }
+
+
+    /**
+     * Returns url to shipping terms url
+     *
+     * @param void
+     * @return string
+     */
+    protected function _fcpoGetPaydirektShippingTermsUrl()
+    {
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $sShippingTermUrl =
+            (string) $oConfig->getConfigParam('sPaydirektShippingTermsUrl');
+
+        return $sShippingTermUrl;
+    }
+
+    /**
+     * Returns checkout type of paydirekt express initial call
+     *
+     * @param void
+     * @return string
+     */
+    protected function _fcpoGetPaydirektCheckoutType()
+    {
+        $oPayment =
+            $this->_oFcpoHelper->getFactoryObject('oxPayment');
+
+        $oPayment->load('fcpopaydirekt_express');
+
+        $sAuthorizationType = $oPayment->oxpayments__fcpoauthmode->value;
+        $blIsPreauthorization = ($sAuthorizationType == 'preauthorization') ;
+        $sType = ($blIsPreauthorization) ? 'order' : 'directsale';
+
+        return $sType;
+    }
+
+
+    /**
      * Send request to PAYONE Server-API with request-type "genericpayment"
      * 
      * @return array
@@ -1619,7 +1745,7 @@ class fcpoRequest extends oxSuperCfg {
         $sNarrativeText = "Performing generic request with WorkOrderID: ".$sCurrentWorkOrderId;
         $this->addParameter('narrative_text', $sNarrativeText);
 
-        $this->_addRedirectUrls('basket', false, true);
+        $this->_addRedirectUrls('basket', false, 'fcpoHandlePayPalExpress');
 
         return $this->send();
     }

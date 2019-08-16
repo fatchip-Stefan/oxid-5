@@ -980,6 +980,33 @@
                 </dd>
                 <div class="spacer"></div>
             </dl>
+            <dl>
+                <dt>
+                    <select name="confstrs[sPaydirektExpressButtonType]">
+                        <option value="none" [{if $confstrs.sPaydirektExpressButtonType == "none"}]SELECTED[{/if}]>[{oxmultilang ident="FCPO_PAYDIREKT_EXPRESS_BUTTON_NONE"}]</option>
+                        <option value="green" [{if $confstrs.sPaydirektExpressButtonType == "green"}]SELECTED[{/if}]>[{oxmultilang ident="FCPO_PAYDIREKT_EXPRESS_BUTTON_GREEN"}]</option>
+                        <option value="green2" [{if $confstrs.sPaydirektExpressButtonType == "green2"}]SELECTED[{/if}]>[{oxmultilang ident="FCPO_PAYDIREKT_EXPRESS_BUTTON_GREEN2"}]</option>
+                        <option value="white" [{if $confstrs.sPaydirektExpressButtonType == "white"}]SELECTED[{/if}]>[{oxmultilang ident="FCPO_PAYDIREKT_EXPRESS_BUTTON_WHITE"}]</option>
+                        <option value="white2" [{if $confstrs.sPaydirektExpressButtonType == "white2"}]SELECTED[{/if}]>[{oxmultilang ident="FCPO_PAYDIREKT_EXPRESS_BUTTON_WHITE2"}]</option>
+                    </select>
+                    [{oxinputhelp ident="FCPO_HELP_PAYDIREKT_BUTTONTYPE"}]
+                </dt>
+                <dd>
+                    [{oxmultilang ident="FCPO_PAYDIREKT_BUTTONTYPE"}]
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+            <dl>
+                <dt>
+                    <input type="text" class="txt" name="confstrs[sPaydirektShippingTermsUrl]" value="[{$confstrs.sPaydirektShippingTermsUrl}]">
+                    [{oxinputhelp ident="FCPO_HELP_PAYDIREKT_SHIPPING_TERMS_URL"}]
+                </dt>
+                <dd>
+                    [{oxmultilang ident="FCPO_PAYDIREKT_SHIPPING_TERMS_URL"}]
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+
         </div>
     </div>
 
