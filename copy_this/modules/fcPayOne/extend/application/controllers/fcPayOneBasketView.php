@@ -90,6 +90,8 @@ class fcPayOneBasketView extends fcPayOneBasketView_parent {
     protected function _fcpoCheckForAmazonLogoff()  {
         $sAmzAction = $this->_oFcpoHelper->fcpoGetRequestParameter('fcpoamzaction');
         if ($sAmzAction == 'logoff') {
+            $this->_oFcpoHelper->fcpoDeleteSessionVariable('amazonRefNr');
+            $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoRefNr');
             $this->_oFcpoHelper->fcpoDeleteSessionVariable('sAmazonLoginAccessToken');
             $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoAmazonWorkorderId');
             $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoAmazonReferenceId');

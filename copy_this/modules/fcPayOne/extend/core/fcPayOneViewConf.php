@@ -67,12 +67,38 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
     protected $_sCurrentMasterpassButtonId = null;
 
     /**
+     * List of themes and their button names
+     * @var array
+     */
+    protected $_aTheme2CssPayButtonSelector = array(
+        'flow' => 'nextStep',
+        'azure' => 'nextStep',
+    );
+
+    /**
      * Initializing needed things
      */
     public function __construct() {
         parent::__construct();
         $this->_oFcpoHelper = oxNew('fcpohelper');
         $this->_iAmzWidgetIncludeCounter = 0;
+    }
+
+    /**
+     * Method returns css selector matching to used (parent-)theme
+     *
+     * @param void
+     * @return string
+     */
+    public function fcpoGetAmazonBuyNowButtonCssSelector()
+    {
+        $sThemeId = $this->fcpoGetActiveThemePath();
+        $blHasSelector =
+            isset($this->_aTheme2CssPayButtonSelector[$sThemeId]);
+        if (!$blHasSelector) return '';
+        $sCssSelector =
+            (string) $this->_aTheme2CssPayButtonSelector[$sThemeId];
+        return $sCssSelector;
     }
 
     /**
@@ -312,7 +338,8 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
      * @return mixed
      */
     public function fcpoGetAmazonPayReferenceId() {
-        $sAmazonReferenceId = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonReferenceId');
+        $sAmazonReferenceId =
+            $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoAmazonReferenceId');
 
         return $sAmazonReferenceId;
     }
@@ -651,4 +678,101 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
 
         return $blIsPayOne;
     }
+
+    /**
+     * Return amazon confirmation error url
+     *
+     * @return mixed
+     */
+    public function fcpoGetAmazonConfirmErrorUrl()
+    {
+        $oConfig = $this->getConfig();
+        $sShopUrl = $oConfig->getShopUrl();
+        $sShopUrl = $sShopUrl."index.php?cl=basket";
+
+        return $sShopUrl;
+    }
+
+    /**
+     * Returns current user md5 delivery address hash
+     *
+     * @return mixed
+     */
+    public function fcpoGetDeliveryMD5()
+    {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oUser = $oBasket->getBasketUser();
+
+        $sDeliveryMD5 = $oUser->getEncodedDeliveryAddress();
+
+        $sDelAddrInfo = $this->fcpoGetDelAddrInfo();
+        if ($sDelAddrInfo) {
+            $sDeliveryMD5 .= $sDelAddrInfo;
+        }
+
+        return $sDeliveryMD5;
+    }
+
+    /**
+     * Returns MD5 hash of current selected deliveryaddress
+     *
+     * @param void
+     * @return string
+     */
+    public function fcpoGetDelAddrInfo()
+    {
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+
+        $sAddressId = $oConfig->getRequestParameter('deladrid');
+        if (!$sAddressId) {
+            $oSession = $this->_oFcpoHelper->fcpoGetSession();
+            $sAddressId = $oSession->getVariable('deladrid');
+        }
+
+        $oAddress = $this->_oFcpoHelper->getFactoryObject('oxAddress');
+        $oAddress->load($sAddressId);
+        $sEncodedDeliveryAddress = $oAddress->getEncodedDeliveryAddress();
+
+        return (string)$sEncodedDeliveryAddress;
+    }
+
+    /**
+     * Returns payment error wether from param or session
+     *
+     * @param void
+     * @return mixed
+     */
+    public function fcpoGetPaymentError()
+    {
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $iPayError = $oConfig->getRequestParameter('payerror');
+
+        if (!$iPayError) {
+            $oSession = $this->_oFcpoHelper->fcpoGetSession();
+            $iPayError = $oSession->getVariable('payerror');
+        }
+
+        return $iPayError;
+    }
+
+    /**
+     * Returns payment error text wether from param or session
+     *
+     * @param void
+     * @return mixed
+     */
+    public function fcpoGetPaymentErrorText()
+    {
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $sPayErrorText = $oConfig->getRequestParameter('payerrortext');
+
+        if (!$sPayErrorText) {
+            $oSession = $this->_oFcpoHelper->fcpoGetSession();
+            $sPayErrorText = $oSession->getVariable('payerrortext');
+        }
+
+        return $sPayErrorText;
+    }
+
 }
