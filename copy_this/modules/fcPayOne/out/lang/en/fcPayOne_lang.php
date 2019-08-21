@@ -33,6 +33,7 @@ $aLang = array(
     'FCPO_CC_NUMBER_INVALID' => 'Please enter a valid credit card number.',
     'FCPO_CC_DATE_INVALID' => 'Please enter a valid date of expiry.',
     'FCPO_CC_CVC2_INVALID' => 'Please enter a valid check digit.',
+    'FCPO_PAY_ERROR_REDIRECT' => 'Payment has been rejected by payment provider! Please select another payment method',
     'fcpo_so_ktonr' => 'bank account number:',
     'fcpo_so_blz' => 'bank identification number:',
     'FCPO_MANIPULATION' => 'suspicion of fraudulent manipulation',

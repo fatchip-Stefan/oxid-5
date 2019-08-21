@@ -263,7 +263,7 @@ class fcpoRequest extends oxSuperCfg {
                 $oOrder->oxorder__oxpaymenttype->value == 'fcpopaydirekt' ||
                 $oOrder->fcIsPayPalOrder() === true &&
                 $this->getConfig()->getConfigParam('blFCPOPayPalDelAddress') === true
-                );
+        );
 
         if ($oOrder->oxorder__oxdellname->value != '') {
             $oDelCountry = oxNew('oxcountry');
@@ -600,6 +600,7 @@ class fcpoRequest extends oxSuperCfg {
 
         if ($blAddAmazonLogoff) {
             $sErrorUrl .= "&fcpoamzaction=logoff";
+            $sBackUrl .= "&fcpoamzaction=logoff";
         }
 
         $this->addParameter('successurl', $sSuccessUrl);
@@ -1579,7 +1580,6 @@ class fcpoRequest extends oxSuperCfg {
         $oBasket = $oSession->getBasket();
         $oPrice = $oBasket->getPrice();
 
-
         $this->addParameter('request', 'genericpayment'); //Request method
         $this->addParameter('mode', $this->getOperationMode('fcpoamazonpay')); //PayOne Portal Operation Mode (live or test)
         $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID')); //ID of PayOne Sub-Account
@@ -1640,7 +1640,9 @@ class fcpoRequest extends oxSuperCfg {
 
         $this->_addRedirectUrls('basket',false, false, $sToken, $sDeliveryMD5, true);
 
-        return $this->send();
+        $aResponse = $this->send();
+
+        return $aResponse;
     }
 
     /**
