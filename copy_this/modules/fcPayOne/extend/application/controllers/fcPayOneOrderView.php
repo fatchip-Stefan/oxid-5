@@ -476,7 +476,7 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
         if (!$sWorkorderId) return;
 
         $oRequest   = $this->_oFcpoHelper->getFactoryObject('fcporequest');
-        $aOutput    = $oRequest->sendRequestPaydirektGetStatus($sWorkorderId);
+        $aOutput    = $oRequest->sendRequestPaydirektCheckout($sWorkorderId);
         $this->_oFcpoHelper->fcpoSetSessionVariable('paymentid', "fcpopaydirekt_express");
         $oUser = $this->_fcpoHandleExpressUser($aOutput);
 

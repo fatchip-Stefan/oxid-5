@@ -464,6 +464,16 @@ $aLang = array(
     'FCPO_CONFIG_GROUP_PAYDIREKT'               => 'Paydirekt',
     'FCPO_PAYDIREKT_OVERCAPTURE'                => 'Overcapture erlauben?',
     'FCPO_HELP_PAYDIREKT_OVERCAPTURE'           => 'Erlaubt den Einzug eines um 10% höheren Betrags basierend auf der vorautorisierten Summe.<br><b>Bitte aktivieren Sie diese Option nur in Absprache mit Paydirekt!</b>',
+
+    'FCPO_HELP_PAYDIREKT_BUTTONTYPE'            => 'Wählen Sie das passende Design des Paydirekt-Express Buttons.',
+    'FCPO_PAYDIREKT_EXPRESS_BUTTON_NONE'        => 'Keins',
+    'FCPO_PAYDIREKT_EXPRESS_BUTTON_GREEN'       => 'Grün',
+    'FCPO_PAYDIREKT_EXPRESS_BUTTON_GREEN2'      => 'Grün 2',
+    'FCPO_PAYDIREKT_EXPRESS_BUTTON_WHITE'       => 'Weiß',
+    'FCPO_PAYDIREKT_EXPRESS_BUTTON_WHITE2'      => 'Weiß 2',
+    'FCPO_PAYDIREKT_SHIPPING_TERMS_URL'         => 'Webadresse (URL) zu der Seite Ihrer Lieferbedingungen',
+    'FCPO_HELP_PAYDIREKT_SHIPPING_TERMS_URL'    => 'Die Angabe einer Webadresse zu ihren Lieferbedinungen ist verpflichtend notwendig für die Verwendung von Paydirekt Express',
+
 );
 
 /*

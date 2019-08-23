@@ -257,9 +257,7 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
      * @return bool
      */
     public function fcpoCanDisplayAmazonPayButton() {
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
-        $oPayment->load('fcpoamazonpay');
-        $blIsActive = (bool) $oPayment->oxpayments__oxactive->value;
+        $blIsActive = $this->_fcpoPaymentIsActive('fcpoamazonpay');
 
         return $blIsActive;
     }
@@ -650,5 +648,33 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
             (bool) fcPayOnePayment::fcIsPayOnePaymentType($sPaymentId);
 
         return $blIsPayOne;
+    }
+
+    /**
+     * Returns if paydirekt express button can be shown
+     *
+     * @param void
+     * @return bool
+     */
+    public function fcpoCanDisplayPaydirektExpressButton()
+    {
+        $blIsActive = $this->_fcpoPaymentIsActive('fcpopaydirekt_express');
+
+        return $blIsActive;
+    }
+
+    /**
+     * Checks is given payment is active
+     *
+     * @param $sPaymentId
+     * @return bool
+     */
+    protected function _fcpoPaymentIsActive($sPaymentId)
+    {
+        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
+        $oPayment->load($sPaymentId);
+        $blIsActive = (bool) $oPayment->oxpayments__oxactive->value;
+
+        return $blIsActive;
     }
 }

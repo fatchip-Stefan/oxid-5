@@ -55,6 +55,7 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         'fcpoamazonpay',
         'fcpo_secinvoice',
         'fcpomasterpass',
+        'fcpopaydirekt_express',
     );
 
     /**
@@ -73,6 +74,7 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         'fcpopaypal_express',
         'fcpoklarna',
         'fcpopaydirekt',
+        'fcpopaydirekt_express',
     );
 
     /**

@@ -195,6 +195,20 @@ class fcPayOneBasketView extends fcPayOneBasketView_parent {
     }
 
     /**
+     * Returns if paydirekt express is set active
+     *
+     * @param void
+     * @return bool
+     */
+    protected function _fcpoIsPaydirektExpressActive() {
+        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
+        $oPayment->load('fcpopaydirekt_express');
+        $blIsActive = (bool) $oPayment->oxpayments__oxactive->value;
+
+        return $blIsActive;
+    }
+
+    /**
      * Returns actual Paydirekt picture. Using paypal express path due its
      * actually the same
      *
@@ -206,7 +220,6 @@ class fcPayOneBasketView extends fcPayOneBasketView_parent {
         $sPaydirektExpressPic = false;
         $oBasket = $this->_oFcpoHelper->getFactoryObject('oxBasket');
         $sPic = $oBasket->fcpoGetPaydirektExpressPic();
-
         $sPaydirektExpressLogoPath =
             getShopBasePath() .
             $this->_sPayPalExpressLogoPath .
@@ -234,7 +247,7 @@ class fcPayOneBasketView extends fcPayOneBasketView_parent {
     public function fcpoUsePaydirektExpress()
     {
         $oRequest = $this->_oFcpoHelper->getFactoryObject('fcporequest');
-        $aOutput = $oRequest->sendRequestGenericPayment();
+        $aOutput = $oRequest->sendRequestPaydirektCheckout();
 
         $blIsRedirect = ($aOutput['status'] == 'REDIRECT');
 
@@ -242,7 +255,7 @@ class fcPayOneBasketView extends fcPayOneBasketView_parent {
             $this->_oFcpoHelper
                 ->fcpoSetSessionVariable('fcpoWorkorderId', $aOutput['workorderid']);
             $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
-            $oUtils->redirect($aOutput['redirecturl']);
+            $oUtils->redirect($aOutput['redirecturl'], false);
             return;
         }
 

@@ -342,6 +342,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * @return bool|int
      */
     protected function _fcpoFinalizeOrder($oBasket, $oUser, $blRecalculatingOrder) {
+die("Angekommen");
         $this->_sFcpoPaymentId = $oBasket->getPaymentId();
 
         $blSaveAfterRedirect = $this->_isRedirectAfterSave();

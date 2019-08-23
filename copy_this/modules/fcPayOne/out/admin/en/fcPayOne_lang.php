@@ -754,6 +754,17 @@ $aLang = array(
     'FCPO_CONFIG_GROUP_PAYDIREKT'               => 'Paydirekt',
     'FCPO_PAYDIREKT_OVERCAPTURE'                => 'Allow overcapture?',
     'FCPO_HELP_PAYDIREKT_OVERCAPTURE'           => 'Let you capture a 10% higher amount based on the sum that has been preauthorized.<br><b>Please ONLY activate this option in confirmation with Paydirekt!</b>',
+
+    'FCPO_PAYDIREKT_BUTTONTYPE'                 => 'Design of Paydirekt-Express button',
+    'FCPO_HELP_PAYDIREKT_BUTTONTYPE'            => 'Choose design of Paydirekt-Express button.',
+    'FCPO_PAYDIREKT_EXPRESS_BUTTON_NONE'        => 'None',
+    'FCPO_PAYDIREKT_EXPRESS_BUTTON_GREEN'       => 'Green',
+    'FCPO_PAYDIREKT_EXPRESS_BUTTON_GREEN2'      => 'Green 2',
+    'FCPO_PAYDIREKT_EXPRESS_BUTTON_WHITE'       => 'White',
+    'FCPO_PAYDIREKT_EXPRESS_BUTTON_WHITE2'      => 'White 2',
+    'FCPO_PAYDIREKT_SHIPPING_TERMS_URL'         => 'Webaddress (URL) to page of your shipping terms',
+    'FCPO_HELP_PAYDIREKT_SHIPPING_TERMS_URL'    => 'Entering a webaddress is mandatory for usage of Paydirekt Express',
+
 );
 
 /*
