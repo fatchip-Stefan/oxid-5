@@ -734,7 +734,7 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
         switch($sPaymentId) {
             case 'fcpopaypal_express':
                 $aStreetAndNumber =
-                    $this->_fcpoSplitAddress($aResponse['add_paydata['.$sPrefix.'_street]']);
+                    $this->_fcpoSplitAddress($aResponse['add_paydata[shipping_street]']);
                 break;
             default:
                 $aStreetAndNumber = array(
