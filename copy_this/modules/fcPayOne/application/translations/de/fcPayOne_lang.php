@@ -30,6 +30,7 @@ $aLang = array(
     'FCPO_KTONR_INVALID'                            => 'Bitte geben Sie eine korrekte Kontonummer ein.',
     'FCPO_ERROR'                                    => 'Es ist ein Fehler aufgetreten:<br>',
     'FCPO_ERROR_BLOCKED'                            => 'Kontodaten inkorrekt.',
+    'FCPO_PAY_ERROR_REDIRECT'                       => 'Die Zahlung wurde von Zahlungsanbieter abgelehnt! Bitte versuchen Sie es mit einer anderen Zahlart',
     'FCPO_CC_NUMBER_INVALID'                        => 'Bitte geben Sie eine korrekte Kreditkarten-Nummer ein.',
     'FCPO_CC_DATE_INVALID'                          => 'Bitte geben Sie ein korrektes Gültigkeits-Datum an.',
     'FCPO_CC_CVC2_INVALID'                          => 'Bitte geben Sie eine korrekte Prüfziffer an.',
