@@ -342,7 +342,6 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * @return bool|int
      */
     protected function _fcpoFinalizeOrder($oBasket, $oUser, $blRecalculatingOrder) {
-die("Angekommen");
         $this->_sFcpoPaymentId = $oBasket->getPaymentId();
 
         $blSaveAfterRedirect = $this->_isRedirectAfterSave();
@@ -377,12 +376,10 @@ die("Angekommen");
 
         $this->_fcpoSaveAfterRedirect($blSaveAfterRedirect);
 
-
         $blRet = $this->_fcpoHandleTsProtection($blRecalculatingOrder, $oBasket);
         if ($blRet !== true) {
             return $blRet;
         }
-
 
         // deleting remark info only when order is finished
         $this->_oFcpoHelper->fcpoDeleteSessionVariable('ordrem');
@@ -1118,7 +1115,8 @@ die("Angekommen");
         $blReturn = (
             $this->oxorder__oxpaymenttype->value == 'fcpoklarna' ||
             $this->oxorder__oxpaymenttype->value == 'fcpo_secinvoice' ||
-            $this->oxorder__oxpaymenttype->value == 'fcporp_bill'
+            $this->oxorder__oxpaymenttype->value == 'fcporp_bill' ||
+            $this->oxorder__oxpaymenttype->value == 'fcpopaydirekt_express'
         );
 
         return $blReturn;

@@ -260,6 +260,7 @@ class fcpoRequest extends oxSuperCfg {
             $this->addParameter('ip', $sIp);
 
         $blIsWalletTypePaymentWithDelAddress = (
+                $oOrder->oxorder__oxpaymenttype->value == 'fcpopaydirekt_express' ||
                 $oOrder->oxorder__oxpaymenttype->value == 'fcpopaydirekt' ||
                 $oOrder->fcIsPayPalOrder() === true &&
                 $this->getConfig()->getConfigParam('blFCPOPayPalDelAddress') === true
@@ -419,8 +420,9 @@ class fcpoRequest extends oxSuperCfg {
     protected function setPaymentParameters($oOrder, $aDynvalue, $sRefNr) {
         $blAddRedirectUrls = false;
         $oConfig = $this->getConfig();
+        $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
 
-        switch ($oOrder->oxorder__oxpaymenttype->value) {
+        switch ($sPaymentId) {
             case 'fcpocreditcard':
                 $blAddRedirectUrls = $this->_setPaymentParamsCC($aDynvalue);
                 break;
@@ -456,15 +458,31 @@ class fcpoRequest extends oxSuperCfg {
                 $this->addParameter('api_version', $this->_sApiVersion);
                 break;
             case 'fcpopaydirekt':
+            case 'fcpopaydirekt_express':
                 $this->addParameter('clearingtype', 'wlt'); //Payment method
                 $this->addParameter('wallettype', 'PDT');
                 if (strlen($sRefNr) <= 37) {// 37 is the max in this parameter for paydirekt - otherwise the request will fail
                     $this->addParameter('narrative_text', $sRefNr);
                 }
-                $blAllowOvercapture = $oConfig->getConfigParam('blFCPOAllowOvercapture');
+                $blAllowOvercapture = (
+                    $oConfig->getConfigParam('blFCPOAllowOvercapture') &&
+                    $sPaymentId == 'fcpopaydirekt'
+                );
                 if ($blAllowOvercapture) {
                     $this->addParameter('add_paydata[over_capture]','yes');
                 }
+
+                if ($sPaymentId == 'fcpopaydirekt_express') {
+                    $sDate = date('Y-m-d');
+                    $sTime = date('H:i:s');
+                    $sTimestamp = $sDate."T".$sTime."Z";
+                    $this->addParameter('add_paydata[terms_accepted_timestamp]', $sTimestamp);
+                    $oSession = $this->_oFcpoHelper->fcpoGetSession();
+                    $sWorkorderId = $oSession->getVariable('fcpoWorkorderId');
+
+                    $this->addParameter('workorderid', $sWorkorderId);
+                }
+
                 $blAddRedirectUrls = true;
                 break;
             case 'fcpopo_bill':
@@ -1623,7 +1641,7 @@ class fcpoRequest extends oxSuperCfg {
      * @param bool $blGetStatus
      * @return array
      */
-    public function sendRequestPaydirektCheckout($sWorkorderId) {
+    public function sendRequestPaydirektCheckout($sWorkorderId = false) {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $oSession = $this->getSession();
         $oBasket = $oSession->getBasket();
