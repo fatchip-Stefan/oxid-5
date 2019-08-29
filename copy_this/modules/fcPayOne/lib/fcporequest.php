@@ -1049,7 +1049,6 @@ class fcpoRequest extends oxSuperCfg {
         $this->addParameter('shipping_country', strtoupper($sShippingCountry));
 
         $this->_fcpoAddBasketItemsFromSession();
-        $this->_fcpoAddShippingCostsFromSession();
 
         return false;
     }
@@ -1080,13 +1079,7 @@ class fcpoRequest extends oxSuperCfg {
             $this->addParameter('va[' . (string) $iIndex . ']', $this->_fcpoGetCentPrice($oBasketItem->getPrice()->getVat()));
             $iIndex++;
         }
-    }
 
-
-    protected function _fcpoAddShippingCostsFromSession()
-    {
-        $oSession = $this->getSession();
-        $oBasket = $oSession->getBasket();
         $sDeliveryCosts =
             $this->_fcpoFetchDeliveryCostsFromBasket($oBasket);
 
@@ -1096,7 +1089,6 @@ class fcpoRequest extends oxSuperCfg {
         $this->addParameter('pr[' . (string) $iIndex . ']', $this->_fcpoGetCentPrice($dDelveryCosts));
         $this->addParameter('no[' . (string) $iIndex . ']', '1');
         $this->addParameter('de[' . (string) $iIndex . ']', 'Standard Versand');
-
     }
 
     /**
