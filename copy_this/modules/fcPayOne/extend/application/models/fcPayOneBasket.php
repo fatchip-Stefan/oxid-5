@@ -85,7 +85,9 @@ class fcPayOneBasket extends fcPayOneBasket_parent {
         );
 
         $blAvailable = in_array($sButtonType, array_keys($aAssignMap));
-        $sPic = ($blAvailable) ? $aAssignMap[$sButtonType] : '';
+        $sPic = ($blAvailable) ?
+            $aAssignMap[$sButtonType] :
+            'paydirekt-express-gruen.png';
 
         return $sPic;
     }
