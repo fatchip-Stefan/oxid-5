@@ -1012,7 +1012,7 @@
                         <option value="none" [{if $confstrs.sPaydirektExpressDeliverySetId == "none"}]SELECTED[{/if}]>[{oxmultilang ident="FCPO_PAYDIREKT_EXPRESS_DELIVERY_NONE"}]</option>
                         [{foreach from=$oView->fcpoGetDeliverySets() item="oDelivery"}]
                             [{assign var="sCurrentSetId" value=$oDelivery->getId()}]
-                            [{assign var="sCurrentSetName" value=$oDelivery->oxdelivery__oxtitle->rawValue}]
+                            [{assign var="sCurrentSetName" value=$oDelivery->oxdeliveryset__oxtitle->rawValue}]
                             <option value="[{$sCurrentSetId}]" [{if $confstrs.sPaydirektExpressDeliverySetId == $sCurrentSetId}]SELECTED[{/if}]>[{$sCurrentSetName}]</option>
                         [{/foreach}]
                     </select>

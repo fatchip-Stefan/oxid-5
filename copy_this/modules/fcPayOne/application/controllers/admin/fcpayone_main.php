@@ -818,7 +818,7 @@ class fcpayone_main extends fcpayone_admindetails {
     public function fcpoGetDeliverySets()
     {
         $oDeliveryAdminList =
-            $this->_oFcpoHelper->getFactoryObject('Delivery_List');
+            $this->_oFcpoHelper->getFactoryObject('DeliverySet_List');
 
         $oList = $oDeliveryAdminList->getItemList();
         $aDeliveryList = $oList->getArray();
