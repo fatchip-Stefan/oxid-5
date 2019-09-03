@@ -144,9 +144,8 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @param void
      * @return bool
      */
-    public function fcpoShowAsRegularPaymentSelection()
+    public function fcpoShowAsRegularPaymentSelection($sPaymentId)
     {
-        $sPaymentId = $this->_fcpoGetPaymentId();
         $oPayment = $this->_oFcpoHelper->getFactoryObject('oxPayment');
         $oPayment->load($sPaymentId);
 
@@ -2651,7 +2650,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return mixed
      */
     protected function _fcpoGetPaymentId() {
-        $sPaymentId = $sPaymentId = $this->_oFcpoHelper->fcpoGetRequestParameter('paymentid');
+        $sPaymentId = $this->_oFcpoHelper->fcpoGetRequestParameter('paymentid');
         if (!$sPaymentId) {
             $sPaymentId = $this->_oFcpoHelper->fcpoGetSessionVariable('paymentid');
         }

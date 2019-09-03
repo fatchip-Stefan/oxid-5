@@ -157,12 +157,12 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
      * Checks if this payment is foreseen to be shown as standard
      * payment selection
      *
-     * @param void
+     * @param string $sPaymentId
      * @return bool
      */
-    public function fcpoShowAsRegularPaymentSelection()
+    public function fcpoShowAsRegularPaymentSelection($sPaymentId=false)
     {
-        $sPaymentId = $this->getId();
+        $sPaymentId = (!$sPaymentId) ? $this->getId() : $sPaymentId;
         $blPaymentAllowedInSelection =
             !in_array($sPaymentId, $this->_aExpressPayments);
 
