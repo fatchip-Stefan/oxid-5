@@ -1,3 +1,16 @@
+==2.3.3==
+New Features
+* Paydirekt Express
+Maintenance
+* remove old docs directory
+
+==2.3.2==
+New Features
+* Amazon Pay is now PSD2 compatible
+
+Bugfixes
+* Fixed English Translations for Paysafe Methods
+
 ﻿==2.3.1==
 Release Date: 2019-07-23
 New Features 
