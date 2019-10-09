@@ -492,6 +492,12 @@ class fcpoconfigexport extends oxBase {
             'fcpoklarna' => 'fnc',
             'fcpobarzahlen' => 'csh',
             'fcpopaydirekt' => 'wlt',
+            'fcpopo_bill' => 'fnc',
+            'fcpopo_debitnote' => 'fnc',
+            'fcpopo_installment' => 'fnc',
+            'fcporp_bill' => 'fnc',
+            'fcpocreditcard_iframe' => 'cc',
+            'fcpobillsafe' => 'fnc',
         );
 
         if (isset($aAbbreviations[$sPaymentId])) {
