@@ -329,6 +329,10 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
         if(array_key_exists('add_paydata[shipping_addressaddition]', $aResponse)) {
             $sAddInfo = $aResponse['add_paydata[shipping_addressaddition]'];
         }
+
+        $sTelephone =
+            (isset($aResponse['add_paydata[telephonenumber]'])) ?
+                $aResponse['add_paydata[telephonenumber]'] : '';
         
         $oUser->oxuser__oxactive = new oxField(1);
         $oUser->oxuser__oxusername = new oxField($aResponse[$sEmailIdent]);
@@ -344,6 +348,7 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
         $oUser->oxuser__oxzip = new oxField($aResponse['add_paydata[shipping_zip]']);
         $oUser->oxuser__oxcountryid = new oxField($this->_fcpoGetIdByCode($aResponse['add_paydata[shipping_country]']));        
         $oUser->oxuser__oxstateid = new oxField('');
+        $oUser->oxuser__oxfon = new oxField($sTelephone);
 
         if ($oUser->save()) {
             $oUser->addToGroup("oxidnotyetordered");
