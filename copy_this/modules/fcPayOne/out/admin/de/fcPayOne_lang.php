@@ -481,6 +481,11 @@ $aLang = array(
     'FCPO_SECINVOICE_PORTAL_KEY'                => 'PAYONE Portal Key (für Zahlart Gesicherter Rechnungskauf)',
     'FCPO_HELP_PAYDIREKT_DELIVERYSET'           => 'Bitte wählen sie die Lieferkosten, die für PayidirektExpress Bestellungen verwendet werden sollen',
     'FCPO_PAYDIREKT_DELIVERYSET'                => 'Lieferbedingunen für PaydirektExpress Bestellungen',
+    'FCPO_ORDER_NO_STATUS'                      => 'Kein Transaktions-Status eingegangen',
+    'FCPO_ORDER_AMOUNT_IN'                      => 'Betrag in',
+    'FCPO_ORDER_TRANSACTION_ACCOUNT'            => 'Transaktionskonto',
+    'FCPO_ORDER_PROCESS'                        => 'Vorgang',
+    'FCPO_ORDER_ADVANCEMENT'                    => 'Forderung',
 );
 
 /*

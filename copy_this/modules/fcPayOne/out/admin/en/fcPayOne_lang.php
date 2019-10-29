@@ -467,6 +467,7 @@ $aLang = array(
     'FCPO_HELP_PAYDIREKT_OVERCAPTURE'           => 'Let you capture a 10% higher amount based on the sum that has been preauthorized.<br><b>Please ONLY activate this option in confirmation with Paydirekt!</b>',
 
     'FCPO_PAYDIREKT_BUTTONTYPE'                 => 'Design of Paydirekt-Express button',
+    'FCPO_CONFIG_GROUP_SECINVOICE'              => 'Secured invoice purchase (rec/POV)',
     'FCPO_HELP_PAYDIREKT_BUTTONTYPE'            => 'Choose design of Paydirekt-Express button.',
     'FCPO_PAYDIREKT_EXPRESS_BUTTON_NONE'        => 'None',
     'FCPO_PAYDIREKT_EXPRESS_BUTTON_GREEN'       => 'Green',
@@ -480,6 +481,11 @@ $aLang = array(
     'FCPO_SECINVOICE_PORTAL_KEY'                => 'PAYONE Portal Key (for payment Secure Invoice)',
     'FCPO_HELP_PAYDIREKT_DELIVERYSET'           => 'Please choose the matching deliveryset for your PaydirektExpress orders',
     'FCPO_PAYDIREKT_DELIVERYSET'                => 'Deliveryset to use for PaydirektExpress orders',
+    'FCPO_ORDER_NO_STATUS'                      => 'No transaction status received',
+    'FCPO_ORDER_AMOUNT_IN'                      => 'Amount in',
+    'FCPO_ORDER_TRANSACTION_ACCOUNT'            => 'Transaction account',
+    'FCPO_ORDER_PROCESS'                        => 'Process',
+    'FCPO_ORDER_ADVANCEMENT'                    => 'Advancement',
 );
 
 /*
