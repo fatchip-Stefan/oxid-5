@@ -467,7 +467,6 @@ $aLang = array(
     'FCPO_HELP_PAYDIREKT_OVERCAPTURE'           => 'Let you capture a 10% higher amount based on the sum that has been preauthorized.<br><b>Please ONLY activate this option in confirmation with Paydirekt!</b>',
 
     'FCPO_PAYDIREKT_BUTTONTYPE'                 => 'Design of Paydirekt-Express button',
-    'FCPO_CONFIG_GROUP_SECINVOICE'              => 'Secured invoice purchase (rec/POV)',
     'FCPO_HELP_PAYDIREKT_BUTTONTYPE'            => 'Choose design of Paydirekt-Express button.',
     'FCPO_PAYDIREKT_EXPRESS_BUTTON_NONE'        => 'None',
     'FCPO_PAYDIREKT_EXPRESS_BUTTON_GREEN'       => 'Green',
@@ -477,10 +476,12 @@ $aLang = array(
     'FCPO_PAYDIREKT_SHIPPING_TERMS_URL'         => 'Webaddress (URL) to page of your shipping terms',
     'FCPO_HELP_PAYDIREKT_SHIPPING_TERMS_URL'    => 'Entering a webaddress is mandatory for usage of Paydirekt Express',
     'FCPO_PAYDIREKT_EXPRESS_DELIVERY_NONE'      => 'No choice (OXID standard method will be used)',
-    'FCPO_SECINVOICE_PORTAL_ID'                 => 'PAYONE Portal ID (for payment Secure Invoice)',
-    'FCPO_SECINVOICE_PORTAL_KEY'                => 'PAYONE Portal Key (for payment Secure Invoice)',
     'FCPO_HELP_PAYDIREKT_DELIVERYSET'           => 'Please choose the matching deliveryset for your PaydirektExpress orders',
     'FCPO_PAYDIREKT_DELIVERYSET'                => 'Deliveryset to use for PaydirektExpress orders',
+
+    'FCPO_CONFIG_GROUP_SECINVOICE'              => 'Secured invoice purchase (rec/POV)',
+    'FCPO_SECINVOICE_PORTAL_ID'                 => 'PAYONE Portal ID (for payment Secure Invoice)',
+    'FCPO_SECINVOICE_PORTAL_KEY'                => 'PAYONE Portal Key (for payment Secure Invoice)',
     'FCPO_ORDER_NO_STATUS'                      => 'No transaction status received',
     'FCPO_ORDER_AMOUNT_IN'                      => 'Amount in',
     'FCPO_ORDER_TRANSACTION_ACCOUNT'            => 'Transaction account',
