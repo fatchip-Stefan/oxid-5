@@ -333,7 +333,11 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
         $sTelephone =
             (isset($aResponse['add_paydata[telephonenumber]'])) ?
                 $aResponse['add_paydata[telephonenumber]'] : '';
-        
+
+        if(array_key_exists('add_paydata[shipping_additionaladdressinformation]', $aResponse)) {
+            $sAddInfo = $aResponse['add_paydata[shipping_additionaladdressinformation]'];
+        }
+
         $oUser->oxuser__oxactive = new oxField(1);
         $oUser->oxuser__oxusername = new oxField($aResponse[$sEmailIdent]);
         $oUser->oxuser__oxfname = new oxField($aResponse['add_paydata[shipping_firstname]']);
