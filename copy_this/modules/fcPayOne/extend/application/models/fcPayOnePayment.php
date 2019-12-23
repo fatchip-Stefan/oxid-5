@@ -54,7 +54,6 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         'fcporp_bill',
         'fcpoamazonpay',
         'fcpo_secinvoice',
-        'fcpomasterpass',
         'fcpopaydirekt_express',
     );
 
@@ -84,7 +83,6 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
      * @var array
      */
     protected $_aExpressPayments = array(
-        'fcpomasterpass',
         'fcpoamazonpay',
         'fcpopaydirekt_express'
     );
