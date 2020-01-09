@@ -489,6 +489,7 @@ $aLang = array(
     'FCPO_PAYDIREKT_EXPRESS_DELIVERY_NONE'      => 'Keine Auswahl (OXID-Standard wird verwendet)',
     'FCPO_HELP_PAYDIREKT_DELIVERYSET'           => 'Bitte wählen sie die Lieferkosten, die für PayidirektExpress Bestellungen verwendet werden sollen',
     'FCPO_PAYDIREKT_DELIVERYSET'                => 'Lieferbedingunen für PaydirektExpress Bestellungen',
+    'FCPO_ORDER_NO_STATUS'                      => 'Kein Transaktions-Status eingegangen',
     'FCPO_ORDER_AMOUNT_IN'                      => 'Betrag in',
     'FCPO_ORDER_TRANSACTION_ACCOUNT'            => 'Transaktionskonto',
     'FCPO_ORDER_PROCESS'                        => 'Vorgang',
