@@ -494,6 +494,8 @@ $aLang = array(
     'FCPO_ORDER_TRANSACTION_ACCOUNT'            => 'Transaktionskonto',
     'FCPO_ORDER_PROCESS'                        => 'Vorgang',
     'FCPO_ORDER_ADVANCEMENT'                    => 'Forderung',
+    'FCPO_HASH_METHOD'                          => 'Key-Verschlüsselungsverfahren',
+    'FCPO_HELP_HASH_METHOD'                     => 'Hier können Sie einstellen, welches Key-Verschlüsselungsverfahren zur Kommunikation mit der Payone-API verwendet wird. Wenn möglich, wird die Verwendung von sha2-384 empfohlen.',
 );
 
 /*
