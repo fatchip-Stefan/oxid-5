@@ -61,12 +61,6 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
     protected $_sCurrentAmazonButtonId = null;
 
     /**
-     * Determines the source of a button include
-     * @var string|null
-     */
-    protected $_sCurrentMasterpassButtonId = null;
-
-    /**
      * List of themes and their button names
      * @var array
      */
@@ -555,62 +549,6 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
         }
 
         return $blReturn;
-    }
-
-    /**
-     * Template getter for receiving masterpass button url
-     *
-     * @param void
-     * @return string
-     */
-    public function fcpoGetMasterpassButtonImg() {
-        $sUrl = 'https://masterpass.com/dyn/img/btn/global/mp_chk_btn_147x034px.svg';
-
-        return $sUrl;
-    }
-
-    /**
-     * Returns url of masterpass js library depending on set mode
-     *
-     * @param void
-     * @return string
-     */
-    public function fcpoGetMasterpassJsLibUrl() {
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
-        $oPayment->load('fcpomasterpass');
-        $blIsLive = $oPayment->oxpayments__fcpolivemode->value;
-
-        $sUrl = "https://sandbox.masterpass.com/lightbox/Switch/integration/MasterPass.client.js";
-        if ($blIsLive) {
-            $sUrl = "https://www.masterpass.com/lightbox/Switch/integration/MasterPass.client.js";
-        }
-
-        return $sUrl;
-    }
-
-    /**
-     * Template getter for deciding if masterpass button can be shown
-     *
-     * @param void
-     * @return bool
-     */
-    public function fcpoCanDisplayMasterpassButton() {
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
-        $oPayment->load('fcpomasterpass');
-        $blIsActive = (bool) $oPayment->oxpayments__oxactive->value;
-
-        return $blIsActive;
-    }
-
-    /**
-     * References current button id set in template
-     * for determine the last masterpass button on current page
-     *
-     * @param string $sButtonId
-     * @return void
-     */
-    public function fcpoSetCurrentMasterpassButtonId($sButtonId) {
-        $this->_sCurrentMasterpassButtonId = $sButtonId;
     }
 
     /**

@@ -172,64 +172,6 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
     }
 
     /**
-     * Adds needed data to payment object
-     *
-     * @param $oPayment
-     * @return object
-     */
-    protected function _fcpoPreparePayment_fcpomasterpass($oPayment) {
-        $sCurrentDesc = $oPayment->oxpayments__oxdesc->value;
-        $sAddDescription = $this->_fcpoGetMasterpassCCData();
-
-        $sNewDesc = $sCurrentDesc." (".$sAddDescription.")";
-
-        $oPayment->oxpayments__oxdesc = new oxField($sNewDesc);
-
-        return $oPayment;
-    }
-
-    /**
-     * Returns CC Data to be shown under payment info
-     *
-     * @param void
-     * @return void
-     */
-    protected function _fcpoGetMasterpassCCData() {
-        $sSessionString =
-            $this->_oFcpoHelper->fcpoGetSessionVariable('fcpompdata');
-
-        $aCCData = explode('|', $sSessionString);
-        $sCardTypeShort = $aCCData[0];
-        $sCardPan = $aCCData[1];
-
-        $sCardType = $this->_fcpoGetMasterpassCardType($sCardTypeShort);
-
-        $sCCData = $sCardType.", No.:".$sCardPan;
-
-        return $sCCData;
-    }
-
-    /**
-     * Returns full name by given card type shortcut
-     *
-     * @param $sCardTypeShort
-     * @return void
-     */
-    protected function _fcpoGetMasterpassCardType($sCardType) {
-        $aMap = array(
-            'M' => 'Mastercard',
-            'V' => 'Visa',
-        );
-
-        $blTranslate = isset($aMap[$sCardType]);
-        if ($blTranslate) {
-            $sCardType = $aMap[$sCardType];
-        }
-
-        return $sCardType;
-    }
-
-    /**
      * Checks if user of this paypal order already exists
      * 
      * @param string $sEmail

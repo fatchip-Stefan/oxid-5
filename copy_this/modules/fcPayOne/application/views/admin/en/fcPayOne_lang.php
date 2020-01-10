@@ -482,7 +482,11 @@ $aLang = array(
     'FCPO_RATEPAY_GENERAL_SETTINGS'             => 'RatePay Settings',
     'FCPO_RATEPAY_PROFILE_DETAILS_FOR_ID'       => 'Profile configuration for ShopID',
     'FCPO_RATEPAY_PROFILE_TOGGLE_DETAILS'       => 'Show or hide the details of this profile',
-
+    'FCPO_ORDER_NO_STATUS'                      => 'No transaction status received',
+    'FCPO_ORDER_AMOUNT_IN'                      => 'Amount in',
+    'FCPO_ORDER_TRANSACTION_ACCOUNT'            => 'Transaction account',
+    'FCPO_ORDER_PROCESS'                        => 'Process',
+    'FCPO_ORDER_ADVANCEMENT'                    => 'Advancement',
 );
 
 /*

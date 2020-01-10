@@ -44,7 +44,8 @@ class fcpayone_events
         'fcpocommerzfinanz',
         'fcpoklarna_installment',
         'fcpocreditcard_iframe',
-        'fcpobillsafe'
+        'fcpobillsafe',
+        'fcpomasterpass',
     );
 
     public static $sQueryTableFcporefnr = "
@@ -347,7 +348,6 @@ class fcpayone_events
         'fcporp_bill' => 'Ratepay Rechnungskauf',
         'fcpoamazonpay' => 'AmazonPay',
         'fcpo_secinvoice' => 'Gesicherter Rechnungskauf',
-        'fcpomasterpass' => 'Masterpass',
         'fcpopaydirekt_express' => 'Paydirekt Express',
     );
 

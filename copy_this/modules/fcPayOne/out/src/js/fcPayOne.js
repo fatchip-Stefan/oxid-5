@@ -866,37 +866,6 @@ $('#payolution_installment_check_availability').click(function(){
 });
 
 /**
- * Triggers setcheckoutcall on button click
- *
- * @param void
- */
-$('.js-payone-masterpass').on('click',function(){
-    var ajax_controller_url = $(this).data('payone-masterpass-controller');
-    var shop_url = $(this).data('payone-masterpass-shopurl');
-    $.ajax({
-        url: ajax_controller_url,
-        method: 'POST',
-        type: 'POST',
-        dataType: 'text',
-        data: { paymentid: "fcpomasterpass", action: "setcheckout" },
-        success: function(Response) {
-            var data = $.parseJSON(Response);
-            console.log(data);
-            MasterPass.client.checkout({
-                "requestToken": data.token,
-                "merchantCheckoutId": data.merchantCheckoutId,
-                "callbackUrl": data.callbackUrl,
-                "allowedCardTypes": data.allowedCardTypes,
-                "version": data.version
-            });
-        },
-        error: function() {
-            window.location = shop_url + 'index.php?cl=basket&fcpoerror=FCPO_ERROR_MP_SETCHECKOUT';
-        }
-    });
-});
-
-/**
  * Checks via js if a certain payment is selected
  *
  * @param paymentId

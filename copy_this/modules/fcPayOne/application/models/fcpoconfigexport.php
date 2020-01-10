@@ -500,7 +500,6 @@ class fcpoconfigexport extends oxBase {
             'fcpobillsafe' => 'fnc',
             'fcpoamazonpay' => 'wlt',
             'fcpo_secinvoice' => 'rec',
-            'fcpomasterpass' => 'wlt',
             'fcpopaydirekt_express' => 'wlt',
         );
 
