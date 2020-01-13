@@ -42,7 +42,6 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         'fcpodebitnote',
         'fcpocashondel',
         'fcpocreditcard',
-        'fcpoonlineueberweisung',
         'fcpopaypal',
         'fcpopaypal_express',
         'fcpoklarna',
@@ -55,6 +54,14 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         'fcpoamazonpay',
         'fcpo_secinvoice',
         'fcpopaydirekt_express',
+        'fcpo_sofort',
+        'fcpo_giropay',
+        'fcpo_eps',
+        'fcpo_pf_finance',
+        'fcpo_pf_card',
+        'fcpo_ideal',
+        'fcpo_p24',
+        'fcpo_bancontact',
     );
 
     /**
@@ -514,7 +521,7 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
     public function fcpoGetMode($aDynvalue) {
         $sReturn = '';
         $sId = $this->getId();
-        $blIdAffected = in_array($sId, array('fcpocreditcard', 'fcpoonlineueberweisung'));
+        $blIdAffected = in_array($sId, array('fcpocreditcard'));
 
         if ($blIdAffected) {
             $aMap = array(
