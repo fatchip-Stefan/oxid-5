@@ -488,6 +488,8 @@ $aLang = array(
     'FCPO_ORDER_TRANSACTION_ACCOUNT'            => 'Transaction account',
     'FCPO_ORDER_PROCESS'                        => 'Process',
     'FCPO_ORDER_ADVANCEMENT'                    => 'Advancement',
+    'FCPO_HASH_METHOD'                          => 'Hash Method',
+    'FCPO_HELP_HASH_METHOD'                     => 'Here you can setup the hash method which will be used for communication with Payone-API. If possible, use sha2-384',
 );
 
 /*

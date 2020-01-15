@@ -33,6 +33,11 @@ if(file_exists(dirname(__FILE__)."/config.ipwhitelist.php")) {
 $sClientIp = null;
 if(isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
     $aIps = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+    $sTmpClientIp = trim($aIps[0]);
+    $blAllowed = in_array($sTmpClientIp, $aWhitelistForwarded);
+    if ($blAllowed) {
+        $sClientIp = $sTmpClientIp;
+    }
     $sClientIp = trim($aIps[0]);
 }
 
