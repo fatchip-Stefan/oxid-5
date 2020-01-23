@@ -17,7 +17,7 @@
                 </div>
             </div>
         </div>
-        <div class="form-group" id="fcpo_ou_ktonr" style="display: none;">
+        <div class="form-group" id="fcpo_ou_ktonr">
             <label class="req control-label col-lg-3">[{oxmultilang ident="FCPO_BANK_ACCOUNT_NUMBER"}]</label>
             <div class="col-lg-9">
                 <input placeholder="[{oxmultilang ident="FCPO_BANK_ACCOUNT_NUMBER"}]" class="form-control" autocomplete="off" type="text" size="20" maxlength="64" name="dynvalue[fcpo_ou_ktonr]" value="[{$dynvalue.fcpo_ou_ktonr}]">
