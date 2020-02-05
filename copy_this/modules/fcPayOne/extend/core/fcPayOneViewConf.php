@@ -795,10 +795,8 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
         $sPhpSessionId = $oSession->getId();
         $sTimestamp = microtime(false);
         $sSessionIdInput = $sMerchantId.$sPhpSessionId.$sTimestamp;
-
         $sPortalKey = $oConfig->getConfigParam('sFCPOPortalKey');
-        $sHashSha2 = hash_hmac('sha2-384', $sSessionIdInput, $sPortalKey);
-
+        $sHashSha2 = hash_hmac('sha384', $sSessionIdInput, $sPortalKey);
         return $sHashSha2;
     }
 }

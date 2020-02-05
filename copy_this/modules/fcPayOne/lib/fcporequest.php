@@ -1367,6 +1367,8 @@ class fcpoRequest extends oxSuperCfg {
 
         $sPaymentType = $this->_fcpoGetPayolutionPaymentTypeById($sPaymentId);
         $sFinancignType = $this->_fcpoGetFinancingTypeByPaymentId($sPaymentId);
+        $sPaySafeSessionId = $this->_oFcpoHelper->fcpoGetSessionVariable('paySafeSessionId');
+
         $this->_fcpoAddPayolutionUserData($oUser, $sPaymentId);
 
         $this->addParameter('financingtype', $sFinancignType);
@@ -1377,6 +1379,8 @@ class fcpoRequest extends oxSuperCfg {
         if ($sWorkorderId !== null) {
             $this->addParameter('workorderid', $sWorkorderId);
         }
+
+        $this->addParameter('add_paydata[analysis_session_id]', $sPaySafeSessionId);
 
         if ($sTelephoneNumber) {
             $this->addParameter('telephonenumber', $sTelephoneNumber);
