@@ -161,6 +161,7 @@ class fcPayOneThankyouView extends fcPayOneThankyouView_parent
     protected function _fcpoDeleteSessionVariablesOnOrderFinish()
     {
         $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoRefNr');
+        $this->_oFcpoHelper->fcpoDeleteSessionVariable('paySafeSessionId');
     }
 
     /**

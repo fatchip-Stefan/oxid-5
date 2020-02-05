@@ -1684,10 +1684,11 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * 
      * @param array $aResponse
      * @param object $oPayGateway
-     * @return mixed int|bool
+     * @return void
      */
     protected function _fcpoHandleAuthorizationError($aResponse, $oPayGateway) {
-        $mReturn = false;
+        $oViewConf = $this->_oFcpoHelper->getFactoryObject('oxViewConfig');
+
         $this->_fcpoFlagOrderPaymentAsRedirect(null);
 
         $sResponseErrorCode = (string) trim($aResponse['errorcode']);
@@ -1698,6 +1699,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
             $sResponseCustomerMessage = $this->_fcpoGetAmazonSuccessCode($aResponse['errorcode']);
         }
         $this->_fcpoSetPayoneUserFlagsByAuthResponse($sResponseErrorCode,$sResponseCustomerMessage, $oPayGateway);
+        $oViewConf->fcpoRemovePaySafeSessionId();
     }
 
     /**

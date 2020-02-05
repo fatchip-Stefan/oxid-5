@@ -1333,7 +1333,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
                 $mReturn = $this->_fcpoCheckRatePayBillMandatoryUserData($mReturn, $sPaymentId);
             }
             $mReturn = $this->_fcpoAdultCheck($mReturn, $sPaymentId);
-
         }
 
         return $mReturn;
