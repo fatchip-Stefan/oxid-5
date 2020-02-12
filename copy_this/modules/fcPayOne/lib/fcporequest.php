@@ -1190,6 +1190,7 @@ class fcpoRequest extends oxSuperCfg {
         $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
         $oUser = $oOrder->getOrderUser();
         $sWorkorderId = $this->_oFcpoHelper->fcpoGetSessionVariable('payolution_workorderid');
+        $sPaySafeSessionId = $this->_oFcpoHelper->fcpoGetSessionVariable('paySafeSessionId');
         $aBankData = $this->_oFcpoHelper->fcpoGetSessionVariable('payolution_bankdata');
         $sInstallmentDuration = $this->_oFcpoHelper->fcpoGetSessionVariable('payolution_installment_duration');
         $sFieldNameAddition = str_replace("fcpopo_", "", $sPaymentId);
@@ -1207,6 +1208,7 @@ class fcpoRequest extends oxSuperCfg {
         if ($sWorkorderId !== null) {
             $this->addParameter('workorderid', $sWorkorderId);
         }
+        $this->addParameter('add_paydata[analysis_session_id]', $sPaySafeSessionId);
 
         $blValidBankData = (
                 is_array($aBankData) &&
@@ -1365,6 +1367,8 @@ class fcpoRequest extends oxSuperCfg {
 
         $sPaymentType = $this->_fcpoGetPayolutionPaymentTypeById($sPaymentId);
         $sFinancignType = $this->_fcpoGetFinancingTypeByPaymentId($sPaymentId);
+        $sPaySafeSessionId = $this->_oFcpoHelper->fcpoGetSessionVariable('paySafeSessionId');
+
         $this->_fcpoAddPayolutionUserData($oUser, $sPaymentId);
 
         $this->addParameter('financingtype', $sFinancignType);
@@ -1375,6 +1379,8 @@ class fcpoRequest extends oxSuperCfg {
         if ($sWorkorderId !== null) {
             $this->addParameter('workorderid', $sWorkorderId);
         }
+
+        $this->addParameter('add_paydata[analysis_session_id]', $sPaySafeSessionId);
 
         if ($sTelephoneNumber) {
             $this->addParameter('telephonenumber', $sTelephoneNumber);
