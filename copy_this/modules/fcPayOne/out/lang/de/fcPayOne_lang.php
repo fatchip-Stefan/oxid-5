@@ -194,6 +194,7 @@ $aLang = array(
     'FCPO_MAIL_SALUTATION_MALE'                     => "Sehr geehrter Herr",
     'FCPO_MAIL_SALUTATION_FEMALE'                   => "Sehr geehrte Frau",
     'FCPO_MAIL_SALUTATION_INFORMAL'                 => "Hallo",
+    'FCPO_PAYOLUTION_FRAUD_GDPR_AGREE'              => 'Ich bestätige, dass PaySafe meine personenbezogengen Daten verarbeiten zur Abwicklung der Zahlung verwenden darf.',
 );
 
 /*

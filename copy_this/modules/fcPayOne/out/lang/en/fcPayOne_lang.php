@@ -185,6 +185,7 @@ $aLang = array(
     'FCPO_MAIL_SALUTATION_MALE'                     => "Dear Mr",
     'FCPO_MAIL_SALUTATION_FEMALE'                   => "Dear Mrs",
     'FCPO_MAIL_SALUTATION_INFORMAL'                 => "Hello",
+    'FCPO_PAYOLUTION_FRAUD_GDPR_AGREE'              => 'I confirm that PaySafe may work with my personal data.',
 );
 
 /*

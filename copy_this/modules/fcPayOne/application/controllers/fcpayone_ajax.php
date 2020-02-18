@@ -364,6 +364,29 @@ class fcpayone_ajax extends oxBase {
         
         return $sCaption;
     }
+
+    /**
+     * Returns JS snippet via ajax if user confirms GDPR
+     *
+     * @param void
+     * @return string
+     */
+    public function fcpoGetPaysafeFraudProtectionSnippet()
+    {
+        $oViewConf = oxNew('oxViewConfig');
+        $sPaySafeSessionId = $oViewConf->fcpoGetPaySafeSessionId();
+        $sSrc = "https://h.online-metrix.net/fp/tags?org_id=363t8kgq&session_id=".$sPaySafeSessionId;
+        $sStyleNoScript = "width: 100px; height: 100px; border: 0; position: absolute; top: -5000px;";
+
+        $sSnippet = '
+            <script type="text/javascript" src="'.$sSrc.'"></script>
+            <noscript>
+                <iframe style="'.$sStyleNoScript.'" src="'.$sSrc.'"></iframe>
+            </noscript>
+        ';
+
+        return $sSnippet;
+    }
 }
 
 
@@ -397,5 +420,9 @@ if ($sPaymentId) {
     );
     if ($blConfirmAmazonOrder) {
         $oPayoneAjax->fcpoConfirmAmazonPayOrder($sParamsJson);
+    }
+
+    if ($sAction == 'getpaysafefraudsnippet') {
+        echo $oPayoneAjax->fcpoGetPaysafeFraudProtectionSnippet();
     }
 }

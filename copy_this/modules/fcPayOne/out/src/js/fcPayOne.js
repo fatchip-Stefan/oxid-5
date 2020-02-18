@@ -866,6 +866,31 @@ $('#payolution_installment_check_availability').click(function(){
 });
 
 /**
+ *
+ */
+function fcpoGetPaySafeFraudSnippet(containerId) {
+    containerId = "#" + containerId;
+    var inputCheckId = containerId + "_agreed";
+    if ($(inputCheckId).prop("checked") == false) {
+        $(containerId).html('');
+        return;
+    }
+
+    var ajax_controller_url = $('#fcpo_ajax_controller_url').val();
+
+    $.ajax({
+        url: ajax_controller_url,
+        method: 'POST',
+        type: 'POST',
+        dataType: 'text',
+        data: { paymentid: "fcpopo_group", action: "getpaysafefraudsnippet"},
+        success: function(Response) {
+            $(containerId).html(Response);
+        }
+    });
+}
+
+/**
  * Checks via js if a certain payment is selected
  *
  * @param paymentId

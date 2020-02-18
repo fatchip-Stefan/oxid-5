@@ -197,7 +197,8 @@ $aLang = array(
     'FCPO_RATEPAY_REJECTED_401' => 'Ratepay payment is faded currently. Please add text here.',
     'FCPO_CC_HOSTED_ERROR_CARDTYPE'                 => 'Please select a cardtype',
     'FCPO_CC_HOSTED_ERROR_CVC'                      => 'Please check CVC',
-    'FCPO_CC_HOSTED_ERROR_INCOMPLETE'               => 'Input incomplete'
+    'FCPO_CC_HOSTED_ERROR_INCOMPLETE'               => 'Input incomplete',
+    'FCPO_PAYOLUTION_FRAUD_GDPR_AGREE'              => 'I confirm that PaySafe may work with my personal data.',
 );
 
 /*

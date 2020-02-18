@@ -191,6 +191,7 @@ class Unit_fcPayOne_Application_Controllers_Admin_fcpayone_boni_main extends Oxi
      *
      * @param void
      * @return void
+     * @throws
      */
     public function test__fcpoBoniAddresscheckActive_Coverage() {
         $oTestObject = oxNew('fcpayone_boni_main');
