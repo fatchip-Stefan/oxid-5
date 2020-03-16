@@ -203,7 +203,6 @@ $aLang = array(
     'FCPO_CC_HOSTED_ERROR_CARDTYPE'                 => 'Bitte wählen Sie einen Kartentyp',
     'FCPO_CC_HOSTED_ERROR_CVC'                      => 'Bitte CVC-Eingabe überprüfen',
     'FCPO_CC_HOSTED_ERROR_INCOMPLETE'               => 'Eingaben unvollständig',
-    'FCPO_PAYOLUTION_FRAUD_GDPR_AGREE'              => 'Ich bestätige, dass PaySafe meine personenbezogengen Daten verarbeiten zur Abwicklung der Zahlung verwenden darf.',
 );
 
 /*

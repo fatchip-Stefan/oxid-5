@@ -62,13 +62,10 @@
         </div>
         
         <div class="alert alert-info col-lg-offset-3 desc">
-            <input name="dynvalue[fcpo_payolution_debitnote_agreed]" value="agreed" type="checkbox">&nbsp;[{oxmultilang ident="FCPO_PAYOLUTION_AGREEMENT_PART_1"}] <a href='[{$oView->fcpoGetPayolutionAgreementLink()}]' class="lightview fcpoPayolutionAgreeRed" data-lightview-type="iframe" data-lightview-options="width: 800, height: 600, viewport: 'scale',background: { color: '#fff', opacity: 1 },skin: 'light'">[{oxmultilang ident="FCPO_PAYOLUTION_AGREE"}]</a> [{oxmultilang ident="FCPO_PAYOLUTION_AGREEMENT_PART_2"}]
+            <input id="fcpo_payolution_debitnote_agreed" name="dynvalue[fcpo_payolution_debitnote_agreed]" value="agreed" type="checkbox" onchange="fcpoGetPaySafeFraudSnippet('fcpo_payolution_debitnote_agreed')">&nbsp;[{oxmultilang ident="FCPO_PAYOLUTION_AGREEMENT_PART_1"}] <a href='[{$oView->fcpoGetPayolutionAgreementLink()}]' class="lightview fcpoPayolutionAgreeRed" data-lightview-type="iframe" data-lightview-options="width: 800, height: 600, viewport: 'scale',background: { color: '#fff', opacity: 1 },skin: 'light'">[{oxmultilang ident="FCPO_PAYOLUTION_AGREE"}]</a> [{oxmultilang ident="FCPO_PAYOLUTION_AGREEMENT_PART_2"}]
         </div>
         <div class="alert alert-info col-lg-offset-3 desc">
             <input name="dynvalue[fcpo_payolution_debitnote_sepa_agreed]" value="agreed" type="checkbox">&nbsp;[{oxmultilang ident="FCPO_PAYOLUTION_SEPA_AGREEMENT_PART_1"}] <a href='[{$oView->fcpoGetPayolutionSepaAgreementLink()}]' class="lightview fcpoPayolutionAgreeRed" data-lightview-type="iframe" data-lightview-options="width: 800, height: 600, viewport: 'scale',background: { color: '#fff', opacity: 1 },skin: 'light'">[{oxmultilang ident="FCPO_PAYOLUTION_SEPA_AGREE"}]</a>
-        </div>
-        <div class="alert alert-info col-lg-offset-3 desc">
-            <input id="paysafe_fraud_prevention_debitnote_agreed" name="dynvalue[fcpo_payolution_fraud_debitnote_agreed]" value="agreed" type="checkbox" onchange="fcpoGetPaySafeFraudSnippet('paysafe_fraud_prevention_debitnote')">&nbsp;[{oxmultilang ident="FCPO_PAYOLUTION_FRAUD_GDPR_AGREE"}]
         </div>
 
         [{block name="checkout_payment_longdesc"}]
