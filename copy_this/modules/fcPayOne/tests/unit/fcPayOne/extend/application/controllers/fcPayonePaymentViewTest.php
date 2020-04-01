@@ -414,7 +414,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOnePaymentView extends O
             'getJCB',
             'getMaestroInternational',
             'getMaestroUK',
-            'getDiscover',
             'getCarteBleue',
             'getSofortUeberweisung',
             'getGiropay',
@@ -433,7 +432,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOnePaymentView extends O
         $oTestObject->expects($this->any())->method('getJCB')->will($this->returnValue(false));
         $oTestObject->expects($this->any())->method('getMaestroInternational')->will($this->returnValue(false));
         $oTestObject->expects($this->any())->method('getMaestroUK')->will($this->returnValue(false));
-        $oTestObject->expects($this->any())->method('getDiscover')->will($this->returnValue(false));
         $oTestObject->expects($this->any())->method('getCarteBleue')->will($this->returnValue(false));
         $oTestObject->expects($this->any())->method('getSofortUeberweisung')->will($this->returnValue(false));
         $oTestObject->expects($this->any())->method('getGiropay')->will($this->returnValue(false));
@@ -459,7 +457,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOnePaymentView extends O
             'getJCB',
             'getMaestroInternational',
             'getMaestroUK',
-            'getDiscover',
             'getCarteBleue',
             'getSofortUeberweisung',
             'getGiropay',
@@ -478,7 +475,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOnePaymentView extends O
         $oTestObject->expects($this->any())->method('getJCB')->will($this->returnValue(false));
         $oTestObject->expects($this->any())->method('getMaestroInternational')->will($this->returnValue(false));
         $oTestObject->expects($this->any())->method('getMaestroUK')->will($this->returnValue(false));
-        $oTestObject->expects($this->any())->method('getDiscover')->will($this->returnValue(false));
         $oTestObject->expects($this->any())->method('getCarteBleue')->will($this->returnValue(false));
         $oTestObject->expects($this->any())->method('getSofortUeberweisung')->will($this->returnValue(false));
         $oTestObject->expects($this->any())->method('getGiropay')->will($this->returnValue(false));
@@ -578,19 +574,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOnePaymentView extends O
         $oTestObject->expects($this->any())->method('getConfigParam')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('isPaymentMethodAvailableToUser')->will($this->returnValue(true));
         $this->assertEquals(true, $oTestObject->getMaestroUK());
-    }
-
-    /**
-     * Testing getDiscover vor Coverage
-     * 
-     * @param void
-     * @return void
-     */
-    public function test_getDiscover_Coverage() {
-        $oTestObject = $this->getMock('fcPayOnePaymentView', array('getConfigParam', 'isPaymentMethodAvailableToUser'));
-        $oTestObject->expects($this->any())->method('getConfigParam')->will($this->returnValue(true));
-        $oTestObject->expects($this->any())->method('isPaymentMethodAvailableToUser')->will($this->returnValue(true));
-        $this->assertEquals(true, $oTestObject->getDiscover());
     }
 
     /**
@@ -820,7 +803,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOnePaymentView extends O
             'getJCB',
             'getMaestroInternational',
             'getMaestroUK',
-            'getDiscover',
             'getCarteBleue',
             '_fcpoGetCCPaymentMetaData',
         ));
@@ -832,7 +814,6 @@ class Unit_fcPayOne_Extend_Application_Controllers_fcPayOnePaymentView extends O
         $oTestObject->expects($this->any())->method('getJCB')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('getMaestroInternational')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('getMaestroUK')->will($this->returnValue(true));
-        $oTestObject->expects($this->any())->method('getDiscover')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('getCarteBleue')->will($this->returnValue(true));
         $oTestObject->expects($this->any())->method('_fcpoGetCCPaymentMetaData')->will($this->returnValue('someValue'));
 
