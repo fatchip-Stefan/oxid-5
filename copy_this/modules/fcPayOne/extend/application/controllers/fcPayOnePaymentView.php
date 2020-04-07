@@ -249,16 +249,33 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
 
     /**
      * Returns matching notiication string if sofo is configured to show iban
-     * 
-     * @param void
-     * @return string
+     *
+     * @param  void
+     * @return bool
      */
-    public function fcpoGetSofoShowIban() {
+    public function fcpoGetSofoShowIban()
+    {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $blFCPOSofoShowIban = $oConfig->getConfigParam('blFCPOSofoShowIban');
+        return (bool) $blFCPOSofoShowIban;
+    }
 
-        $sReturn = ($blFCPOSofoShowIban) ? 'true' : 'false';
-        return $sReturn;
+    /**
+     * Method checks if deprecated bankdata should be requested instead of
+     * IBAN/BIC
+     *
+     * @param void
+     * @return bool
+     */
+    public function fcpoForceDeprecatedBankData() {
+        $oCur = $this->getActCurrency();
+        $sCurrencySign = $oCur->sign;
+        $sBillCountrySign = $this->fcGetBillCountry();
+        return (
+            $this->fcpoGetSofoShowIban() &&
+            $sCurrencySign == 'CHF' &&
+            $sBillCountrySign == 'CH'
+        );
     }
 
     /**
@@ -355,7 +372,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
                 $this->getJCB(),
                 $this->getMaestroInternational(),
                 $this->getMaestroUK(),
-                $this->getDiscover(),
                 $this->getCarteBleue(),
             ),
             'sb' => array(
@@ -436,15 +452,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      */
     public function getMaestroUK() {
         return ($this->getConfigParam('blFCPOMaestroUKActivated') && $this->isPaymentMethodAvailableToUser('U', 'cc'));
-    }
-
-    /**
-     * Check if sub payment method Discover is available to the user
-     * 
-     * @return bool
-     */
-    public function getDiscover() {
-        return ($this->getConfigParam('blFCPODiscoverActivated') && $this->isPaymentMethodAvailableToUser('C', 'cc'));
     }
 
     /**
@@ -626,7 +633,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         $this->_fcpoSetCCMetaData($oPayment, 'J', 'JCB');
         $this->_fcpoSetCCMetaData($oPayment, 'O', 'Maestro International');
         $this->_fcpoSetCCMetaData($oPayment, 'U', 'Maestro UK');
-        $this->_fcpoSetCCMetaData($oPayment, 'C', 'Discover');
         $this->_fcpoSetCCMetaData($oPayment, 'B', 'Carte Bleue');
 
         return $this->_aPaymentCCMetaData;
@@ -1108,7 +1114,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
             'J' => $this->getJCB(),
             'O' => $this->getMaestroInternational(),
             'U' => $this->getMaestroUK(),
-            'C' => $this->getDiscover(),
             'B' => $this->getCarteBleue(),
         );
 

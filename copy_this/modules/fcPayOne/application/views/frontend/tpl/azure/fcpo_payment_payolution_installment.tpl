@@ -9,6 +9,7 @@
         <link href="[{$oViewConf->fcpoGetModuleCssPath('lightview.css')}]" rel="stylesheet">
         <script src="[{$oViewConf->fcpoGetModuleJsPath('jquery-1.10.1.min.js')}]"></script>
         <script src="[{$oViewConf->fcpoGetModuleJsPath()}]lightview/lightview.js"></script>
+        <input type="hidden" id="fcpo_ajax_controller_url" name="fcpo_ajax_controller_url_name" value="[{$oViewConf->fcpoGetAjaxControllerUrl()}]">
         <div class="fcRow">
             <div class="fcCol fcCol-1">
                 <div class="content">
