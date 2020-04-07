@@ -868,11 +868,11 @@ $('#payolution_installment_check_availability').click(function(){
 /**
  *
  */
-function fcpoGetPaySafeFraudSnippet(containerId) {
+function fcpoGetPaySafeFraudSnippet(inputCheckId, containerId) {
     containerId = "#" + containerId;
-    var inputCheckId = containerId + "_agreed";
+    inputCheckId = "#" + inputCheckId;
     if ($(inputCheckId).prop("checked") == false) {
-        $(containerId).html('');
+        location.reload();
         return;
     }
 
