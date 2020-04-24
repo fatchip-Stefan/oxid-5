@@ -1,3 +1,4 @@
+<input type="hidden" id="fcpo_ajax_controller_url" name="fcpo_ajax_controller_url_name" value="[{$oViewConf->fcpoGetAjaxControllerUrl()}]">
 [{assign var="aFcPoCCPaymentMetaData" value=$oView->fcpoGetCCPaymentMetaData()}]
 [{assign var="aFcPoOnlinePaymentMetaData" value=$oView->fcpoGetOnlinePaymentMetaData()}]
 [{assign var="dynvalue" value=$oView->getDynValue()}]

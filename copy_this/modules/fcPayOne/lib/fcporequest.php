@@ -1391,6 +1391,8 @@ class fcpoRequest extends oxSuperCfg {
     public function sendRequestPayolutionInstallment($sPaymentId, $oUser, $aBankData = null, $sAction = 'calculation', $sWorkorderId = null, $sDuration = null) {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $sPaySafeSessionId = $oSession->getVariable('paySafeSessionId');
+
 
         $sRequestMethod = 'genericpayment';
         $sRequestMethod = ($sAction == 'preauthorization') ? 'preauthorization' : 'genericpayment';
@@ -1410,6 +1412,7 @@ class fcpoRequest extends oxSuperCfg {
         $this->_fcpoAddPayolutionUserData($oUser, $sPaymentId);
         $this->addParameter('financingtype', $sFinancingType);
         $this->addParameter('add_paydata[action]', $sAction);
+        $this->addParameter('add_paydata[analysis_session_id]', $sPaySafeSessionId);
         $this->addParameter('api_version', '3.10');
 
         if ($sWorkorderId !== null) {

@@ -202,7 +202,7 @@ $aLang = array(
     'FCPO_COMPANYDATA_INVALID'                      => 'Ihre Firmendaten sind nicht vollständig. Für eine gewerbliche Bestellung ist die Angabe des Firmennamens und der UStId notwendig.',
     'FCPO_CC_HOSTED_ERROR_CARDTYPE'                 => 'Bitte wählen Sie einen Kartentyp',
     'FCPO_CC_HOSTED_ERROR_CVC'                      => 'Bitte CVC-Eingabe überprüfen',
-    'FCPO_CC_HOSTED_ERROR_INCOMPLETE'               => 'Eingaben unvollständig'
+    'FCPO_CC_HOSTED_ERROR_INCOMPLETE'               => 'Eingaben unvollständig',
 );
 
 /*
