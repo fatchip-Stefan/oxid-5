@@ -744,6 +744,62 @@ function fcSetPayoneInputFields(oForm) {
 }
 
 /**
+ * Triggers session start call via ajax
+ *
+ * @param void
+ */
+$('#fcpo_klarna_combined_agreed, #klarna_payment_selector').change(
+    function() {
+        var payment_id = $('#klarna_payment_selector').children("option:selected").val();
+        var ajax_controller_url = $('#fcpo_ajax_controller_url').val();
+        $('#payment_klarna_combined').val(payment_id);
+
+        if ($('#fcpo_klarna_combined_agreed').is(':checked') == false) {
+            $('#klarna_widget_combined_container').empty();
+
+            if ($('#klarna_combined_js_inject').html() !== '') {
+                location.reload();
+            }
+            return;
+        }
+
+        let payment_category_list = {
+            "fcpoklarna_invoice" : "pay_later",
+            "fcpoklarna_directdebit" : "pay_now",
+            "fcpoklarna_installments" : "slice_it",
+        }
+
+        var payment_category = payment_category_list[payment_id];
+
+        var formParams = '{' +
+            '"payment_container_id":"klarna_widget_combined_container", ' +
+            '"payment_category":"' + payment_category + '"' +
+            '}';
+
+        $.ajax(
+            {
+                url: ajax_controller_url,
+                method: 'POST',
+                type: 'POST',
+                dataType: 'text',
+                data: {
+                    paymentid: payment_id,
+                    action: "start_session",
+                    params: formParams
+                },
+                success: function(Response) {
+                    $('#klarna_widget_combined_container').empty();
+                    $('#klarna_combined_js_inject').empty().html(Response);
+                },
+                error: function () {
+                    location.reload();
+                }
+            }
+        );
+    }
+);
+
+/**
  * Triggers precheck for payolution installment via ajax
  * 
  * @param void
@@ -1022,6 +1078,70 @@ function resetCardTypeCCHosted() {
 }
 
 /**
+ * send authorize call to klarna
+ *
+ * @param e
+ */
+function authorizeKlarna(e) {
+    var paymentId = $('input[name=paymentid]:checked').val();
+    var ajax_controller_url = $('#fcpo_ajax_controller_url').val();
+    var oForm = getPaymentForm();
+    var jsonParams;
+
+    if (paymentId == 'fcpoklarna_invoice' ||
+        paymentId == 'fcpoklarna_installments' ||
+        paymentId == 'fcpoklarna_directdebit'
+
+    ) {
+        alert('Klarna');
+        e.preventDefault();
+        var jsonKlarnaData;
+        let payment_category_list = {
+            "fcpoklarna_invoice" : "pay_later",
+            "fcpoklarna_directdebit" : "pay_now",
+            "fcpoklarna_installments" : "slice_it",
+        }
+
+        var payment_category = payment_category_list[paymentId];
+
+        var formParams = '{' +
+            '"payment_container_id":"klarna_widget_combined_container", ' +
+            '"payment_category":"' + payment_category + '"' +
+            '}';
+
+        $.ajax(
+            {
+                url: ajax_controller_url,
+                method: 'POST',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    paymentid: paymentId,
+                    action: "get_klarna_authorize_params",
+                    params: formParams
+                },
+                success: function(Response) {
+                    jsonParams = Response;
+                    alert(Response);
+                },
+                error: function () {
+                    location.reload();
+                }
+            }
+        );
+
+        Klarna.Payments.authorize({
+            payment_method_category: "pay_later"
+        }, jsonParams
+        , function(res) {
+            console.debug("After Auth");
+            console.debug(res);
+            oForm.submit();
+        })
+    }
+}
+
+/**
  * handles form submission if method is credit card hosted iframe
  */
 $( document).ready(function() {
@@ -1034,5 +1154,6 @@ $( document).ready(function() {
         hideCCHostedErrorsAtSubmit();
         validateCardTypeCCHosted(e);
         validateInputCCHosted(e);
+        authorizeKlarna(e);
     });
 });

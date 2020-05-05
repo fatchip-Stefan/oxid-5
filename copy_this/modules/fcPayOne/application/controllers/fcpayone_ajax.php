@@ -25,11 +25,12 @@
 if (!function_exists('getShopBasePath')) {
     function getShopBasePath()
     {
-        return dirname(__FILE__).'/../../../../';
+        $test = realpath(dirname(__FILE__).'/../../../../../../../').'/';
+        return realpath(dirname(__FILE__).'/../../../../../../../').'/';
     }
 }
 
-require_once getShopBasePath() . "/bootstrap.php";
+require_once getShopBasePath() . "bootstrap.php";
 
 // receive params
 $sPaymentId = filter_input( INPUT_POST, 'paymentid' );
@@ -387,6 +388,97 @@ class fcpayone_ajax extends oxBase {
 
         return $sSnippet;
     }
+
+    /**
+     *
+     *
+     * @param $sPaymentId
+     * @param $sAction
+     * @param $sParamsJson
+     * @return string
+     */
+    public function fcpoTriggerKlarnaAction($sPaymentId, $sAction, $sParamsJson)
+    {
+        if ($sAction === 'start_session') {
+            return $this->fcpoTriggerKlarnaSessionStart($sPaymentId, $sParamsJson);
+        }
+    }
+    /**
+     * Trigger klarna session start
+     *
+     * @param $sPaymentId
+     * @param $sParamsJson
+     * @return string
+     */
+    public function fcpoTriggerKlarnaSessionStart($sPaymentId, $sParamsJson)
+    {
+        $oRequest = $this->_oFcpoHelper->getFactoryObject('fcporequest');
+        $aResponse = $oRequest->sendRequestKlarnaStartSession($sPaymentId);
+        $blIsValid = (
+            isset($aResponse['status'], $aResponse['add_paydata[client_token]']) &&
+            $aResponse['status'] === 'OK'
+        );
+        if (!$blIsValid) {
+            $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
+            $this->_oFcpoHelper->fcpoSetSessionVariable(
+                'payerrortext',
+                $aResponse['errormessage']
+            );
+            return header("HTTP/1.0 503 Service not available");
+        }
+        $this->_fcpoSetKlarnaSessionParams($aResponse);
+        return $this->_fcpoGetKlarnaWidgetJS($aResponse['add_paydata[client_token]'], $sParamsJson);
+    }
+    /**
+     * Set needed session params for later handling of Klarna payment
+     *
+     * @param $aResponse
+     * @return void
+     */
+    protected function _fcpoSetKlarnaSessionParams($aResponse)
+    {
+        $this->_oFcpoHelper->fcpoDeleteSessionVariable('klarna_authorization_token');
+        $this->_oFcpoHelper->fcpoSetSessionVariable(
+            'klarna_authorization_token',
+            $aResponse['add_paydata[client_token]']
+        );
+        $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoWorkorderId');
+        $this->_oFcpoHelper->fcpoSetSessionVariable(
+            'fcpoWorkorderId',
+            $aResponse['workorderid']
+        );
+    }
+
+    /**
+     * @param $sClientToken
+     * @param $sParamsJson
+     * @return string
+     */
+    protected function _fcpoGetKlarnaWidgetJS($sClientToken, $sParamsJson)
+    {
+        $aKlarnaWidgetSearch = array(
+            '%%TOKEN%%',
+            '%%PAYMENT_CONTAINER_ID%%',
+            '%%PAYMENT_CATEGORY%%',
+        );
+        $aParams = json_decode($sParamsJson, true);
+        $aKlarnaWidgetReplace = array(
+            $sClientToken,
+            $aParams['payment_container_id'],
+            $aParams['payment_category'],
+        );
+        $sKlarnaWidgetJS = file_get_contents($this->_fcpoGetKlarnaWidgetPath());
+        $sKlarnaWidgetJS = str_replace($aKlarnaWidgetSearch, $aKlarnaWidgetReplace, $sKlarnaWidgetJS);
+        return (string) $sKlarnaWidgetJS;
+    }
+    protected function _fcpoGetKlarnaWidgetPath()
+    {
+        $oViewConf = $this->_oFcpoHelper->getFactoryObject('oxviewconfig');
+        $sPath =
+            $oViewConf->getModulePath('fcpayone') . '/out/snippets/fcpoKlarnaWidget.txt';
+        return $sPath;
+    }
+
 }
 
 
@@ -425,4 +517,34 @@ if ($sPaymentId) {
     if ($sAction == 'getpaysafefraudsnippet') {
         echo $oPayoneAjax->fcpoGetPaysafeFraudProtectionSnippet();
     }
+
+    $aKlarnaPayments = array(
+        'fcpoklarna_invoice',
+        'fcpoklarna_installments',
+        'fcpoklarna_directdebit',
+    );
+
+    if (in_array($sPaymentId, $aKlarnaPayments) && $sAction == 'start_session')
+    {
+        echo $oPayoneAjax->fcpoTriggerKlarnaAction($sPaymentId, $sAction, $sParamsJson);
+    }
+
+    if (in_array($sPaymentId, $aKlarnaPayments) && $sAction == 'get_klarna_authorize_params')
+    {
+        $dataHelper = oxNew('fcpoRequest');
+
+        $klarnaOrder = [
+            'purchase_country' => '',
+            'purchase_currency' => '',
+            'locale' => '',
+            'order_amount' => $dataHelper->get,
+            'order_tax_amount' => '',
+        ];
+        $orderLines = [];
+        $customer = [];
+        $billingAddress = [];
+        $shippingAddress = [];
+        echo json_encode('Test');
+    }
+
 }

@@ -126,6 +126,12 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     );
 
     /**
+     * Flag for checking if klarna payment combined payment widget is already present
+     * @var bool
+     */
+    public $_blKlarnaCombinedIsPresent = false;
+
+    /**
      * init object construction
      * 
      * @return null
@@ -3316,7 +3322,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     }
 
     /**
-     * Method saves a single value to a cerrtain field of user table
+     * Method saves a single value to a certain field of user table
      *
      * @param $sField
      * @param $sValue
@@ -3454,5 +3460,59 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         $sLink = 'https://www.ratepay.com/zgb-dse';
 
         return $sLink;
+    }
+
+    /**
+     * Returns if given paymentid represents an active payment
+     *
+     * @param $sPaymentId
+     * @return bool
+     */
+    public function fcpoPaymentActive($sPaymentId)
+    {
+        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxPayment');
+        $oPayment->load($sPaymentId);
+
+        return (bool) ($oPayment->oxpayments__oxactive->value);
+    }
+
+    /**
+     * Checks if given payment id is of type of new klarna
+     * implementation
+     *
+     * @param $sPaymentId
+     * @return bool
+     */
+    public function fcpoIsKlarnaCombined($sPaymentId)
+    {
+        return (
+        in_array($sPaymentId, array(
+            'fcpoklarna_invoice',
+            'fcpoklarna_directdebit',
+            'fcpoklarna_installments',
+        ))
+        );
+    }
+
+    /**
+     * Method decides if certain paymentid is of newer klarna type and
+     * the combined widget already has been displayed
+     *
+     * @param $sPaymentId
+     * @return bool
+     */
+    public function fcpoShowKlarnaCombined($sPaymentId)
+    {
+        $blIsKlarnaCombined = $this->fcpoIsKlarnaCombined($sPaymentId);
+
+        if (
+            $blIsKlarnaCombined &&
+            $this->_blKlarnaCombinedIsPresent === false
+        ) {
+            $this->_blKlarnaCombinedIsPresent = true;
+            return true;
+        }
+
+        return false;
     }
 }

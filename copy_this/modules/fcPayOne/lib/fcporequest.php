@@ -479,6 +479,33 @@ class fcpoRequest extends oxSuperCfg {
                 $this->addParameter('clearingtype', 'fnc'); //Payment method
                 $this->addParameter('financingtype', 'KLV');
                 break;
+            case 'fcpoklarna_directdebit':
+                $this->addParameter('clearingtype', 'fnc'); //Payment method
+                $this->addParameter('financingtype', 'KDD');
+                $blAddRedirectUrls = true;
+                $oSession = $this->_oFcpoHelper->fcpoGetSession();
+                $sWorkorderId = $oSession->getVariable('fcpoWorkorderId');
+                $this->addParameter('workorderid', $sWorkorderId);
+                break;
+            case 'fcpoklarna_invoice':
+                $this->addParameter('clearingtype', 'fnc'); //Payment method
+                $this->addParameter('financingtype', 'KIV');
+                $blAddRedirectUrls = true;
+                $this->addParameter('api_version', $this->_sApiVersion);
+                $oSession = $this->_oFcpoHelper->fcpoGetSession();
+                $sWorkorderId = $oSession->getVariable('fcpoWorkorderId');
+                $sClientToken = $oSession->getVariable('klarna_authorization_token');
+                $this->addParameter('workorderid', $sWorkorderId);
+                $this->addParameter('add_paydata[authorization_token]', $sClientToken);
+                unset($this->_aParameters['telephonenumber']);
+                break;
+            case 'fcpoklarna_installments':
+                $this->addParameter('clearingtype', 'fnc'); //Payment method
+                $this->addParameter('financingtype', 'KIS');
+                $blAddRedirectUrls = true;
+                $oSession = $this->_oFcpoHelper->fcpoGetSession();
+                $sWorkorderId = $oSession->getVariable('fcpoWorkorderId');
+                $this->addParameter('workorderid', $sWorkorderId);
                 break;
             case 'fcpobarzahlen':
                 $this->addParameter('clearingtype', 'csh'); //Payment method
@@ -3140,6 +3167,64 @@ class fcpoRequest extends oxSuperCfg {
         $this->_oFcpoHelper->fcpoSetSessionVariable('fcpoRefNr', $sRefNr);
 
         return $sRefNrComplete;
+    }
+
+    /**
+     * Sending start session call
+     *
+     * @param $sPaymentId
+     * @return array
+     */
+    public function sendRequestKlarnaStartSession($sPaymentId)
+    {
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oUser = $oBasket->getUser();
+        $sShippingId = $oBasket->getShippingId();
+
+        $this->addParameter('request', 'genericpayment'); //Request method
+        $this->addParameter('mode', $this->getOperationMode($sPaymentId)); //PayOne Portal Operation Mode (live or test)
+        $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID')); //ID of PayOne Sub-Account
+
+        $this->addParameter('add_paydata[action]', 'start_session');
+        $this->addParameter('clearingtype', 'fnc');
+        $this->addParameter('financingtype', $this->_fcpoGetKlarnaFinancingType($sPaymentId));
+
+        $oPrice = $oBasket->getPrice();
+        $this->addParameter('amount', number_format($oPrice->getBruttoPrice(), 2, '.', '') * 100);
+        $oCurr = $oConfig->getActShopCurrencyObject();
+        $this->addParameter('currency', $oCurr->name);
+
+        $this->addAddressParamsByUser($oUser);
+        $this->_fcpoAddBasketItemsFromSession($sShippingId);
+
+        if ($sCampaign = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpo_klarna_campaign')) {
+            $this->addParameter('add_paydata[klsid]', $sCampaign);
+            $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpo_klarna_campaign');
+        }
+
+        return $this->send();
+    }
+
+    /**
+     * Returning klarna financingtype by paymentid
+     *
+     * @param string $sPaymentId
+     * @return string
+     */
+    protected function _fcpoGetKlarnaFinancingType($sPaymentId)
+    {
+        $aMap = array(
+            'fcpoklarna_installments' => 'KIS',
+            'fcpoklarna_invoice' => 'KIV',
+            'fcpoklarna_directdebit' => 'KDD',
+        );
+
+        $sFinancingType =
+            (isset($aMap[$sPaymentId])) ? $aMap[$sPaymentId] : '';
+
+        return $sFinancingType;
     }
 
 }
