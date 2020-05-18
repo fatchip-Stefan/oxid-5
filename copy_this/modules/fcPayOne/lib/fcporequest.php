@@ -485,19 +485,37 @@ class fcpoRequest extends oxSuperCfg {
                 $blAddRedirectUrls = true;
                 $oSession = $this->_oFcpoHelper->fcpoGetSession();
                 $sWorkorderId = $oSession->getVariable('fcpoWorkorderId');
+                $sClientToken = $oSession->getVariable('klarna_authorization_token');
                 $this->addParameter('workorderid', $sWorkorderId);
+                $this->addParameter('add_paydata[authorization_token]', $sClientToken);
+                $oSession = $this->_oFcpoHelper->fcpoGetSession();
+                $oBasket = $oSession->getBasket();
+                $oUser = $oBasket->getUser();
+                if ($oUser->oxuser__oxcompany->value != '') {
+                    $this->addParameter('add_paydata[organization_entity_type]', 'OTHER');
+                    $this->addParameter('add_paydata[organization_registry_id]', 'DE 265567757');
+                    unset($this->_aParameters['firstname']);
+                    unset($this->_aParameters['lastname']);
+                }
                 break;
             case 'fcpoklarna_invoice':
                 $this->addParameter('clearingtype', 'fnc'); //Payment method
                 $this->addParameter('financingtype', 'KIV');
                 $blAddRedirectUrls = true;
-                $this->addParameter('api_version', $this->_sApiVersion);
                 $oSession = $this->_oFcpoHelper->fcpoGetSession();
                 $sWorkorderId = $oSession->getVariable('fcpoWorkorderId');
                 $sClientToken = $oSession->getVariable('klarna_authorization_token');
                 $this->addParameter('workorderid', $sWorkorderId);
                 $this->addParameter('add_paydata[authorization_token]', $sClientToken);
-                unset($this->_aParameters['telephonenumber']);
+                $oSession = $this->_oFcpoHelper->fcpoGetSession();
+                $oBasket = $oSession->getBasket();
+                $oUser = $oBasket->getUser();
+                if ($oUser->oxuser__oxcompany->value != '') {
+                    $this->addParameter('add_paydata[organization_entity_type]', 'OTHER');
+                    $this->addParameter('add_paydata[organization_registry_id]', 'DE 265567757');
+                    unset($this->_aParameters['firstname']);
+                    unset($this->_aParameters['lastname']);
+                }
                 break;
             case 'fcpoklarna_installments':
                 $this->addParameter('clearingtype', 'fnc'); //Payment method
@@ -505,7 +523,18 @@ class fcpoRequest extends oxSuperCfg {
                 $blAddRedirectUrls = true;
                 $oSession = $this->_oFcpoHelper->fcpoGetSession();
                 $sWorkorderId = $oSession->getVariable('fcpoWorkorderId');
+                $sClientToken = $oSession->getVariable('klarna_authorization_token');
                 $this->addParameter('workorderid', $sWorkorderId);
+                $this->addParameter('add_paydata[authorization_token]', $sClientToken);
+                $oSession = $this->_oFcpoHelper->fcpoGetSession();
+                $oBasket = $oSession->getBasket();
+                $oUser = $oBasket->getUser();
+                if ($oUser->oxuser__oxcompany->value != '') {
+                    $this->addParameter('add_paydata[organization_entity_type]', 'OTHER');
+                    $this->addParameter('add_paydata[organization_registry_id]', 'DE 265567757');
+                    unset($this->_aParameters['firstname']);
+                    unset($this->_aParameters['lastname']);
+                }
                 break;
             case 'fcpobarzahlen':
                 $this->addParameter('clearingtype', 'csh'); //Payment method
@@ -2257,6 +2286,10 @@ class fcpoRequest extends oxSuperCfg {
         if ($oUser->oxuser__oxfon->value != '') {
             $this->addParameter('telephonenumber', $oUser->oxuser__oxfon->value);
         }
+
+        if ($oUser->oxuser__oxbirthdate != '0000-00-00' && $oUser->oxuser__oxbirthdate != '') {
+            $this->addParameter('birthday', str_ireplace('-', '', $oUser->oxuser__oxbirthdate->value));
+        }
     }
 
     /**
@@ -3004,10 +3037,11 @@ class fcpoRequest extends oxSuperCfg {
         if ($this->_stateNeeded($oCountry->oxcountry__oxisoalpha2->value)) {
             $this->addParameter('state', $this->_getShortState($oOrder->oxorder__oxbillstateid->value));
         }
+        $this->addParameter('birthday', str_ireplace('-', '', $oUser->oxuser__oxbirthdate->value), $blIsUpdateUser);
         $this->addParameter('email', $oOrder->oxorder__oxbillemail->value, $blIsUpdateUser);
-        if ($blIsUpdateUser || $oOrder->oxorder__oxbillfon->value != '')
+        if ($blIsUpdateUser || $oOrder->oxorder__oxbillfon->value != '') {
             $this->addParameter('telephonenumber', $oOrder->oxorder__oxbillfon->value, $blIsUpdateUser);
-
+        }
         if ((
                 in_array($oOrder->oxorder__oxpaymenttype->value, array('fcpoklarna')) &&
                 in_array($oCountry->oxcountry__oxisoalpha2->value, array('DE', 'NL', 'AT'))
@@ -3203,6 +3237,12 @@ class fcpoRequest extends oxSuperCfg {
             $this->addParameter('add_paydata[klsid]', $sCampaign);
             $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpo_klarna_campaign');
         }
+
+        if ($oUser->oxuser__oxcompany->value != '') {
+            $this->addParameter('add_paydata[organization_entity_type]', 'OTHER');
+            $this->addParameter('add_paydata[organization_registry_id]', 'DE 265567757');
+        }
+
 
         return $this->send();
     }

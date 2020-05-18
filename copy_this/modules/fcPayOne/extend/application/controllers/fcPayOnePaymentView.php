@@ -22,7 +22,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
 
     /**
      * Helper object for dealing with different shop versions
-     * @var object
+     * @var fcpohelper
      */
     protected $_oFcpoHelper = null;
 
@@ -1339,11 +1339,39 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
 
             $this->_fcCleanupSessionFragments($oPayment);
 
+            $mReturn = $this->_fcpoKlarnaCombinedValidate($mReturn, $sPaymentId);
+
             $mReturn = $this->_fcpoPayolutionPreCheck($mReturn, $sPaymentId);
             if ($sPaymentId == 'fcporp_bill') {
                 $mReturn = $this->_fcpoCheckRatePayBillMandatoryUserData($mReturn, $sPaymentId);
             }
             $mReturn = $this->_fcpoAdultCheck($mReturn, $sPaymentId);
+        }
+
+        return $mReturn;
+    }
+
+    /**
+     * Validating new klarna payment
+     *
+     * @param $mReturn
+     * @param $sPaymentId
+     * @return mixed
+     */
+    protected function _fcpoKlarnaCombinedValidate($mReturn, $sPaymentId)
+    {
+        if ($this->fcpoIsKlarnaCombined($sPaymentId)) {
+            $aDynValues = $this->_fcpoGetDynValues();
+            if (!$aDynValues['fcpo_klarna_combined_agreed']) {
+                $this->_fcpoSetErrorMessage('FCPO_KLARNA_NOT_AGREED');
+                return null;
+            }
+            if (empty($aDynValues['klarna_authorization_token'])) {
+                $this->_fcpoSetErrorMessage('FCPO_KLARNA_NO_AUTHORIZATION');
+                return null;
+            } else {
+                $this->_oFcpoHelper->fcpoSetSessionVariable('klarna_authorization_token', $aDynValues['klarna_authorization_token']);
+            }
         }
 
         return $mReturn;
@@ -3495,8 +3523,9 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     }
 
     /**
-     * Method decides if certain paymentid is of newer klarna type and
-     * the combined widget already has been displayed
+     * Method decides if certain paymentid is of newer klarna type,
+     * the currency and country is supported and
+     * the combined widget already has been displayed.
      *
      * @param $sPaymentId
      * @return bool
@@ -3504,9 +3533,12 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     public function fcpoShowKlarnaCombined($sPaymentId)
     {
         $blIsKlarnaCombined = $this->fcpoIsKlarnaCombined($sPaymentId);
-
+        $blIsCountrySupportedFromKlarna = $this->_fcpoIsCountrySupportedFromKlarna();
+        $blIsCurrencySupportedFromKlarna = $this->_fcpoIsCurrencySupportedFromKlarna();
         if (
             $blIsKlarnaCombined &&
+            $blIsCountrySupportedFromKlarna &&
+            $blIsCurrencySupportedFromKlarna &&
             $this->_blKlarnaCombinedIsPresent === false
         ) {
             $this->_blKlarnaCombinedIsPresent = true;
@@ -3514,5 +3546,50 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         }
 
         return false;
+    }
+
+    /**
+     * Checks if klarna support the user's billing country for payments.
+     *
+     * @return bool
+     */
+    protected function _fcpoIsCountrySupportedFromKlarna()
+    {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oUser = $oBasket->getUser();
+
+        return (
+        in_array($oUser->fcpoGetUserCountryIso(), array(
+            'AT',
+            'DK',
+            'FI',
+            'DE',
+            'NL',
+            'NO',
+            'SE',
+            'CH',
+        ))
+        );
+    }
+
+    /**
+     * Checks if klarna supports the active shop currency for payments.
+     *
+     * @return bool
+     */
+    protected function _fcpoIsCurrencySupportedFromKlarna()
+    {
+        $oConfig = $this->_oFcpoHelper->getConfig();
+        $oActCurrency = $oConfig->getActShopCurrencyObject();
+        return (
+        in_array($oActCurrency->name, array(
+            'EUR',
+            'DKK',
+            'NOK',
+            'SEK',
+            'CHF',
+        ))
+        );
     }
 }

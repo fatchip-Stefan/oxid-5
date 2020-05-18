@@ -72,7 +72,14 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * List of Payment IDs which need to save workorderid
      * @var array
      */
-    protected $_aPaymentsWorkorderIdSave = array('fcpopo_bill', 'fcpopo_debitnote', 'fcpopo_installment');
+    protected $_aPaymentsWorkorderIdSave = array(
+        'fcpopo_bill',
+        'fcpopo_debitnote',
+        'fcpopo_installment',
+        'fcpoklarna_invoice',
+        'fcpoklarna_directdebit',
+        'fcpoklarna_installments',
+    );
 
     /**
      * List of Payment IDs which are foreseen for saving clearing reference
@@ -763,7 +770,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
     /** Determine if finalizing order will be done by exiting with orderexists statement
      *
      * @param bool $blSaveAfterRedirect
-     * @return void
+     * @return bool
      */
     protected function _fcpoCheckReturnOrderExists($blSaveAfterRedirect) {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
@@ -1124,17 +1131,22 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * @return bool
      */
     public function isDetailedProductInfoNeeded() {
-        $blReturn = (
-            $this->oxorder__oxpaymenttype->value == 'fcpoklarna' ||
-            $this->oxorder__oxpaymenttype->value == 'fcpo_secinvoice' ||
-            $this->oxorder__oxpaymenttype->value == 'fcporp_bill' ||
-            $this->oxorder__oxpaymenttype->value == 'fcpopaydirekt_express' ||
-            $this->oxorder__oxpaymenttype->value == 'fcpoklarna_invoice' ||
-            $this->oxorder__oxpaymenttype->value == 'fcpoklarna_installments' ||
-            $this->oxorder__oxpaymenttype->value == 'fcpoklarna_directdebit'
+
+        $blForcedByPaymentMethod = in_array(
+            $this->oxorder__oxpaymenttype->value,
+            array(
+                'fcpobillsafe',
+                'fcpoklarna',
+                'fcpoklarna_invoice',
+                'fcpoklarna_installments',
+                'fcpoklarna_directdebit',
+                'fcpo_secinvoice',
+                'fcporp_bill',
+                'fcpopaydirekt_express',
+            )
         );
 
-        return $blReturn;
+        return $blForcedByPaymentMethod;
     }
 
     /**

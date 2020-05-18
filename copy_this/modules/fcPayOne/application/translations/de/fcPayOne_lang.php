@@ -203,6 +203,9 @@ $aLang = array(
     'FCPO_CC_HOSTED_ERROR_CARDTYPE'                 => 'Bitte wählen Sie einen Kartentyp',
     'FCPO_CC_HOSTED_ERROR_CVC'                      => 'Bitte CVC-Eingabe überprüfen',
     'FCPO_CC_HOSTED_ERROR_INCOMPLETE'               => 'Eingaben unvollständig',
+    'FCPO_KLARNA_COMBINED_DATA_AGREEMENT'           => 'Ich stimme zu',
+    'FCPO_KLARNA_NOT_AGREED'                        => 'Sie müssen der Übermittlung ihrer Daten zustimmen, um mit Klarna zu bezahlen.',
+    'FCPO_KLARNA_NO_AUTHORIZATION'                  => 'Es ist ein unerwarteter Fehler aufgetreten.',
 );
 
 /*
