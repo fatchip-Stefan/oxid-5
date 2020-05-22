@@ -30,6 +30,7 @@ $aLang = array(
     'FCPO_KTONR_INVALID' => 'Please enter a valid bank account number.',
     'FCPO_ERROR' => 'An error occurred: <br>',
     'FCPO_ERROR_BLOCKED' => 'Bankdata invalid.',
+    'FCPO_PAY_ERROR_REDIRECT' => 'Your payment was rejected by your payment provider! Please choose another payment mean',
     'FCPO_CC_NUMBER_INVALID' => 'Please enter a valid credit card number.',
     'FCPO_CC_DATE_INVALID' => 'Please enter a valid date of expiry.',
     'FCPO_CC_CVC2_INVALID' => 'Please enter a valid check digit.',
@@ -69,6 +70,7 @@ $aLang = array(
     'FCPO_BANK_ACCOUNT_NUMBER' => 'Account number:',
     'FCPO_BANK_ACCOUNT_HOLDER' => 'Account holder:',
     'FCPO_CREDITCARD' => "Credit card:",
+    'FCPO_CREDITCARD_CHOOSE' => "Please select",
     'FCPO_CARD_VISA' => "Visa",
     'FCPO_CARD_MASTERCARD' => "Mastercard",
     'FCPO_NUMBER' => "Number:",
@@ -110,7 +112,6 @@ $aLang = array(
     'FCPO_KLS_CHOOSE_CAMPAIGN' => 'Please select a campaign',
     'FCPO_KLS_CAMPAIGN_INVALID' => 'You have to select a campaign.',
     'FCPO_KLS_NO_CAMPAIGN' => 'There are no installment-campaigns for your current combination of delivery-country, language and currency.<br>Please select another payment-type.',
-    'FCPO_MASTERPASS_LEARNMORE'                     => 'learn more',
 
     'FCPO_ORDER_MANDATE_HEADER' => 'SEPA direct debit',
     'FCPO_ORDER_MANDATE_INFOTEXT' => 'In order to debit the SEPA direct debit, we need a SEPA mandate from you.',
@@ -188,11 +189,15 @@ $aLang = array(
     'FCPO_MAIL_AMZ_DECLINED_SUBJECT'                => "Please update your payment information",
     'FCPO_MAIL_AMZ_DECLINED_BODY'                   => "Valued customer,\n\nThank you very much for your order at %s.\nAmazon Pay was not able to process your payment.\nPlease go to https://pay.amazon.com/uk/ and update the payment information for your order. Afterwards we will automatically request payment again from Amazon Pay and you will receive a confirmation email.\n\nKind regards,\n\n%s",
     'FCPO_SECINVOICE_BIRTHDATE' => 'Please enter your birthday',
+    'FCPO_SECINVOICE_USTID' => 'Tax Identification Number',
+    'FCPO_SECINVOICE_NO_COMPANY' => 'Not a company? Click <a href="index.php?cl=account_user" style="color:green;">here</a> for changing your address.',
     'FCPO_NOT_ADULT' => 'Due to your age you are not allowed to use this payment. Please select another payment method',
     'FCPO_BIRTHDATE_INVALID' => 'Your birthday data is not valid.',
     'FCPO_COMPANYDATA_INVALID' => 'Your company data is not complete. For ordering as a business entering either company name and VatId is mandatory.',
     'FCPO_RATEPAY_REJECTED_401' => 'Ratepay payment is faded currently. Please add text here.',
-    'FCPO_ERROR_MP_SETCHECKOUT'                     => "Due to technical reasons Masterpass can't be used currently. Please use another payment method. We apologize for any inconvienience.",
+    'FCPO_CC_HOSTED_ERROR_CARDTYPE'                 => 'Please select a cardtype',
+    'FCPO_CC_HOSTED_ERROR_CVC'                      => 'Please check CVC',
+    'FCPO_CC_HOSTED_ERROR_INCOMPLETE'               => 'Input incomplete',
 );
 
 /*

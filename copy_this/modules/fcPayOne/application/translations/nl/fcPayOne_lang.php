@@ -30,6 +30,7 @@ $aLang = array(
     'FCPO_KTONR_INVALID' => 'Please enter a valid bank account number.',
     'FCPO_ERROR' => 'An error occurred: <br>',
     'FCPO_ERROR_BLOCKED' => 'Bankdata invalid.',
+    'FCPO_PAY_ERROR_REDIRECT' => 'Your payment was rejected by your payment provider! Please choose another payment mean',
     'FCPO_CC_NUMBER_INVALID' => 'Please enter a valid credit card number.',
     'FCPO_CC_DATE_INVALID' => 'Please enter a valid date of expiry.',
     'FCPO_CC_CVC2_INVALID' => 'Please enter a valid check digit.',
@@ -69,6 +70,7 @@ $aLang = array(
     'FCPO_BANK_ACCOUNT_NUMBER' => 'Account number:',
     'FCPO_BANK_ACCOUNT_HOLDER' => 'Account holder:',
     'FCPO_CREDITCARD' => "Credit card:",
+    'FCPO_CREDITCARD_CHOOSE' => "Please select",
     'FCPO_CARD_VISA' => "Visa",
     'FCPO_CARD_MASTERCARD' => "Mastercard",
     'FCPO_NUMBER' => "Number:",
@@ -162,6 +164,9 @@ $aLang = array(
     'FCPO_PAYOLUTION_NO_INSTALLMENT_SELECTED' => 'You did not choose an installment.',
     'FCPO_RATEPAY_BIRTHDATE' => 'Date of birth',
     'FCPO_RATEPAY_REJECTED_401' => 'Ratepay payment is faded currently. Please add text here.',
+    'FCPO_CC_HOSTED_ERROR_CARDTYPE'                 => 'Please select a cardtype',
+    'FCPO_CC_HOSTED_ERROR_CVC'                      => 'Please check CVC',
+    'FCPO_CC_HOSTED_ERROR_INCOMPLETE'               => 'Input incomplete'
 );
 
 /*

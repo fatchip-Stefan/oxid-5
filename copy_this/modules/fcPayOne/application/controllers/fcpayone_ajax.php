@@ -60,48 +60,6 @@ class fcpayone_ajax extends oxBase {
     }
 
     /**
-     * Calls masterpass setcheckoutcall for initializing
-     *
-     * @param void
-     * @return string
-     */
-    public function fcpoMasterpassSetcheckout() {
-        $oRequest = $this->_oFcpoHelper->getFactoryObject('fcporequest');
-        $aResponse = $oRequest->fcpoSendRequestMasterpassSetcheckout();
-
-        if ($aResponse['status'] == 'ERROR') {
-            header("HTTP/1.0 406 Not Acceptable");
-        }
-
-        $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoMasterpassWorkorderId');
-        $this->_oFcpoHelper->fcpoSetSessionVariable('fcpoMasterpassWorkorderId', $aResponse['workorderid']);
-        $this->_oFcpoHelper->fcpoDeleteSessionVariable('paymentid');
-        $this->_oFcpoHelper->fcpoSetSessionVariable('paymentid', 'fcpomasterpass');
-        $sJson = $this->_fcpoFetchMasterpassInitDataAsJson($aResponse);
-        return $sJson;
-    }
-
-    /**
-     * Creates an array of response, translates it into json and returns it
-     *
-     * @param $aResponse
-     * @return string
-     */
-    protected function _fcpoFetchMasterpassInitDataAsJson($aResponse) {
-        $aJson = array(
-            'token'=>$aResponse['add_paydata[token]'],
-            'merchantCheckoutId'=>$aResponse['add_paydata[merchantCheckoutId]'],
-            'callbackUrl'=>$aResponse['add_paydata[callbackUrl]'],
-            'allowedCardTypes'=>$aResponse['add_paydata[allowedCardTypes]'],
-            'version'=>$aResponse['add_paydata[version]'],
-        );
-
-        $sJson = json_encode($aJson, JSON_UNESCAPED_SLASHES);
-
-        return $sJson;
-    }
-
-    /**
      * Triggers a call on payoneapi for handling ajax calls for referencedetails
      *
      * @param $sParamsJson
@@ -119,6 +77,50 @@ class fcpayone_ajax extends oxBase {
         $this->_fcpoHandleGetOrderReferenceDetails($sAmazonReferenceId, $sAmazonLoginAccessToken);
         $this->_fcpoHandleSetOrderReferenceDetails($sAmazonReferenceId, $sAmazonLoginAccessToken);
     }
+
+    /**
+     * Public handler for confirmorderreference call
+     *
+     * @param $sParamsJson
+     * @return void
+     */
+    public function fcpoConfirmAmazonPayOrder($sParamsJson)
+    {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $aParams = json_decode($sParamsJson, true);
+        $sAmazonReferenceId = $aParams['fcpoAmazonReferenceId'];
+        $sToken = $aParams['fcpoAmazonStoken'];
+        $sDeliveryMD5 = $aParams['fcpoAmazonDeliveryMD5'];
+
+        $oSession->deleteVariable('fcpoAmazonReferenceId');
+        $oSession->setVariable('fcpoAmazonReferenceId', $sAmazonReferenceId);
+
+        $this->_fcpoHandleConfirmAmazonPayOrder($sAmazonReferenceId, $sToken, $sDeliveryMD5);
+    }
+
+    /**
+     * Calls confirmorderreference call. Sends a 404 on invalid state
+     *
+     * @param $sAmazonReferenceId
+     * @param $sToken
+     */
+    protected function _fcpoHandleConfirmAmazonPayOrder($sAmazonReferenceId, $sToken, $sDeliveryMD5)
+    {
+        $oRequest = $this->_oFcpoHelper->getFactoryObject('fcporequest');
+
+        $aResponse =
+            $oRequest->sendRequestGetConfirmAmazonPayOrder($sAmazonReferenceId, $sToken, $sDeliveryMD5);
+
+        $blSend400 = (
+            isset($aResponse['status']) &&
+            $aResponse['status'] != 'OK'
+        );
+
+        if ($blSend400) return header("HTTP/1.0 404 Not Found");
+
+        header("HTTP/1.0 200 Ok");
+    }
+
 
     /**
      * Triggers call setorderreferencedetails
@@ -362,6 +364,29 @@ class fcpayone_ajax extends oxBase {
         
         return $sCaption;
     }
+
+    /**
+     * Returns JS snippet via ajax if user confirms GDPR
+     *
+     * @param void
+     * @return string
+     */
+    public function fcpoGetPaysafeFraudProtectionSnippet()
+    {
+        $oViewConf = oxNew('oxViewConfig');
+        $sPaySafeSessionId = $oViewConf->fcpoGetPaySafeSessionId();
+        $sSrc = "https://h.online-metrix.net/fp/tags?org_id=363t8kgq&session_id=".$sPaySafeSessionId;
+        $sStyleNoScript = "width: 100px; height: 100px; border: 0; position: absolute; top: -5000px;";
+
+        $sSnippet = '
+            <script type="text/javascript" src="'.$sSrc.'"></script>
+            <noscript>
+                <iframe style="'.$sStyleNoScript.'" src="'.$sSrc.'"></iframe>
+            </noscript>
+        ';
+
+        return $sSnippet;
+    }
 }
 
 
@@ -389,7 +414,15 @@ if ($sPaymentId) {
         $oPayoneAjax->fcpoGetAmazonReferenceId($sParamsJson);
     }
 
-    if ($sAction == 'setcheckout' && $sPaymentId == 'fcpomasterpass') {
-        echo $oPayoneAjax->fcpoMasterpassSetcheckout();
+    $blConfirmAmazonOrder = (
+        $sAction == 'confirm_amazon_pay_order' &&
+        $sPaymentId == 'fcpoamazonpay'
+    );
+    if ($blConfirmAmazonOrder) {
+        $oPayoneAjax->fcpoConfirmAmazonPayOrder($sParamsJson);
+    }
+
+    if ($sAction == 'getpaysafefraudsnippet') {
+        echo $oPayoneAjax->fcpoGetPaysafeFraudProtectionSnippet();
     }
 }

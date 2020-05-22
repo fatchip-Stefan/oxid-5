@@ -645,12 +645,19 @@ class fcpayone_main extends fcpayone_admindetails {
             'fcpodebitnote' => 'elv',
             'fcpopayadvance' => 'vor',
             'fcpoinvoice' => 'rec',
-            'fcpoonlineueberweisung' => 'sb',
             'fcpopaypal' => 'wlt',
             'fcpopaypal_express' => 'wlt',
             'fcpoklarna' => 'fnc',
             'fcpobarzahlen' => 'csh',
             'fcpopaydirekt' => 'wlt',
+            'fcpo_sofort' => 'sb',
+            'fcpo_giropay' => 'sb',
+            'fcpo_eps' => 'sb',
+            'fcpo_pf_finance' => 'sb',
+            'fcpo_pf_card' => 'sb',
+            'fcpo_ideal' => 'sb',
+            'fcpo_p24' => 'sb',
+            'fcpo_bancontact' => 'sb',
         );
 
         if (isset($aAbbreviations[$sPaymentId])) {
@@ -807,6 +814,23 @@ class fcpayone_main extends fcpayone_admindetails {
         $sJsCode .= 'var iframes = new Payone.ClientApi.HostedIFrames(config, request);';
 
         return $sJsCode;
+    }
+
+    /**
+     * Returns a list of deliverysets for template select
+     *
+     * @param void
+     * @return array
+     */
+    public function fcpoGetDeliverySets()
+    {
+        $oDeliveryAdminList =
+            $this->_oFcpoHelper->getFactoryObject('DeliverySet_List');
+
+        $oList = $oDeliveryAdminList->getItemList();
+        $aDeliveryList = $oList->getArray();
+
+        return $aDeliveryList;
     }
 
     /**

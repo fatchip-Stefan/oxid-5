@@ -129,6 +129,24 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
     }
 
     /**
+     * Handling of paydirekt express
+     *
+     * @param void
+     * @return string
+     */
+    public function fcpoHandlePaydirektExpress()
+    {
+        try {
+            $this->_handlePaydirektExpressCall();
+        }
+        catch (oxException $oExcp) {
+            $oUtilsView = $this->_oFcpoHelper->fcpoGetUtilsView();
+            $oUtilsView->addErrorToDisplay($oExcp);
+            return "basket";
+        }
+    }
+
+    /**
      * Loads payment from session and deligates to specific methods
      * depending on paymentid
      *
@@ -154,76 +172,27 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
     }
 
     /**
-     * Adds needed data to payment object
-     *
-     * @param $oPayment
-     * @return object
-     */
-    protected function _fcpoPreparePayment_fcpomasterpass($oPayment) {
-        $sCurrentDesc = $oPayment->oxpayments__oxdesc->value;
-        $sAddDescription = $this->_fcpoGetMasterpassCCData();
-
-        $sNewDesc = $sCurrentDesc." (".$sAddDescription.")";
-
-        $oPayment->oxpayments__oxdesc = new oxField($sNewDesc);
-
-        return $oPayment;
-    }
-
-    /**
-     * Returns CC Data to be shown under payment info
-     *
-     * @param void
-     * @return void
-     */
-    protected function _fcpoGetMasterpassCCData() {
-        $sSessionString =
-            $this->_oFcpoHelper->fcpoGetSessionVariable('fcpompdata');
-
-        $aCCData = explode('|', $sSessionString);
-        $sCardTypeShort = $aCCData[0];
-        $sCardPan = $aCCData[1];
-
-        $sCardType = $this->_fcpoGetMasterpassCardType($sCardTypeShort);
-
-        $sCCData = $sCardType.", No.:".$sCardPan;
-
-        return $sCCData;
-    }
-
-    /**
-     * Returns full name by given card type shortcut
-     *
-     * @param $sCardTypeShort
-     * @return void
-     */
-    protected function _fcpoGetMasterpassCardType($sCardType) {
-        $aMap = array(
-            'M' => 'Mastercard',
-            'V' => 'Visa',
-        );
-
-        $blTranslate = isset($aMap[$sCardType]);
-        if ($blTranslate) {
-            $sCardType = $aMap[$sCardType];
-        }
-
-        return $sCardType;
-    }
-
-    /**
      * Checks if user of this paypal order already exists
      * 
      * @param string $sEmail
      * @return mixed
      */
-    protected function _fcpoDoesPaypalUserAlreadyExist($sEmail) {
+    protected function _fcpoDoesExpressUserAlreadyExist($sEmail) {
         $sPaymentId = $this->_oFcpoHelper->fcpoGetSessionVariable('paymentid');
         $oOrder = $this->_oFcpoHelper->getFactoryObject('oxOrder');
         $blReturn = $oOrder->fcpoDoesUserAlreadyExist($sEmail);
-        $blIsPaypalExpressException = ($blReturn !== false && $sPaymentId == 'fcpopaypal_express');
-        if ($blIsPaypalExpressException) {
-            // always using the address that has been sent by paypal express is mandatory
+
+        $blIsExpressException = (
+            $blReturn !== false &&
+            (
+                $sPaymentId == 'fcpopaypal_express' ||
+                $sPaymentId == 'fcpopaydirekt_express'
+            )
+        );
+
+        if ($blIsExpressException) {
+            // always using the address that has been
+            // sent by express service is mandatory
             $blReturn = false;
         }
 
@@ -283,22 +252,36 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
      * @param array $aResponse
      * @return object
      */
-    protected function _fcpoCreatePayPalUser($aResponse) {
+    protected function _fcpoCreateUserByResponse($aResponse) {
         $oUser = $this->_oFcpoHelper->getFactoryObject("oxUser");
+        $sPaymentId = $this->_oFcpoHelper->fcpoGetSessionVariable('paymentid');
 
-        $sUserId = $this->_fcpoGetIdByUserName($aResponse['add_paydata[email]']);
+        $sEmailIdent =
+            ($sPaymentId == 'fcpopaydirekt_express') ?
+            'add_paydata[buyer_email]' :
+            'add_paydata[email]';
+
+        $sUserId = $this->_fcpoGetIdByUserName($aResponse[$sEmailIdent]);
         if ($sUserId) {
             $oUser->load($sUserId);
         }
 
-        list($sStreet, $sStreetNr) = $this->_fcpoSplitAddress($aResponse['add_paydata[shipping_street]']);
+        list($sStreet, $sStreetNr) = $this->_fcpoFetchStreetAndNumber($aResponse);
         $sAddInfo = '';
         if(array_key_exists('add_paydata[shipping_addressaddition]', $aResponse)) {
             $sAddInfo = $aResponse['add_paydata[shipping_addressaddition]'];
         }
-        
+
+        $sTelephone =
+            (isset($aResponse['add_paydata[telephonenumber]'])) ?
+                $aResponse['add_paydata[telephonenumber]'] : '';
+
+        if(array_key_exists('add_paydata[shipping_additionaladdressinformation]', $aResponse)) {
+            $sAddInfo = $aResponse['add_paydata[shipping_additionaladdressinformation]'];
+        }
+
         $oUser->oxuser__oxactive = new oxField(1);
-        $oUser->oxuser__oxusername = new oxField($aResponse['add_paydata[email]']);
+        $oUser->oxuser__oxusername = new oxField($aResponse[$sEmailIdent]);
         $oUser->oxuser__oxfname = new oxField($aResponse['add_paydata[shipping_firstname]']);
         $oUser->oxuser__oxlname = new oxField($aResponse['add_paydata[shipping_lastname]']);
         $oUser->oxuser__oxfon = new oxField('');
@@ -311,6 +294,7 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
         $oUser->oxuser__oxzip = new oxField($aResponse['add_paydata[shipping_zip]']);
         $oUser->oxuser__oxcountryid = new oxField($this->_fcpoGetIdByCode($aResponse['add_paydata[shipping_country]']));        
         $oUser->oxuser__oxstateid = new oxField('');
+        $oUser->oxuser__oxfon = new oxField($sTelephone);
 
         if ($oUser->save()) {
             $oUser->addToGroup("oxidnotyetordered");
@@ -327,7 +311,7 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
      * @param array $aResponse
      * @return bool
      */
-    protected function _fcpoIsSamePayPalUser($oUser, $aResponse) {
+    protected function _fcpoIsSameExpressUser($oUser, $aResponse) {
         
         $blIsSamePayPalUser = (
             $oUser->oxuser__oxfname->value == $aResponse['add_paydata[shipping_firstname]'] ||
@@ -346,35 +330,56 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
      * @param array $aResponse
      * @return object
      */
-    protected function _fcpoHandlePaypalExpressUser($aResponse) {
+    protected function _fcpoHandleExpressUser($aResponse) {
         $sEmail = $aResponse['add_paydata[email]'];
-        
         $oCurrentUser = $this->getUser();
         if ($oCurrentUser) {
             $sEmail = $oCurrentUser->oxuser__oxusername->value;
         }
 
-        if ($sUserId = $this->_fcpoDoesPaypalUserAlreadyExist($sEmail)) {
-            $oUser = $this->_oFcpoHelper->getFactoryObject("oxUser");
-            $oUser->load($sUserId);
-
-            if (!$oCurrentUser) {
-                if (!$this->_fcpoIsSamePayPalUser($oUser, $aResponse)) {
-                    $this->_fcpoThrowException('FCPO_PAYPALEXPRESS_USER_SECURITY_ERROR');
-                }
-            } elseif (!$this->_fcpoIsSamePayPalUser($oUser, $aResponse)) {
-                // user is logged in, but paypal address is different from the oxid-address, so create a new one
-                $this->_fcpoCreatePayPalDelAddress($aResponse, $sUserId);
-            } else {
-                // remove custom shipping address ID from session
-                $this->_oFcpoHelper->fcpoDeleteSessionVariable('deladrid');
+        $sUserId = $this->_fcpoDoesExpressUserAlreadyExist($sEmail);
+        if ($sUserId) {
+            try {
+                $oUser = $this->_fcpoValidateAndGetExpressUser($sUserId, $aResponse);
+            } catch (oxException $oEx) {
+                throw $oEx;
             }
         } else {
-            $oUser = $this->_fcpoCreatePayPalUser($aResponse);
+            $oUser = $this->_fcpoCreateUserByResponse($aResponse);
         }
-        
+
+
         $this->_oFcpoHelper->fcpoSetSessionVariable('usr', $oUser->getId());
         $this->setUser($oUser);
+
+        return $oUser;
+    }
+
+    /**
+     * Validate possibly logged in user, comparing exting users
+     *
+     * @param $sUserId
+     * @param $aResponse
+     * @return object
+     */
+    protected function _fcpoValidateAndGetExpressUser($sUserId, $aResponse)
+    {
+        $oCurrentUser = $this->getUser();
+
+        $oUser = $this->_oFcpoHelper->getFactoryObject("oxUser");
+        $oUser->load($sUserId);
+        $blSameUser = $this->_fcpoIsSameExpressUser($oUser, $aResponse);
+        $blNoUserException = (!$oCurrentUser && !$blSameUser);
+
+        if ($blNoUserException) {
+            $this->_fcpoThrowException('FCPO_PAYPALEXPRESS_USER_SECURITY_ERROR');
+        }
+
+        if (!$blSameUser) {
+            $this->_fcpoCreateExpressDelAddress($aResponse, $sUserId);
+        } else {
+            $this->_oFcpoHelper->fcpoDeleteSessionVariable('deladrid');
+        }
 
         return $oUser;
     }
@@ -406,31 +411,67 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
             $oRequest   = $this->_oFcpoHelper->getFactoryObject('fcporequest');
             $aOutput    = $oRequest->sendRequestGenericPayment($sWorkorderId);
             $this->_oFcpoHelper->fcpoSetSessionVariable('paymentid', "fcpopaypal_express");
-            $oUser = $this->_fcpoHandlePaypalExpressUser($aOutput);
+            $oUser = $this->_fcpoHandleExpressUser($aOutput);
 
             if($oUser) {
-                $oSession = $this->_oFcpoHelper->fcpoGetSession();
-                $oBasket = $oSession->getBasket();
-                $oBasket->setBasketUser($oUser);
-
-                // setting PayPal as current active payment
-                $oBasket->setPayment("fcpopaypal_express");
-                
-                $sActShipSet = $this->_oFcpoHelper->fcpoGetRequestParameter('sShipSet');
-                if (!$sActShipSet) {
-                    $sActShipSet = $this->_oFcpoHelper->fcpoGetSessionVariable('sShipSet');
-                }
-
-                // load sets, active set, and active set payment list
-                $oDelSets = $this->_oFcpoHelper->getFactoryObject("oxdeliverysetlist");
-                list($aAllSets, $sActShipSet, $aPaymentList) = $oDelSets->getDeliverySetData($sActShipSet, $this->getUser(), $oBasket);
-                
-                $oBasket->setShipping($sActShipSet);
-                $oBasket->onUpdate();
-                $oBasket->calculateBasket(true);
+                $this->_fcpoUpdateUserOfExpressBasket($oUser, "fcpopaypal_express");
             }
         }
     }
+
+    /**
+     * Handles Paydirekt Express Call
+     *
+     * @param void
+     * @return void
+     */
+    protected function _handlePaydirektExpressCall()
+    {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $sWorkorderId = $oSession->getVariable('fcpoWorkorderId');
+
+        if (!$sWorkorderId) return;
+
+        $oRequest   = $this->_oFcpoHelper->getFactoryObject('fcporequest');
+        $aOutput    = $oRequest->sendRequestPaydirektCheckout($sWorkorderId);
+        $this->_oFcpoHelper->fcpoSetSessionVariable('paymentid', "fcpopaydirekt_express");
+        $oUser = $this->_fcpoHandleExpressUser($aOutput);
+
+        if($oUser) {
+            $this->_fcpoUpdateUserOfExpressBasket($oUser, "fcpopaydirekt_express");
+        }
+    }
+
+    /**
+     * Updates given user into basket
+     *
+     * @param $oUser
+     * @return void
+     */
+    protected function _fcpoUpdateUserOfExpressBasket($oUser, $sPaymentId)
+    {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oBasket->setBasketUser($oUser);
+
+        // setting PayPal as current active payment
+        $oBasket->setPayment($sPaymentId);
+
+        $sActShipSet = $this->_oFcpoHelper->fcpoGetRequestParameter('sShipSet');
+        if (!$sActShipSet) {
+            $sActShipSet = $this->_oFcpoHelper->fcpoGetSessionVariable('sShipSet');
+        }
+
+        // load sets, active set, and active set payment list
+        $oDelSets = $this->_oFcpoHelper->getFactoryObject("oxdeliverysetlist");
+        list($aAllSets, $sActShipSet, $aPaymentList) =
+            $oDelSets->getDeliverySetData($sActShipSet, $this->getUser(), $oBasket);
+
+        $oBasket->setShipping($sActShipSet);
+        $oBasket->onUpdate();
+        $oBasket->calculateBasket(true);
+    }
+
 
     /**
      * Overwriting next step action if there is some special redirect needed
@@ -598,13 +639,13 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
      * @param string $sUserId
      * @return void
      */
-    protected function _fcpoCreatePayPalDelAddress($aResponse, $sUserId) {
+    protected function _fcpoCreateExpressDelAddress($aResponse, $sUserId) {
         if ($sAddressId = $this->_fcpoGetExistingPayPalAddressId($aResponse)) {
             $this->_oFcpoHelper->fcpoSetSessionVariable("deladrid", $sAddressId);
         } 
         else {
-            list($sStreet, $sStreetNr) = $this->_fcpoSplitAddress($aResponse['add_paydata[shipping_street]']);
-            
+            list($sStreet, $sStreetNr) = $this->_fcpoFetchStreetAndNumber($aResponse, true);
+
             $sAddInfo = '';
             if(array_key_exists('add_paydata[shipping_addressaddition]', $aResponse)) {
                 $sAddInfo = $aResponse['add_paydata[shipping_addressaddition]'];
@@ -628,7 +669,33 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
             $this->_oFcpoHelper->fcpoSetSessionVariable("deladrid", $oAddress->getId());
         }
     }
-    
+
+    /**
+     * Fetches streetname and number depending by payment
+     *
+     * @param $aResponse
+     * @return array
+     */
+    protected function _fcpoFetchStreetAndNumber($aResponse, $blShipping=false)
+    {
+        $sPrefix = ($blShipping) ? 'shipping' : 'billing';
+
+        $sPaymentId = $this->_oFcpoHelper->fcpoGetSessionVariable('paymentid');
+
+        switch($sPaymentId) {
+            case 'fcpopaypal_express':
+                $aStreetAndNumber =
+                    $this->_fcpoSplitAddress($aResponse['add_paydata[shipping_street]']);
+                break;
+            default:
+                $aStreetAndNumber = array(
+                    $aResponse['add_paydata['.$sPrefix.'_streetname]'],
+                    $aResponse['add_paydata['.$sPrefix.'_streetnumber]'],
+                );
+        }
+
+        return $aStreetAndNumber;
+    }
     
     /**
      * Searches an existing addressid by extracting response of payone

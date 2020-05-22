@@ -1,3 +1,57 @@
+==2.4.0==
+New Features
+
+* Adding option for changing hash algorithm to sha2-384
+* Splitting online payments to single instances
+
+Bugfixes
+
+* Changed giropay to fixed iban request
+* Exchanged certificate
+* Changed handling of paid status
+
+Maintenance
+
+* Masterpass was deprecated by Mastercard, so we removed it
+* Removed cardtype type discover
+* so many translations
+
+==2.3.3==
+New Features
+* Paydirekt Express
+Maintenance
+* remove old docs directory
+
+==2.3.2==
+New Features
+* Amazon Pay is now PSD2 compatible
+
+Bugfixes
+* Fixed English Translations for Paysafe Methods
+
+﻿==2.3.1==
+Release Date: 2019-07-23
+New Features 
+
+* b2b order with BS PAYONE safe invoice 
+
+Bugfixes 
+
+* prevent creditcard payment without cvc2 
+* removed some rogue updateuser calls to the PAYONE API 
+* various fixes for Ratepay 
+
+Maintenance 
+
+* dropped support for mobile theme.⚠
+* removed deprecated payment method Billsafe 
+* added iDeal Handelsbanken 
+
+## Warning 
+
+* be sure to clear the complete module directory before use to prevent errors
+* since we've dropped support for the mobile theme, please make sure to use a newer responsive theme like Flow
+
 ==2.3.0==
 Release Date: 2018-12-10
 New Features

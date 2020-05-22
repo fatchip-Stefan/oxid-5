@@ -290,7 +290,7 @@ class fcpayone_order extends fcpayone_admindetails {
 
         if ($blFCPOMandateDownload) {
             $oOrder = $this->fcpoGetInstance("oxOrder");
-            $sFilename = $oOrder->fcpoGetMandateFilename();
+            $sFilename = $oOrder->fcpoGetMandateFilename($sOxid);
 
             if ($sFilename) {
                 $sPath = getShopBasePath() . 'modules/fcPayOne/mandates/' . $sFilename;

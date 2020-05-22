@@ -1,5 +1,5 @@
 <?php
-/** 
+/**
  * PAYONE OXID Connector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -17,16 +17,17 @@
  * @copyright (C) Payone GmbH
  * @version   OXID eShop CE
  */
- 
-class fcPayOneThankyouView extends fcPayOneThankyouView_parent {
-    
-    
+
+class fcPayOneThankyouView extends fcPayOneThankyouView_parent
+{
+
+
     /**
      * Helper object for dealing with different shop versions
      * @var object
      */
     protected $_oFcpoHelper = null;
-    
+
     /**
      * Instance of oxdb
      * @var object
@@ -38,7 +39,7 @@ class fcPayOneThankyouView extends fcPayOneThankyouView_parent {
      * @var string
      */
     protected $_sMandatePdfUrl = null;
-    
+
     /**
      * Html for Barzahlen
      * @var string
@@ -50,73 +51,74 @@ class fcPayOneThankyouView extends fcPayOneThankyouView_parent {
      * @var bool
      */
     protected $_blIsAmazonOrder = false;
-    
-    
+
+
     /**
      * init object construction
-     * 
+     *
      * @return null
      */
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
         $this->_oFcpoHelper = oxNew('fcpohelper');
-        $this->_oFcpoDb     = oxDb::getDb();
+        $this->_oFcpoDb = oxDb::getDb();
     }
 
 
     /**
      * Returns generated mandate pdf url and deletes it from session afterwards
-     * 
+     *
      * @param void
      * @return string
      */
-    public function fcpoGetMandatePdfUrl() {
-        $sPdfUrl    = false;
-        $oConfig    = $this->getConfig();
-        $oOrder     = $this->getOrder();
+    public function fcpoGetMandatePdfUrl()
+    {
+        $sPdfUrl = false;
+        $oConfig = $this->getConfig();
+        $oOrder = $this->getOrder();
 
 
-        if($oOrder->oxorder__oxpaymenttype->value == 'fcpodebitnote' && $oConfig->getConfigParam('blFCPOMandateDownload')) {
+        if ($oOrder->oxorder__oxpaymenttype->value == 'fcpodebitnote' && $oConfig->getConfigParam('blFCPOMandateDownload')) {
             $sMandateIdentification = false;
             $sMode = false;
 
             $aMandate = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoMandate');
-            if($aMandate && array_key_exists('mandate_identification', $aMandate) !== false) {
+            $sMode = $aMandate['mode'];
+            if ($aMandate && array_key_exists('mandate_identification', $aMandate) !== false) {
                 $sMandateIdentification = $aMandate['mandate_identification'];
             }
-            if($aMandate && array_key_exists('mode', $aMandate) !== false) {
-                $sMode = $aMandate['mode'];
-            }
 
-            if($sMandateIdentification && $aMandate['mandate_status'] == 'active') {
+            if ($sMandateIdentification && $sMode && $oOrder) {
+                $oPORequest = $this->_oFcpoHelper->getFactoryObject('fcporequest');
+                $sPdfUrl = $oPORequest->sendRequestGetFile($oOrder->getId(), $sMandateIdentification, $sMode);
+            } elseif ($sMandateIdentification) {
                 $oPayment = oxNew('oxPayment');
                 $oPayment->fcpoAddMandateToDb($oOrder->getId(),$sMandateIdentification);
                 $sPdfUrl = $oConfig->getShopUrl()."modules/fcPayOne/download.php?id=".$oOrder->getId();
-            } elseif($sMandateIdentification && $sMode && $oOrder) {
-                $oPORequest = $this->_oFcpoHelper->getFactoryObject('fcporequest');
-                $sPdfUrl = $oPORequest->sendRequestGetFile($oOrder->getId(), $sMandateIdentification, $sMode);
             }
 
             $oUser = $this->getUser();
-            if(!$oUser || !$oUser->oxuser__oxpassword->value) {
-                $sPdfUrl .= '&uid='.$this->_oFcpoHelper->fcpoGetSessionVariable('sFcpoUserId');
+            if (!$oUser || !$oUser->oxuser__oxpassword->value) {
+                $sPdfUrl .= '&uid=' . $this->_oFcpoHelper->fcpoGetSessionVariable('sFcpoUserId');
             }
         }
         $this->_sMandatePdfUrl = $sPdfUrl;
         $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoMandate');
-        
+
         return $this->_sMandatePdfUrl;
     }
-    
-    
+
+
     /**
      * Method checks if any error occured (appointment-error, fraud etc.)
-     * 
+     *
      * @param void
      * @return bool
      */
-    public function fcpoOrderHasProblems() {
-        $oOrder     = $this->getOrder();
+    public function fcpoOrderHasProblems()
+    {
+        $oOrder = $this->getOrder();
         $blIsPayone = $oOrder->isPayOnePaymentType();
 
         $blReturn = (
@@ -124,28 +126,29 @@ class fcPayOneThankyouView extends fcPayOneThankyouView_parent {
             $oOrder->oxorder__oxfolder->value == 'ORDERFOLDER_PROBLEMS' &&
             $oOrder->oxorder__oxtransstatus->value == 'ERROR'
         );
-        
+
         return $blReturn;
     }
-    
-    
+
+
     /**
      * Sets userid into session berfore triggering the parent method
-     * 
+     *
      * @param void
      * @return string
      */
-    public function render() {
+    public function render()
+    {
         $oUser = $this->getUser();
-        if($oUser) {
+        if ($oUser) {
             $this->_oFcpoHelper->fcpoSetSessionVariable('sFcpoUserId', $oUser->getId());
         }
 
         $this->_fcpoHandleAmazonThankyou();
         $this->_fcpoDeleteSessionVariablesOnOrderFinish();
-        
+
         $sReturn = parent::render();
-        
+
         return $sReturn;
     }
 
@@ -155,8 +158,10 @@ class fcPayOneThankyouView extends fcPayOneThankyouView_parent {
      * @param void
      * @return void
      */
-    protected function _fcpoDeleteSessionVariablesOnOrderFinish() {
+    protected function _fcpoDeleteSessionVariablesOnOrderFinish()
+    {
         $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoRefNr');
+        $this->_oFcpoHelper->fcpoDeleteSessionVariable('paySafeSessionId');
     }
 
     /**
@@ -165,7 +170,8 @@ class fcPayOneThankyouView extends fcPayOneThankyouView_parent {
      * @param void
      * @return bool
      */
-    public function fcpoIsAmazonOrder() {
+    public function fcpoIsAmazonOrder()
+    {
         return $this->_blIsAmazonOrder;
     }
 
@@ -175,7 +181,8 @@ class fcPayOneThankyouView extends fcPayOneThankyouView_parent {
      * @param void
      * @return void
      */
-    protected function _fcpoHandleAmazonThankyou() {
+    protected function _fcpoHandleAmazonThankyou()
+    {
         $blIsAmazonOrder = $this->_fcpoDetermineAmazonOrder();
         if ($blIsAmazonOrder) {
             $this->_blIsAmazonOrder = true;
@@ -185,6 +192,7 @@ class fcPayOneThankyouView extends fcPayOneThankyouView_parent {
             $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoAmazonPayAddressWidgetLocked');
             $this->_oFcpoHelper->fcpoDeleteSessionVariable('usr');
             $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoAmazonPayOrderIsPending');
+            $this->_oFcpoHelper->fcpoDeleteSessionVariable('amazonRefNr');
         }
     }
 
@@ -194,7 +202,8 @@ class fcPayOneThankyouView extends fcPayOneThankyouView_parent {
      * @param void
      * @return bool
      */
-    protected function _fcpoDetermineAmazonOrder() {
+    protected function _fcpoDetermineAmazonOrder()
+    {
         $blReturn = false;
         $sAmazonLoginAccessToken = $this->_oFcpoHelper->fcpoGetSessionVariable('sAmazonLoginAccessToken');
         if ($sAmazonLoginAccessToken) {
@@ -204,20 +213,21 @@ class fcPayOneThankyouView extends fcPayOneThankyouView_parent {
         return $blReturn;
     }
 
-    
+
     /**
      * Returns the html of barzahlen instructions
-     * 
+     *
      * @param void
      * @return mixed
      */
-    public function fcpoGetBarzahlenHtml() {
-        if ( $this->_sBarzahlenHtml === null ) {
+    public function fcpoGetBarzahlenHtml()
+    {
+        if ($this->_sBarzahlenHtml === null) {
             $this->_sBarzahlenHtml = $this->_oFcpoHelper->fcpoGetSessionVariable('sFcpoBarzahlenHtml');
             // delete this from session after we have the result for one time displaying
             $this->_oFcpoHelper->fcpoDeleteSessionVariable('sFcpoBarzahlenHtml');
         }
-        
+
         return $this->_sBarzahlenHtml;
     }
 }

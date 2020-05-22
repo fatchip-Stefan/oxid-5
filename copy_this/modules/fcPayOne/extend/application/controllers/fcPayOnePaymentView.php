@@ -138,6 +138,24 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     }
 
     /**
+     * Wrapper for checking if payment is allowed to be in usual payment
+     * selection
+     *
+     * @param void
+     * @return bool
+     */
+    public function fcpoShowAsRegularPaymentSelection($sPaymentId)
+    {
+        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxPayment');
+        $oPayment->load($sPaymentId);
+
+        $blShowAsRegularPaymentSelection =
+            $oPayment->fcpoShowAsRegularPaymentSelection();
+
+        return $blShowAsRegularPaymentSelection;
+    }
+
+    /**
      * Extends oxid standard method init()
      * Executes parent method parent::init().
      *
@@ -164,54 +182,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         $this->_oFcpoHelper->fcpoDeleteSessionVariable('sess_challenge');
 
         parent::init();
-    }
-
-    /**
-     * Catches success return for validating and processing next steps
-     *
-     * @param void
-     * @return void
-     */
-    public function fcpoMasterpassSuccessReturn() {
-        $oRequest = $this->_oFcpoHelper->getFactoryObject('fcporequest');
-        $aResponse = $oRequest->fcpoSendRequestMasterpassGetCheckout();
-        $blError = ($aResponse['status'] == 'ERROR');
-
-        if ($blError) {
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
-            return $this->render();
-        }
-
-        $oUser = $this->_oFcpoHelper->getFactoryObject('oxUser');
-        $blSuccess = $oUser->fcpoSetMasterpassUser($aResponse);
-
-        if (!$blSuccess) {
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
-            return $this->render();
-        }
-
-        // redirect for executing orderprocess
-        $this->_fcpoSetMasterpassCCDataIntoSession($aResponse);
-        $this->fcSetPaymentId('fcpomasterpass');
-        $this->fcSetShipSet('oxidstandard');
-        $oConfig = $this->getConfig();
-        $sShopUrl = $oConfig->getShopUrl();
-        $sOrderRedirectUrl = $sShopUrl."index.php?cl=order";
-        $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
-        $oUtils->redirect($sOrderRedirectUrl);
-    }
-
-    /**
-     * Writes CC-DataString
-     *
-     * @param $aResponse
-     * @return void
-     */
-    protected function _fcpoSetMasterpassCCDataIntoSession($aResponse) {
-        $sSessionString  = $aResponse['add_paydata[cardtype]']."|";
-        $sSessionString .= $aResponse['add_paydata[truncatedcardpan]'];
-
-        $this->_oFcpoHelper->fcpoSetSessionVariable('fcpompdata', $sSessionString);
     }
 
     /**
@@ -279,16 +249,33 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
 
     /**
      * Returns matching notiication string if sofo is configured to show iban
-     * 
-     * @param void
-     * @return string
+     *
+     * @param  void
+     * @return bool
      */
-    public function fcpoGetSofoShowIban() {
+    public function fcpoGetSofoShowIban()
+    {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $blFCPOSofoShowIban = $oConfig->getConfigParam('blFCPOSofoShowIban');
+        return (bool) $blFCPOSofoShowIban;
+    }
 
-        $sReturn = ($blFCPOSofoShowIban) ? 'true' : 'false';
-        return $sReturn;
+    /**
+     * Method checks if deprecated bankdata should be requested instead of
+     * IBAN/BIC
+     *
+     * @param void
+     * @return bool
+     */
+    public function fcpoForceDeprecatedBankData() {
+        $oCur = $this->getActCurrency();
+        $sCurrencySign = $oCur->sign;
+        $sBillCountrySign = $this->fcGetBillCountry();
+        return (
+            $this->fcpoGetSofoShowIban() &&
+            $sCurrencySign == 'CHF' &&
+            $sBillCountrySign == 'CH'
+        );
     }
 
     /**
@@ -385,7 +372,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
                 $this->getJCB(),
                 $this->getMaestroInternational(),
                 $this->getMaestroUK(),
-                $this->getDiscover(),
                 $this->getCarteBleue(),
             ),
             'sb' => array(
@@ -403,29 +389,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         $blReturn = in_array(true, $aSubtypes[$sType]);
 
         return $blReturn;
-    }
-
-    /**
-     * Return the default type for this payment-type for the mobile-theme
-     * 
-     * @return string
-     */
-    public function getDefaultOnlineUeberweisung() {
-        if ($this->getSofortUeberweisung())
-            return 'PNT';
-        if ($this->getGiropay())
-            return 'GPY';
-        if ($this->getEPS())
-            return 'EPS';
-        if ($this->getPostFinanceEFinance())
-            return 'PFF';
-        if ($this->getPostFinanceCard())
-            return 'PFC';
-        if ($this->getIdeal())
-            return 'IDL';
-        if ($this->getP24())
-            return 'P24';
-        return '';
     }
 
     /**
@@ -489,15 +452,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      */
     public function getMaestroUK() {
         return ($this->getConfigParam('blFCPOMaestroUKActivated') && $this->isPaymentMethodAvailableToUser('U', 'cc'));
-    }
-
-    /**
-     * Check if sub payment method Discover is available to the user
-     * 
-     * @return bool
-     */
-    public function getDiscover() {
-        return ($this->getConfigParam('blFCPODiscoverActivated') && $this->isPaymentMethodAvailableToUser('C', 'cc'));
     }
 
     /**
@@ -636,18 +590,26 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * 
      * @return string
      */
-    public function getHashCC($sType = '') {
-        $sHash = md5(
-                $this->getSubAccountId() .
-                $this->getEncoding() .
-                $this->getMerchantId() .
-                $this->_getOperationModeCC($sType) .
-                $this->getPortalId() .
-                'creditcardcheck' .
-                'JSON' .
-                'yes' .
-                $this->getPortalKey()
-        );
+    public function getHashCC($sType = '')
+    {
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $sFCPOHashMethod = $oConfig->getConfigParam('sFCPOHashMethod');
+        $sKey = $this->getPortalKey();
+        $sData =
+            $this->getSubAccountId() .
+            $this->getEncoding() .
+            $this->getMerchantId() .
+            $this->_getOperationModeCC($sType) .
+            $this->getPortalId() .
+            'creditcardcheck' .
+            'JSON' .
+            'yes';
+
+        $sHashMD5 = md5($sData.$sKey);
+        $sHashSha2 = hash_hmac('sha384', $sData, $sKey);
+        $sHash = ($sFCPOHashMethod == 'sha2-384')
+            ? $sHashSha2 : $sHashMD5;
+
         return $sHash;
     }
 
@@ -671,7 +633,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         $this->_fcpoSetCCMetaData($oPayment, 'J', 'JCB');
         $this->_fcpoSetCCMetaData($oPayment, 'O', 'Maestro International');
         $this->_fcpoSetCCMetaData($oPayment, 'U', 'Maestro UK');
-        $this->_fcpoSetCCMetaData($oPayment, 'C', 'Discover');
         $this->_fcpoSetCCMetaData($oPayment, 'B', 'Carte Bleue');
 
         return $this->_aPaymentCCMetaData;
@@ -1153,7 +1114,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
             'J' => $this->getJCB(),
             'O' => $this->getMaestroInternational(),
             'U' => $this->getMaestroUK(),
-            'C' => $this->getDiscover(),
             'B' => $this->getCarteBleue(),
         );
 
@@ -1378,7 +1338,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
                 $mReturn = $this->_fcpoCheckRatePayBillMandatoryUserData($mReturn, $sPaymentId);
             }
             $mReturn = $this->_fcpoAdultCheck($mReturn, $sPaymentId);
-
         }
 
         return $mReturn;
@@ -1971,13 +1930,43 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return mixed
      */
     protected function _fcpoSecInvoiceSaveRequestedValues($mReturn, $sPaymentId) {
+        if ($sPaymentId != 'fcpo_secinvoice') {
+            return $mReturn;
+        }
+
         $blSavedBirthdateData = $this->_fcpoSaveBirthdayData($sPaymentId);
-        if (!$blSavedBirthdateData) {
-            // could not save (required) birthdate => invalid
+        $blSavedCompanyData = $this->_fcpoSaveCompanyData($sPaymentId);
+
+        $blValid = (
+            $blSavedBirthdateData &&
+            $blSavedCompanyData
+        );
+
+        if (!$blValid) {
+            // could not save (required) birthdate or company data => invalid
             $mReturn = null;
         }
 
         return $mReturn;
+    }
+
+    /**
+     * Saving company related data if needed
+     *
+     * @param $sPaymentId
+     * @return bool
+     */
+    protected function _fcpoSaveCompanyData($sPaymentId)
+    {
+        $aBirthdayValidation = $this->_fcpoValidateBirthdayData($sPaymentId);
+        $blBirthdayRequired = $aBirthdayValidation['blBirthdayRequired'];
+
+        if (!$blBirthdayRequired) {
+            $blResult = $this->_fcpoUpdateCompanyData($sPaymentId);
+            return $blResult;
+        }
+
+        return true;
     }
 
     /**
@@ -2012,13 +2001,55 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     protected function _fcpoSaveBirthdayData($sPaymentId) {
         $aBirthdayValidation = $this->_fcpoValidateBirthdayData($sPaymentId);
         $blBirthdayRequired = $aBirthdayValidation['blBirthdayRequired'];
-        if (!$blBirthdayRequired) {
-            $blResult = $this->_fcValidateCompanyData($sPaymentId);
-        } else {
+
+        if ($blBirthdayRequired) {
             $blResult = $this->_fcpoUpdateBirthdayData($aBirthdayValidation);
+            return $blResult;
         }
 
-        return $blResult;
+        return true;
+    }
+
+    /**
+     * Updates company data and checks userdata finally
+     *
+     * @param $sPaymentId
+     * @return bool
+     */
+    protected function _fcpoUpdateCompanyData($sPaymentId) {
+        $sUstId = $this->_fcpoFetchUstid($sPaymentId);
+
+        if ($sUstId) {
+            $oUser = $this->_fcpoGetUserFromSession();
+            $oUser->oxuser__oxustid = new oxField($sUstId, oxField::T_RAW);
+            $oUser->save();
+        }
+
+        $blValidCompanyData = $this->_fcValidateCompanyData($sPaymentId);
+
+        return $blValidCompanyData;
+    }
+
+    /**
+     * Fetches Ustid from dynpayment form on payment page
+     *
+     * @param $sPaymentId
+     * @return string
+     */
+    protected function _fcpoFetchUstid($sPaymentId)
+    {
+        $aRequestedValues = $this->_fcpoGetRequestedValues();
+
+        $blCompleteDataSecInvoice = (
+            $sPaymentId == 'fcpo_secinvoice' &&
+            isset($aRequestedValues['fcpo_secinvoice_ustid'])
+        );
+
+        if ($blCompleteDataSecInvoice) {
+            return (string) $aRequestedValues['fcpo_secinvoice_ustid'];
+        }
+
+        return '';
     }
 
 
@@ -2056,16 +2087,14 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return bool
      */
     protected function _fcValidateCompanyData($sPaymentId) {
-        $aPayments2Validate = array(
-            'fcpo_secinvoice',
-        );
+        $aPayments2Validate = array('fcpo_secinvoice');
 
         $blDeeperValidationNeeded = in_array($sPaymentId, $aPayments2Validate);
         if (!$blDeeperValidationNeeded) {
             return true;
         }
 
-        $blReturn = $this->fcpoIsB2B(true);
+        $blReturn = $this->fcpoIsB2B();
 
         if (!$blReturn) {
             $oLang = $this->_oFcpoHelper->fcpoGetLang();
@@ -2145,7 +2174,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
                 break;
             case 'fcpo_secinvoice':
                 $blValidBirthdateData = $this->_fcpoValidateSecInvoiceBirthdayData();
-                $blBirthdayRequired = $this->fcpoIsB2C();
+                $blBirthdayRequired = ! $this->fcpoIsB2BPov();
                 break;
         }
 
@@ -2585,7 +2614,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return mixed
      */
     protected function _fcpoGetPaymentId() {
-        $sPaymentId = $sPaymentId = $this->_oFcpoHelper->fcpoGetRequestParameter('paymentid');
+        $sPaymentId = $this->_oFcpoHelper->fcpoGetRequestParameter('paymentid');
         if (!$sPaymentId) {
             $sPaymentId = $this->_oFcpoHelper->fcpoGetSessionVariable('paymentid');
         }
@@ -3167,6 +3196,17 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     }
 
     /**
+     * Generic method for determine if order is b2b
+     * Used by pov / rec
+     *
+     * @return bool
+     */
+    public function fcpoIsB2BPov() {
+        $oUser = $this->getUser();
+        return !empty($oUser->oxuser__oxcompany->value);
+    }
+
+    /**
      * Template getter for checking which kind of field should be shown
      * 
      * @param void
@@ -3415,5 +3455,4 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
 
         return $sLink;
     }
-
 }

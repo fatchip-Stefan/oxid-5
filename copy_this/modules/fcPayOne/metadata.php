@@ -34,11 +34,13 @@ $aModule = array(
                             https://www.payone.de
                         </a>',
     'thumbnail'     => 'picture.gif',
-    'version'       => '2.3.0',
+    'version'       => '2.4.0',
     'author'        => 'FATCHIP GmbH',
     'email'         => 'kontakt@fatchip.de',
     'url'           => 'https://wiki.fatchip.de/public/faqpayone',
     'extend'        => array(
+        // controllers admin
+        'payment_main'                      => 'fcPayOne/extend/application/controllers/admin/fcPayOnePaymentMain',
         // controllers
         'basket'                            => 'fcPayOne/extend/application/controllers/fcPayOneBasketView',
         'user'                              => 'fcPayOne/extend/application/controllers/fcPayOneUserView',
@@ -169,11 +171,6 @@ $aModule = array(
             'file' => 'fcpo_payment_select_override',
         ),
         array(
-            'template' => 'fcpayone_mobile_payment.tpl',
-            'block' => 'mb_select_payment',
-            'file' => 'fcpo_mb_payment_select_override',
-        ),
-        array(
             'template' => 'page/checkout/order.tpl',
             'block' => 'order_basket',
             'file' => 'fcpo_order_basket_override',
@@ -239,16 +236,6 @@ $aModule = array(
             'file' => 'fcpo_basket_btn_next_bottom',
         ),
         array(
-            'template' => 'page/checkout/basket.tpl',
-            'block' => 'mb_basket_btn_next_top',
-            'file' => 'fcpo_mb_basket_btn_next',
-        ),
-        array(
-            'template' => 'page/checkout/basket.tpl',
-            'block' => 'mb_basket_btn_next_bottom',
-            'file' => 'fcpo_mb_basket_btn_next',
-        ),
-        array(
             'template' => 'page/checkout/payment.tpl',
             'block' => 'checkout_payment_errors',
             'file' => 'fcpo_payment_errors',
@@ -258,7 +245,11 @@ $aModule = array(
             'block' => 'checkout_options_login_text',
             'file' => 'fcpo_checkout_options_login_text',
         ),
-
+        array(
+            'template' => 'page/checkout/basket.tpl',
+            'block' => 'checkout_basket_main',
+            'file' => 'fcpo_basket_errors',
+        ),
     ),
 );
 

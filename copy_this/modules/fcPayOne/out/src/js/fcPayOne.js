@@ -74,54 +74,6 @@ function fcCheckDebitCountry() {
     fcHandleDebitInputs();    
 }
 
-function fcCheckOUType(select, SofoShowIban) {
-    if (typeof SofoShowIban === 'undefined') {
-        SofoShowIban = $('#fcpoSofoShowIban').val();
-    }
-    var oForm = getPaymentForm();
-    if(document.getElementById('fcpo_ou_iban')) {
-        document.getElementById('fcpo_ou_iban').style.display = 'none';
-    }
-    if(document.getElementById('fcpo_ou_bic')) {
-        document.getElementById('fcpo_ou_bic').style.display = 'none';
-    }
-    if(document.getElementById('fcpo_ou_blz')) {
-        document.getElementById('fcpo_ou_blz').style.display = 'none';
-    }
-    if(document.getElementById('fcpo_ou_ktonr')) {
-        document.getElementById('fcpo_ou_ktonr').style.display = 'none';
-    }
-    if(document.getElementById('fcpo_ou_eps')) {
-        document.getElementById('fcpo_ou_eps').style.display = 'none';
-    }
-    if(document.getElementById('fcpo_ou_idl')){
-        document.getElementById('fcpo_ou_idl').style.display = 'none';
-    }
-    if(oForm['dynvalue[fcpo_sotype]'].value == 'PNT') {
-        if (SofoShowIban == 'true') {
-            if(oForm.fcpo_bill_country.value == 'CH' && oForm.fcpo_currency.value == 'CHF') {
-                document.getElementById('fcpo_ou_blz').style.display = '';
-                document.getElementById('fcpo_ou_ktonr').style.display = '';
-            } else {
-                document.getElementById('fcpo_ou_iban').style.display = '';
-                document.getElementById('fcpo_ou_bic').style.display = '';            
-            }
-        }
-    }
-    if(oForm['dynvalue[fcpo_sotype]'].value == 'GPY') {
-        document.getElementById('fcpo_ou_iban').style.display = '';
-        document.getElementById('fcpo_ou_bic').style.display = '';
-    }
-
-    if(oForm['dynvalue[fcpo_sotype]'].value == 'EPS') {
-        document.getElementById('fcpo_ou_eps').style.display = '';
-    }
-
-    if(oForm['dynvalue[fcpo_sotype]'].value == 'IDL') {
-        document.getElementById('fcpo_ou_idl').style.display = '';
-    }
-}
-
 function resetErrorContainers() {
     if(document.getElementById('fcpo_cc_number_invalid')) {
         document.getElementById('fcpo_cc_number_invalid').style.display = '';
@@ -555,8 +507,6 @@ function fcCheckPaymentSelection() {
         var oForm = getPaymentForm();
         if(sCheckedValue == 'fcpocreditcard' && oForm.fcpo_cc_type.value == 'ajax') {
             return startCCRequest();
-        } else if(sCheckedValue == 'fcpocreditcard' && oForm.fcpo_cc_type.value == 'hosted') {
-            return startCCHostedRequest();
         } else if(sCheckedValue == 'fcpodebitnote') {
             return startELVRequest(true);
         } else if(sCheckedValue == 'fcpoonlineueberweisung') {
@@ -733,35 +683,6 @@ function fcInitCCIframes() {
     return iframes;
 }
 
-function startCCHostedRequest() { // Function called by submitting PAY-button
-    if (iframes.isComplete()) {
-        iframes.creditCardCheck('processPayoneResponseCCHosted');// Perform "CreditCardCheck" to create and get a
-        // PseudoCardPan; then call your function "payCallback"
-    } else {
-        console.debug("not complete");
-    }
-    return false;
-}
-
-/**
- * Process hosted iframe cc data
- *
- * @param response
- */
-function processPayoneResponseCCHosted(response) {
-    response = validateCardExpireDate(response);
-    console.log(response);
-    if (response.status === "VALID") {
-        var oForm = getPaymentForm();
-        oForm["dynvalue[fcpo_pseudocardpan]"].value = response.pseudocardpan;
-        oForm["dynvalue[fcpo_ccmode]"].value = getOperationMode(fcpoGetCreditcardType());
-        oForm["dynvalue[fcpo_kknumber]"].value = response.truncatedcardpan;
-        oForm.submit();
-    } else {
-        document.getElementById('errorOutput').innerHTML = response.errormessage;
-    }
-}
-
 /**
  * validates the expiredate given in response
  *
@@ -897,35 +818,29 @@ $('#payolution_installment_check_availability').click(function(){
 });
 
 /**
- * Triggers setcheckoutcall on button click
  *
- * @param void
  */
-$('.js-payone-masterpass').on('click',function(){
-    var ajax_controller_url = $(this).data('payone-masterpass-controller');
-    var shop_url = $(this).data('payone-masterpass-shopurl');
+function fcpoGetPaySafeFraudSnippet(inputCheckId, containerId) {
+    containerId = "#" + containerId;
+    inputCheckId = "#" + inputCheckId;
+    if ($(inputCheckId).prop("checked") == false) {
+        location.reload();
+        return;
+    }
+
+    var ajax_controller_url = $('#fcpo_ajax_controller_url').val();
+
     $.ajax({
         url: ajax_controller_url,
         method: 'POST',
         type: 'POST',
         dataType: 'text',
-        data: { paymentid: "fcpomasterpass", action: "setcheckout" },
+        data: { paymentid: "fcpopo_group", action: "getpaysafefraudsnippet"},
         success: function(Response) {
-            var data = $.parseJSON(Response);
-            console.log(data);
-            MasterPass.client.checkout({
-                "requestToken": data.token,
-                "merchantCheckoutId": data.merchantCheckoutId,
-                "callbackUrl": data.callbackUrl,
-                "allowedCardTypes": data.allowedCardTypes,
-                "version": data.version
-            });
-        },
-        error: function() {
-            window.location = shop_url + 'index.php?cl=basket&fcpoerror=FCPO_ERROR_MP_SETCHECKOUT';
+            $(containerId).html(Response);
         }
     });
-});
+}
 
 /**
  * Checks via js if a certain payment is selected
@@ -963,9 +878,6 @@ function fcpoGetIsPaymentSelected(paymentId) {
     if (oForm) {
         fcSetPayoneInputFields(oForm);
 
-        if(oForm["dynvalue[fcpo_sotype]"]) {
-            fcCheckOUType(oForm["dynvalue[fcpo_sotype]"]);
-        }
         if(oForm["dynvalue[fcpo_elv_country]"]) {
             fcCheckDebitCountry(oForm["dynvalue[fcpo_elv_country]"]);
         }
@@ -987,3 +899,140 @@ function fcpoGetIsPaymentSelected(paymentId) {
     }, 2000);
     
 }(document, 'script'));
+
+/**
+ * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ * Following code is only used on cc hosted iframes
+ * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ */
+
+/**
+ * Validate input (credit card data) on hosted iframes
+ *
+ * @return int
+ * 0 = incomplete
+ * 1 = complete
+ * 2 = cvc missing
+ *
+ */
+function validateCCHostedInputs() { // Function called by submitting PAY-button
+    if (iframes.isComplete()) {
+        return 1;
+    } else {
+        if(iframes.isCardTypeComplete() &&
+            iframes.isCardpanComplete() &&
+            iframes.isExpireMonthComplete() &&
+            iframes.isExpireYearComplete())
+        {
+            return 2;
+        }
+    }
+
+    return 0;
+}
+
+/**
+ * Process hosted iframe cc data
+ *
+ * @param response
+ */
+function processPayoneResponseCCHosted(response) {
+    response = validateCardExpireDate(response);
+    console.log(response);
+    if (response.status === "VALID") {
+        var oForm = getPaymentForm();
+        oForm["dynvalue[fcpo_pseudocardpan]"].value = response.pseudocardpan;
+        oForm["dynvalue[fcpo_ccmode]"].value = getOperationMode(fcpoGetCreditcardType());
+        oForm["dynvalue[fcpo_kknumber]"].value = response.truncatedcardpan;
+        oForm.submit();
+    } else {
+        document.getElementById('errorOutput').innerHTML = response.errormessage;
+    }
+}
+
+/**
+ * already displayed error will get hidden before recheck
+ */
+function hideCCHostedErrorsAtSubmit() {
+    $('#errorCardType').hide();
+    $('#errorCVC').hide();
+    $('#errorIncomplete').hide();
+}
+
+/**
+ * validates if customer has selected a valid card type on hosted iframes
+ *
+ * @param e
+ */
+function validateCardTypeCCHosted(e) {
+    var paymentId = $('input[name=paymentid]:checked').val();
+    var cardType = $( '#cardtype option:selected' ).attr('data-cardtype');
+    var oForm = getPaymentForm();
+
+    if(paymentId == 'fcpocreditcard' && oForm.fcpo_cc_type.value == 'hosted' && cardType == 'none') {
+        $('#errorCardType').show();
+
+        e.preventDefault();
+    }
+}
+
+/**
+ * validate input like cvc and missing fields
+ *
+ * @param e
+ */
+function validateInputCCHosted(e) {
+    var paymentId = $('input[name=paymentid]:checked').val();
+    var cardType = $( '#cardtype option:selected' ).attr('data-cardtype');
+    var oForm = getPaymentForm();
+
+    if(paymentId == 'fcpocreditcard' && oForm.fcpo_cc_type.value == 'hosted' && cardType != 'none') {
+        $validateResult = validateCCHostedInputs();
+
+        if($validateResult == 0) {
+            e.preventDefault();
+            $('#errorIncomplete').show();
+        } else if($validateResult == 2) {
+            $('#errorCVC').show();
+            e.preventDefault();
+        } else {
+            // halt here if response returns valid but data is not valid (expiry date e.g.)
+            e.preventDefault();
+            //perform request for validation
+            iframes.creditCardCheck('processPayoneResponseCCHosted');
+        }
+    }
+}
+
+/**
+ * if user is using browser back function,
+ * card type is preselected and cvc check may is not working
+ */
+function resetCardTypeCCHosted() {
+    var cardTypeOptionEl = $('#cardtype option[data-cardtype="none"]');
+    var cardTypeEl = $('#cardtype');
+
+    if(cardTypeOptionEl) {
+        cardTypeOptionEl.attr('selected', true);
+    }
+
+    if(cardTypeOptionEl && cardTypeEl && (typeof cardTypeEl.selectpicker === "function")) {
+        cardTypeEl.selectpicker('refresh');
+    }
+}
+
+/**
+ * handles form submission if method is credit card hosted iframe
+ */
+$( document).ready(function() {
+    var paymentForm = $( '#payment' );
+
+    resetCardTypeCCHosted();
+
+    //check cvc, check if cardtype is selected, progress request, output errors
+    paymentForm.on('submit', function(e) {
+        hideCCHostedErrorsAtSubmit();
+        validateCardTypeCCHosted(e);
+        validateInputCCHosted(e);
+    });
+});

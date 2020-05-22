@@ -376,12 +376,10 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
 
         $this->_fcpoSaveAfterRedirect($blSaveAfterRedirect);
 
-
         $blRet = $this->_fcpoHandleTsProtection($blRecalculatingOrder, $oBasket);
         if ($blRet !== true) {
             return $blRet;
         }
-
 
         // deleting remark info only when order is finished
         $this->_oFcpoHelper->fcpoDeleteSessionVariable('ordrem');
@@ -952,13 +950,17 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * @return string
      */
     protected function _fcpoCheckRefNr() {
-        $sReturn = "";
-        $iSessRefNr = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpoRefNr');
+        $oPORequest = $this->_oFcpoHelper->getFactoryObject('fcporequest');
+        $sSessRefNr = $oPORequest->getRefNr(false, true);
+        $sRequestRefNr = $this->_oFcpoHelper->fcpoGetRequestParameter('refnr');
 
-        if ($this->_oFcpoHelper->fcpoGetRequestParameter('refnr') != $iSessRefNr) {
-            $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoRefNr');
-            $sReturn = $this->_oFcpoHelper->fcpoGetLang()->translateString('FCPO_MANIPULATION');
-        }
+        $blValid = ($sRequestRefNr == $sSessRefNr);
+
+        if ($blValid) return '';
+
+        $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoRefNr');
+        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $sReturn = $oLang->translateString('FCPO_MANIPULATION');
 
         return $sReturn;
     }
@@ -1117,7 +1119,8 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         $blReturn = (
             $this->oxorder__oxpaymenttype->value == 'fcpoklarna' ||
             $this->oxorder__oxpaymenttype->value == 'fcpo_secinvoice' ||
-            $this->oxorder__oxpaymenttype->value == 'fcporp_bill'
+            $this->oxorder__oxpaymenttype->value == 'fcporp_bill' ||
+            $this->oxorder__oxpaymenttype->value == 'fcpopaydirekt_express'
         );
 
         return $blReturn;
@@ -1334,8 +1337,12 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * @param void
      * @return mixed
      */
-    public function fcpoGetMandateFilename() {
-        $sOxid = $this->getId();
+    public function fcpoGetMandateFilename($sOXID = null) {
+        if ($sOXID) {
+            $sOxid = $sOXID;
+        } else {
+            $sOxid = $this->getId();
+        }
         $sQuery = "SELECT fcpo_filename FROM fcpopdfmandates WHERE oxorderid = '{$sOxid}'";
         $sFile = $this->_oFcpoDb->GetOne($sQuery);
 
@@ -1404,10 +1411,9 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         $sAuthorizationType = $oPayment->oxpayments__fcpoauthmode->value;
 
         $sRefNr = $oPORequest->getRefNr($this);
-        $this->_oFcpoHelper->fcpoSetSessionVariable('fcpoRefNr', $sRefNr);
 
         $aResponse = $oPORequest->sendRequestAuthorization($sAuthorizationType, $this, $this->getOrderUser(), $aDynvalue, $sRefNr);
-        $sMode = $oPayment->fcpoGetMode($aDynvalue);
+        $sMode = $oPayment->fcpoGetOperationMode();
         $mResult = $this->_fcpoHandleAuthorizationResponse($aResponse, $oPayGateway, $sRefNr, $sMode, $sAuthorizationType, $blReturnRedirectUrl);
 
         return $mResult;
@@ -1612,6 +1618,11 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
             $this->_oFcpoHelper->fcpoSetSessionVariable('sFcpoBarzahlenHtml', $sBarzahlenHtml);
         }
 
+        if ($sPaymentId == 'fcpodebitnote' && isset($aResponse['mandate_identification'])) {
+            $aResponse['mode'] = $sMode;
+            $this->_oFcpoHelper->fcpoSetSessionVariable('fcpoMandate', $aResponse);
+        }
+
         $this->_fcpoSaveWorkorderId($sPaymentId, $aResponse);
         $this->_fcpoSaveClearingReference($sPaymentId, $aResponse);
         $this->_fcpoSaveProfileIdent($sPaymentId, $aResponse);
@@ -1673,10 +1684,11 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * 
      * @param array $aResponse
      * @param object $oPayGateway
-     * @return mixed int|bool
+     * @return void
      */
     protected function _fcpoHandleAuthorizationError($aResponse, $oPayGateway) {
-        $mReturn = false;
+        $oViewConf = $this->_oFcpoHelper->getFactoryObject('oxViewConfig');
+
         $this->_fcpoFlagOrderPaymentAsRedirect(null);
 
         $sResponseErrorCode = (string) trim($aResponse['errorcode']);
@@ -1687,6 +1699,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
             $sResponseCustomerMessage = $this->_fcpoGetAmazonSuccessCode($aResponse['errorcode']);
         }
         $this->_fcpoSetPayoneUserFlagsByAuthResponse($sResponseErrorCode,$sResponseCustomerMessage, $oPayGateway);
+        $oViewConf->fcpoRemovePaySafeSessionId();
     }
 
     /**

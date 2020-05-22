@@ -44,7 +44,9 @@ class fcpayone_events
         'fcpocommerzfinanz',
         'fcpoklarna_installment',
         'fcpocreditcard_iframe',
-        'fcpobillsafe'
+        'fcpobillsafe',
+        'fcpomasterpass',
+        'fcpoonlineueberweisung',
     );
 
     public static $sQueryTableFcporefnr = "
@@ -347,7 +349,15 @@ class fcpayone_events
         'fcporp_bill' => 'Ratepay Rechnungskauf',
         'fcpoamazonpay' => 'AmazonPay',
         'fcpo_secinvoice' => 'Gesicherter Rechnungskauf',
-        'fcpomasterpass' => 'Masterpass',
+        'fcpopaydirekt_express' => 'Paydirekt Express',
+        'fcpo_sofort' => 'Sofortüberweisung',
+        'fcpo_giropay' => 'Giropay',
+        'fcpo_eps' => 'eps - Onlineüberweisung',
+        'fcpo_pf_finance' => 'PostFinance E-Finance',
+        'fcpo_pf_card' => 'PostFinance Card',
+        'fcpo_ideal' => 'iDeal',
+        'fcpo_p24' => 'P24',
+        'fcpo_bancontact' => 'Bancontact',
     );
 
     /**
@@ -382,7 +392,7 @@ class fcpayone_events
     public static function onDeactivate()
     {
         self::$_oFcpoHelper = oxNew('fcpohelper');
-        self::deactivePaymethods();
+        self::deactivatePaymethods();
         $sMessage = "Payone-Zahlarten deaktiviert!<br>";
         self::clearTmp();
         $sMessage .= "Tmp geleert...<br>";
@@ -781,7 +791,7 @@ class fcpayone_events
      * 
      * @return void
      */
-    public static function deactivePaymethods()
+    public static function deactivatePaymethods()
     {
         $sPaymenthodIds = "'" . implode("','", array_keys(self::$aPaymentMethods)) . "'";
         $sQ = "update oxpayments set oxactive = 0 where oxid in ($sPaymenthodIds)";
@@ -790,14 +800,36 @@ class fcpayone_events
 
     /**
      * Sets default config values on activation.
-     * 
+     *
      * @return void
      */
     public static function setDefaultConfigValues()
     {
-        if (!self::$_oFcpoHelper->fcpoGetConfig()->getConfigParam('sFCPOAddresscheck')) {
-            self::$_oFcpoHelper->fcpoGetConfig()->saveShopConfVar('str', 'sFCPOAddresscheck', 'NO');
+        $oConfig = self::$_oFcpoHelper->fcpoGetConfig();
+        $blIsUpdate = self::isUpdate();
+        $blHashMethodSet = (bool) $oConfig->getConfigParam('sFCPOHashMethod');
+
+
+        if (!$blHashMethodSet && $blIsUpdate) {
+            $oConfig->saveShopConfVar('str', 'sFCPOHashMethod', 'md5');
+        } elseif (!$blHashMethodSet) {
+            $oConfig->saveShopConfVar('str', 'sFCPOHashMethod', 'sha2-384');
+        }
+
+        if (!$oConfig->getConfigParam('sFCPOAddresscheck')) {
+            $oConfig->saveShopConfVar('str', 'sFCPOAddresscheck', 'NO');
         }
     }
-
+    /**
+     * If there is an existing merchant id we assume, that current activation
+     * is an update
+     *
+     * @param void
+     * @return bool
+     */
+    public static function isUpdate()
+    {
+        $oConfig = self::$_oFcpoHelper->fcpoGetConfig();
+        return (bool) ($oConfig->getConfigParam('sFCPOMerchantID'));
+    }
 }
