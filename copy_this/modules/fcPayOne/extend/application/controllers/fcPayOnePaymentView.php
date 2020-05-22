@@ -3490,6 +3490,12 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         return $sLink;
     }
 
+    public function isPaymentMethodAllowedByBoniCheck($oPayment)
+    {
+        $oUser = $this->_fcpoGetUserFromSession();
+        return ((int)$oPayment->oxpayments__oxfromboni->value <= (int)$oUser->oxuser__oxboni->value);
+    }
+
     /**
      * Returns if given paymentid represents an active payment
      *
@@ -3500,8 +3506,10 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     {
         $oPayment = $this->_oFcpoHelper->getFactoryObject('oxPayment');
         $oPayment->load($sPaymentId);
-
-        return (bool) ($oPayment->oxpayments__oxactive->value);
+        $blPaymentActive = (bool) ($oPayment->oxpayments__oxactive->value);
+        // also check boni score
+        $blPaymentAllowed = $this->isPaymentMethodAllowedByBoniCheck($oPayment);
+        return ($blPaymentActive && $blPaymentAllowed );
     }
 
     /**
