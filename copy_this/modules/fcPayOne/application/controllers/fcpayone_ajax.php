@@ -25,8 +25,8 @@
 if (!function_exists('getShopBasePath')) {
     function getShopBasePath()
     {
-        $test = realpath(dirname(__FILE__).'/../../../../../../').'/';
-        return realpath(dirname(__FILE__).'/../../../../../../').'/';
+        $test = realpath(dirname(__FILE__).'/../../../../../../../').'/';
+        return realpath(dirname(__FILE__).'/../../../../../../../').'/';
     }
 }
 
@@ -527,12 +527,12 @@ class fcpayone_ajax extends oxBase {
                     'given_name' => $oShippingAddress->oxaddress__oxfname->value,
                     'family_name' => $oShippingAddress->oxaddress__oxlname->value,
                     'email' => $oUser->oxuser__oxusername->value,
-                    'title' => $oShippingAddress->oxaddress__oxsal->value,
+                    'title' => "Herr",
                     'street_address' => $oShippingAddress->oxaddress__oxstreet->value . " " . $oShippingAddress->oxaddress__oxstreetnr->value,
                     'street_address2' => $oShippingAddress->oxaddress__oxaddinfo->value,
                     'postal_code' => $oShippingAddress->oxaddress__oxzip->value,
                     'city' => $oShippingAddress->oxaddress__oxcity->value,
-                    'region' => $oUser->getStateTitle(),
+                    'region' => "",
                     'phone' => $oShippingAddress->oxaddress__oxfon->value,
                     'country' => $oShippingAddress->fcpoGetUserCountryIso(),
                 ),
@@ -593,6 +593,27 @@ class fcpayone_ajax extends oxBase {
             $aOrderlines[] = $aOrderline;
         }
 
+        // add shipping
+        $sDeliveryCosts =
+            $this->_fcpoFetchDeliveryCostsFromBasket($oBasket);
+
+        $oDelivery = $oBasket->getCosts('oxdelivery');
+
+        $sDeliveryCosts = (double) str_replace(',', '.', $sDeliveryCosts);
+        if ($sDeliveryCosts > 0) {
+            $aOrderlineShipping = array(
+                'reference' => 'delivery',
+                'name' =>  'Aufschlag Versandkosten',
+                'quantity' => 1,
+                'unit_price' => $sDeliveryCosts,
+                'tax_rate' => (string)$oDelivery->getVat(),
+                'total_amount' => $sDeliveryCosts,
+                // 'product_url' => $oBasketItem->getLink(),
+                // 'image_url' => $oBasketItem->getIconUrl(),
+            );
+            $aOrderlines[] = $aOrderlineShipping;
+        }
+
         return array(
             'basket' => $aBasketData,
             'orderlines' => $aOrderlines
@@ -640,6 +661,20 @@ class fcpayone_ajax extends oxBase {
             $oViewConf->getModulePath('fcpayone') . '/out/snippets/'.$sFileName;
 
         return $sPath;
+    }
+
+    /**
+     * Returns delivery costs of given basket object
+     *
+     * @param $oBasket
+     * @return object $oDelivery
+     */
+    protected function _fcpoFetchDeliveryCostsFromBasket($oBasket)
+    {
+        $oDelivery = $oBasket->getCosts('oxdelivery');
+        if ($oDelivery === null) return 0.0;
+
+        return $oDelivery->getBruttoPrice();
     }
 
 }

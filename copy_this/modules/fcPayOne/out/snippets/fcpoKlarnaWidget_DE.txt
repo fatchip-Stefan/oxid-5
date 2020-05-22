@@ -11,6 +11,13 @@ window.klarnaAsyncCallback = function () {
         console.debug(res);
         var klarnaData = $.parseJSON('%%KLARNA_DATA%%');
         var klarnaBasket = $.parseJSON('%%KLARNA_BASKET%%');
+        var orderlines=$.parseJSON('%%KLARNA_ORDERLINES%%');
+        console.log('klarnaData:');
+        console.log(klarnaData);
+        console.log('klarnaBasket:');
+        console.log(klarnaBasket);
+        console.log('orderlines:');
+        console.log(orderlines);
         Klarna.Payments.authorize({
             payment_method_category: '%%PAYMENT_CATEGORY%%',
         }, {
@@ -27,11 +34,15 @@ window.klarnaAsyncCallback = function () {
                 city: klarnaData.billing.city,
                 region: klarnaData.billing.region,
                 phone: klarnaData.billing.phone,
-                country: klarnaData.billing.country
+                country: klarnaData.billing.country,
+                organization_name: "StefCorp"
             },
+            orderlines: %%KLARNA_ORDERLINES%%,
             customer: {
                 date_of_birth: klarnaData.customer.date_of_birth,
-                gender: klarnaData.customer.gender
+                gender: klarnaData.customer.gender,
+                organization_entity_type: "OTHER",
+                organization_registration_id: "DE 265567757"
             }
         }, function (res) {
             $("#fcpo_klarna_auth_token").val(res.authorization_token);
