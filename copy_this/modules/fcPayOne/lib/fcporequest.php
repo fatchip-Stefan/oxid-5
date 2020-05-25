@@ -1248,11 +1248,6 @@ class fcpoRequest extends oxSuperCfg {
         $this->addParameter('email', $oViewConf->fcpoAmazonEmailDecode($oUser->oxuser__oxusername->value));
         $this->addParameter('reference', $sAmazonRefNr);
 
-        $sAmazonMode = $oConfig->getConfigParam('sFCPOAmazonMode');
-        if ($sAmazonMode == 'alwayssync') {
-            $this->addParameter('add_paydata[cancel_on_timeout]', 'yes');
-        }
-
         return true;
     }
 
@@ -1274,6 +1269,7 @@ class fcpoRequest extends oxSuperCfg {
             case 'firstsyncthenasync':
                 $iAmazonTimeout = 0;
                 break;
+            /** still needed for async timeout */
             case 'alwaysasync':
                 $iAmazonTimeout = 1440;
                 break;
