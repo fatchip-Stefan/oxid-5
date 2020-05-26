@@ -284,7 +284,7 @@ class fcpoRequest extends oxSuperCfg {
                 $this->addParameter('shipping_state', $this->_getShortState($oOrder->oxorder__oxdelstateid->value));
             }
             // Steftest Klarna
-            $this->addParameter('add_paydata[shipping_title]', 'Herr');
+            $this->addParameter('add_paydata[shipping_title]', $this->_fcpoGetKlarnaTitleParam());
             $this->addParameter('add_paydata[shipping_telephonenumber]', $oOrder->oxorder__oxdelfon->value);
             $this->addParameter('add_paydata[shipping_email]', $oOrder->oxorder__oxbillemail->value);
         } elseif ($blIsWalletTypePaymentWithDelAddress) {
@@ -322,7 +322,7 @@ class fcpoRequest extends oxSuperCfg {
                $this->addParameter('shipping_state', $this->_getShortState($oOrder->oxorder__oxbillstateid->value));
            }
            // Steftest Klarna
-           $this->addParameter('add_paydata[shipping_title]', 'Herr');
+           $this->addParameter('add_paydata[shipping_title]', $this->_fcpoGetKlarnaTitleParam());
            $this->addParameter('add_paydata[shipping_telephonenumber]', $oOrder->oxorder__oxbillfon->value);
            $this->addParameter('add_paydata[shipping_email]', $oOrder->oxorder__oxbillemail->value);
 
@@ -2329,7 +2329,7 @@ class fcpoRequest extends oxSuperCfg {
             $this->addParameter('shipping_zip', $oShippingAddress->oxaddress__oxzip->rawValue);
             $this->addParameter('shipping_city', $oShippingAddress->oxaddress__oxcity->rawValue);
             $this->addParameter('shipping_country', $oCountry->oxcountry__oxisoalpha2->value);
-            $this->addParameter('add_paydata[shipping_title]', 'Herr');
+            $this->addParameter('add_paydata[shipping_title]', $this->_fcpoGetKlarnaTitleParam());
             $this->addParameter('add_paydata[shipping_telephonenumber]', $oShippingAddress->oxaddress__oxfon->rawValue);
             $this->addParameter('add_paydata[shipping_email]', $oUser->oxuser__oxusername->rawValue);
         } else {
@@ -2339,7 +2339,7 @@ class fcpoRequest extends oxSuperCfg {
             $this->addParameter('shipping_zip', $oUser->oxuser__oxzip->value);
             $this->addParameter('shipping_city', $oUser->oxuser__oxcity->value);
             $this->addParameter('shipping_country', $oCountry->oxcountry__oxisoalpha2->value);
-            $this->addParameter('add_paydata[shipping_title]', 'Herr');
+            $this->addParameter('add_paydata[shipping_title]', $this->_fcpoGetKlarnaTitleParam());
             $this->addParameter('add_paydata[shipping_telephonenumber]', $oUser->oxuser__oxfon->value);
             $this->addParameter('add_paydata[shipping_email]', $oUser->oxuser__oxusername->rawValue);
         }
@@ -3302,13 +3302,13 @@ class fcpoRequest extends oxSuperCfg {
         $this->addParameter('clearingtype', 'fnc');
         $this->addParameter('financingtype', $this->_fcpoGetKlarnaFinancingType($sPaymentId));
 
-        $oPrice = $oBasket->getPrice();
-        $this->addParameter('amount', number_format($oPrice->getBruttoPrice(), 2, '.', '') * 100);
         $oCurr = $oConfig->getActShopCurrencyObject();
         $this->addParameter('currency', $oCurr->name);
 
         $this->addAddressParamsByUser($oUser);
         $this->_fcpoAddBasketItemsFromSession($sShippingId);
+        $oPrice = $oBasket->getPrice();
+        $this->addParameter('amount', number_format($oPrice->getBruttoPrice(), 2, '.', '') * 100);
 
         if ($sCampaign = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpo_klarna_campaign')) {
             $this->addParameter('add_paydata[klsid]', $sCampaign);
@@ -3322,6 +3322,41 @@ class fcpoRequest extends oxSuperCfg {
 
 
         return $this->send();
+    }
+
+    // ToDO duplicate code in ajax controller
+    /**
+     * Returns title param for klarna widget
+     *
+     * @param void
+     * @return string
+     */
+    protected function _fcpoGetKlarnaTitleParam()
+    {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oUser = $oBasket->getUser();
+        $sGender = ($oUser->oxuser__oxsal->value == 'MR') ? 'male' : 'female';
+        $sCountryIso2 = $oUser->fcpoGetUserCountryIso();
+        switch ($sCountryIso2) {
+            case 'AT':
+            case 'DE':
+            case 'CH':
+                $sTitle = ($sGender === 'male') ? 'Herr' : 'Frau';
+                break;
+            case 'GB':
+            case 'US':
+                $sTitle = ($sGender === 'male') ? 'Mr' : 'Ms';
+                break;
+            case 'DK':
+            case 'FI':
+            case 'SE':
+            case 'NL':
+            case 'NO':
+                $sTitle = ($sGender === 'male') ? 'Dhr.' : 'Mevr.';
+                break;
+        }
+        return $sTitle;
     }
 
     /**

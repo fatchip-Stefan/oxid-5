@@ -526,6 +526,41 @@ class fcpayone_ajax extends oxBase {
     }
 
     /**
+     * Returns title param for klarna widget
+     *
+     * @param void
+     * @return string
+     */
+    protected function _fcpoGetKlarnaTitleParam()
+    {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oUser = $oBasket->getUser();
+        $sGender = ($oUser->oxuser__oxsal->value == 'MR') ? 'male' : 'female';
+        $sCountryIso2 = $oUser->fcpoGetUserCountryIso();
+        switch ($sCountryIso2) {
+            case 'AT':
+            case 'DE':
+            case 'CH':
+                $sTitle = ($sGender === 'male') ? 'Herr' : 'Frau';
+                break;
+            case 'GB':
+            case 'US':
+                $sTitle = ($sGender === 'male') ? 'Mr' : 'Ms';
+                break;
+            case 'DK':
+            case 'FI':
+            case 'SE':
+            case 'NL':
+            case 'NO':
+                $sTitle = ($sGender === 'male') ? 'Dhr.' : 'Mevr.';
+                break;
+        }
+        return $sTitle;
+    }
+
+
+    /**
      * Returns customer billing address params for klarna widget
      *
      * @param void
@@ -536,14 +571,12 @@ class fcpayone_ajax extends oxBase {
         $oSession = $this->_oFcpoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
         $oUser = $oBasket->getUser();
-        // Todo landespez.
-        $sTitle = ($oUser->oxuser__oxsal->value == 'MR') ? 'Herr' : 'Frau';
 
         return array(
             'given_name' => $oUser->oxuser__oxfname->value,
             'family_name' => $oUser->oxuser__oxlname->value,
             'email' => $oUser->oxuser__oxusername->value,
-            'title' => $sTitle,
+            'title' => $this->_fcpoGetKlarnaTitleParam(),
             'street_address' => $oUser->oxuser__oxstreet->value . " " . $oUser->oxuser__oxstreetnr->value,
             'street_address2' => $oUser->oxuser__oxaddinfo->value,
             'postal_code' => $oUser->oxuser__oxzip->value,
@@ -568,15 +601,13 @@ class fcpayone_ajax extends oxBase {
         $oUser = $oBasket->getUser();
         $oShippingAddress = $this->_fcpoGetShippingAddress();
         $blHasShipping = (!$oShippingAddress) ? false : true;
-        // Todo landespez.
-        $sTitle = ($oUser->oxuser__oxsal->value == 'MR') ? 'Herr' : 'Frau';
 
         if ($blHasShipping) {
             return array(
                 'given_name' => $oShippingAddress->oxaddress__oxfname->value,
                 'family_name' => $oShippingAddress->oxaddress__oxlname->value,
                 'email' => $oUser->oxuser__oxusername->value,
-                'title' => $sTitle,
+                'title' => $this->_fcpoGetKlarnaTitleParam(),
                 'street_address' => $oShippingAddress->oxaddress__oxstreet->value . " " . $oShippingAddress->oxaddress__oxstreetnr->value,
                 'street_address2' => $oShippingAddress->oxaddress__oxaddinfo->value,
                 'postal_code' => $oShippingAddress->oxaddress__oxzip->value,
