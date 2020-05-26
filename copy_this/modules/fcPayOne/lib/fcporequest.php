@@ -2316,8 +2316,12 @@ class fcpoRequest extends oxSuperCfg {
             $this->addParameter('telephonenumber', $oUser->oxuser__oxfon->value);
         }
 
-        if ($oUser->oxuser__oxbirthdate != '0000-00-00' && $oUser->oxuser__oxbirthdate != '') {
+        if ($oUser->oxuser__oxbirthdate->value != '0000-00-00' && $oUser->oxuser__oxbirthdate != '') {
             $this->addParameter('birthday', str_ireplace('-', '', $oUser->oxuser__oxbirthdate->value));
+        }
+
+        if ($oUser->oxuser__fcpopersonalid->value != '0000-00-00' && $oUser->oxuser__fcpopersonalid->value != '') {
+            $this->addParameter('personalid', $oUser->oxuser__fcpopersonalid->value);
         }
 
         $oShippingAddress = $this->_fcpoGetShippingAddress();
@@ -3126,7 +3130,7 @@ class fcpoRequest extends oxSuperCfg {
         ) {
             $this->addParameter('birthday', str_ireplace('-', '', $oUser->oxuser__oxbirthdate->value), $blIsUpdateUser);
         }
-        if (in_array($oOrder->oxorder__oxpaymenttype->value, array('fcpoklarna'))) {
+        if (in_array($oOrder->oxorder__oxpaymenttype->value, array('fcpoklarna', 'fcpoklarna_invoice', 'fcpoklarna_installments', 'fcpoklarna_directdebit'))) {
             if ($blIsUpdateUser || $oUser->oxuser__fcpopersonalid->value != '')
                 $this->addParameter('personalid', $oUser->oxuser__fcpopersonalid->value, $blIsUpdateUser);
         }

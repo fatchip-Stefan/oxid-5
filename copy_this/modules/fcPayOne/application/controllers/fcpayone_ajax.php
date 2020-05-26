@@ -412,6 +412,8 @@ class fcpayone_ajax extends oxBase {
      */
     public function fcpoTriggerKlarnaSessionStart($sPaymentId, $sParamsJson)
     {
+        // Update birthday, telephone number and personalid if posted
+        $this->_fcpoUpdateUser($sParamsJson);
         $oRequest = $this->_oFcpoHelper->getFactoryObject('fcporequest');
         $aResponse = $oRequest->sendRequestKlarnaStartSession($sPaymentId);
         $blIsValid = (
@@ -429,6 +431,32 @@ class fcpayone_ajax extends oxBase {
         $this->_fcpoSetKlarnaSessionParams($aResponse);
         return $this->_fcpoGetKlarnaWidgetJS($aResponse['add_paydata[client_token]'], $sParamsJson);
     }
+
+    /**
+     *
+     *
+     * @param $sParamsJson
+     * @return string
+     */
+    public function _fcpoUpdateUser($sParamsJson)
+    {
+        $aParams = json_decode($sParamsJson, true);
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oUser = $oBasket->getUser();
+        /** @var oxUser $oUser value */
+        if ($aParams['birthday'] !== 'undefined') {
+            $oUser->oxuser__oxbirthdate = new oxField($aParams['birthday']);
+        }
+        if ($aParams['telephone'] !== 'undefined') {
+            $oUser->oxuser__oxfon = new oxField($aParams['telephone']);
+        }
+        if ($aParams['personalid'] !== 'undefined') {
+            $oUser->oxuser__fcpopersonalid = new oxField($aParams['personalid']);
+        }
+        $oUser->save();
+    }
+
     /**
      * Set needed session params for later handling of Klarna payment
      *
@@ -474,7 +502,6 @@ class fcpayone_ajax extends oxBase {
         $aPurchase = $this->_fcpoGetKlarnaPurchaseParams();
         $aOrderlines = $this->_fcpoGetKlarnaOrderlinesParams();
         $aOrder = $this->_fcpoGetKlarnaOrderParams();
-
 
         $aKlarnaWidgetSearch = array(
             '%%TOKEN%%',
@@ -522,6 +549,7 @@ class fcpayone_ajax extends oxBase {
         return array(
             'date_of_birth' => ($oUser->oxuser__oxbirthdate->value === '0000-00-00') ? '' : $oUser->oxuser__oxbirthdate->value,
             'gender' => $sGender,
+            'national_identification_number' => $oUser->oxuser__fcpopersonalid->value,
         );
     }
 

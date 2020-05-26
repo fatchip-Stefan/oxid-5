@@ -752,6 +752,18 @@ $('#fcpo_klarna_combined_agreed, #klarna_payment_selector').change(
     function() {
         var payment_id = $('#klarna_payment_selector').children("option:selected").val();
         var ajax_controller_url = $('#fcpo_ajax_controller_url').val();
+        var oForm = getPaymentForm();
+        console.log(oForm);
+        // TODO Validate
+        if (typeof(oForm['dynvalue[fcpo_klarna_birthday][year]']) !== 'undefined') {
+            var birthday = oForm['dynvalue[fcpo_klarna_birthday][year]'].value + '-'+ oForm['dynvalue[fcpo_klarna_birthday][month]'].value + '-' + oForm['dynvalue[fcpo_klarna_birthday][day]'].value;
+        }
+        if (typeof(oForm['dynvalue[fcpo_klarna_telephone]']) !== 'undefined') {
+            var telephone = oForm['dynvalue[fcpo_klarna_telephone]'].value;
+        }
+        if (typeof(oForm['dynvalue[fcpo_klarna_personalid]']) !== 'undefined') {
+            var personalid = oForm['dynvalue[fcpo_klarna_personalid]'].value;
+        }
         $('#payment_klarna_combined').val(payment_id);
 
         if ($('#fcpo_klarna_combined_agreed').is(':checked') == false) {
@@ -773,7 +785,10 @@ $('#fcpo_klarna_combined_agreed, #klarna_payment_selector').change(
 
         var formParams = '{' +
             '"payment_container_id":"klarna_widget_combined_container", ' +
-            '"payment_category":"' + payment_category + '"' +
+            '"payment_category":"' + payment_category + '",' +
+            '"birthday":"' + birthday + '",' +
+            '"personalid":"' + personalid + '",' +
+            '"telephone":"' + telephone + '"' +
             '}';
 
         $.ajax(
@@ -785,7 +800,8 @@ $('#fcpo_klarna_combined_agreed, #klarna_payment_selector').change(
                 data: {
                     paymentid: payment_id,
                     action: "start_session",
-                    params: formParams
+                    params: formParams,
+                    birthday: birthday,
                 },
                 success: function(Response) {
                     $('#klarna_widget_combined_container').empty();
