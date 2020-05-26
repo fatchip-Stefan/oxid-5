@@ -266,7 +266,7 @@ class fcpoRequest extends oxSuperCfg {
                 $this->getConfig()->getConfigParam('blFCPOPayPalDelAddress') === true
         );
 
-        if ($oOrder->oxorder__oxdellname->value != '') {
+       if ($oOrder->oxorder__oxdellname->value != '') {
             $oDelCountry = oxNew('oxcountry');
             $oDelCountry->load($oOrder->oxorder__oxdelcountryid->value);
 
@@ -304,7 +304,29 @@ class fcpoRequest extends oxSuperCfg {
             if ($this->_stateNeeded($oDelCountry->oxcountry__oxisoalpha2->value)) {
                 $this->addParameter('shipping_state', $this->_getShortState($oOrder->oxorder__oxbillstateid->value));
             }
-        }
+        } else {
+           $oDelCountry = oxNew('oxcountry');
+           $oDelCountry->load($oOrder->oxorder__oxbillcountryid->value);
+
+           $this->addParameter('shipping_firstname', $oOrder->oxorder__oxbillfname->value);
+           $this->addParameter('shipping_lastname', $oOrder->oxorder__oxbilllname->value);
+           if ($oOrder->oxorder__oxbillcompany->value)
+               $this->addParameter('shipping_company', $oOrder->oxorder__oxbillcompany->value);
+           $this->addParameter('shipping_street', trim($oOrder->oxorder__oxbillstreet->value . ' ' . $oOrder->oxorder__oxbillstreetnr->value));
+           if ($oOrder->oxorder__oxbilladdinfo->value)
+               $this->addParameter('shipping_addressaddition', $oOrder->oxorder__oxbilladdinfo->value);
+           $this->addParameter('shipping_zip', $oOrder->oxorder__oxbillzip->value);
+           $this->addParameter('shipping_city', $oOrder->oxorder__oxbillcity->value);
+           $this->addParameter('shipping_country',  $oDelCountry->oxcountry__oxisoalpha2->value);
+           if ($this->_stateNeeded($oDelCountry->oxcountry__oxisoalpha2->value)) {
+               $this->addParameter('shipping_state', $this->_getShortState($oOrder->oxorder__oxbillstateid->value));
+           }
+           // Steftest Klarna
+           $this->addParameter('add_paydata[shipping_title]', 'Herr');
+           $this->addParameter('add_paydata[shipping_telephonenumber]', $oOrder->oxorder__oxbillfon->value);
+           $this->addParameter('add_paydata[shipping_email]', $oOrder->oxorder__oxbillemail->value);
+
+       }
 
         $blPaymentTypeKnown = $this->setPaymentParameters($oOrder, $aDynvalue, $sRefNr);
 
@@ -538,8 +560,8 @@ class fcpoRequest extends oxSuperCfg {
                 if ($oUser->oxuser__oxcompany->value != '') {
                     $this->addParameter('add_paydata[organization_entity_type]', 'OTHER');
                     $this->addParameter('add_paydata[organization_registry_id]', 'DE 265567757');
-                    unset($this->_aParameters['firstname']);
-                    unset($this->_aParameters['lastname']);
+                    // unset($this->_aParameters['firstname']);
+                    // unset($this->_aParameters['lastname']);
                 }
                 break;
             case 'fcpobarzahlen':
@@ -1240,7 +1262,7 @@ class fcpoRequest extends oxSuperCfg {
         $sDeliveryCosts = (double) str_replace(',', '.', $sDeliveryCosts);
         if ($sDeliveryCosts > 0) {
             $this->addParameter('it[' . (string) $iIndex . ']', 'shipment');
-            $this->addParameter('id[' . (string) $iIndex . ']', 'Standard Versand');
+            $this->addParameter('id[' . (string) $iIndex . ']', 'delivery');
             $this->addParameter('pr[' . (string) $iIndex . ']', $this->_fcpoGetCentPrice($sDeliveryCosts));
             $this->addParameter('no[' . (string) $iIndex . ']', '1');
             $this->addParameter('de[' . (string) $iIndex . ']', 'Standard Versand');
@@ -2301,14 +2323,24 @@ class fcpoRequest extends oxSuperCfg {
         $oShippingAddress = $this->_fcpoGetShippingAddress();
         $blHasShipping = (!$oShippingAddress) ? false : true;
         if ($blHasShipping) {
-            $this->addParameter('shipping_firstname', $oShippingAddress->oxaddress__oxfname->rawValue);
-            $this->addParameter('shipping_lastname', $oShippingAddress->oxaddress__oxlname->rawValue);
+            $this->addParameter('shipping_firstname', $oUser->oxuser__oxfname->value);
+            $this->addParameter('shipping_lastname',  $oUser->oxuser__oxlname->value);
             $this->addParameter('shipping_street', $oShippingAddress->oxaddress__oxstreet->rawValue . " " . $oShippingAddress->oxaddress__oxstreetnr->rawValue );
             $this->addParameter('shipping_zip', $oShippingAddress->oxaddress__oxzip->rawValue);
             $this->addParameter('shipping_city', $oShippingAddress->oxaddress__oxcity->rawValue);
             $this->addParameter('shipping_country', $oCountry->oxcountry__oxisoalpha2->value);
             $this->addParameter('add_paydata[shipping_title]', 'Herr');
             $this->addParameter('add_paydata[shipping_telephonenumber]', $oShippingAddress->oxaddress__oxfon->rawValue);
+            $this->addParameter('add_paydata[shipping_email]', $oUser->oxuser__oxusername->rawValue);
+        } else {
+            $this->addParameter('shipping_firstname', $oUser->oxuser__oxfname->value);
+            $this->addParameter('shipping_lastname', $oUser->oxuser__oxlname->value);
+            $this->addParameter('shipping_street', trim($oUser->oxuser__oxstreet->rawValue . ' ' . $oUser->oxuser__oxstreetnr->value));
+            $this->addParameter('shipping_zip', $oUser->oxuser__oxzip->value);
+            $this->addParameter('shipping_city', $oUser->oxuser__oxcity->value);
+            $this->addParameter('shipping_country', $oCountry->oxcountry__oxisoalpha2->value);
+            $this->addParameter('add_paydata[shipping_title]', 'Herr');
+            $this->addParameter('add_paydata[shipping_telephonenumber]', $oUser->oxuser__oxfon->value);
             $this->addParameter('add_paydata[shipping_email]', $oUser->oxuser__oxusername->rawValue);
         }
     }

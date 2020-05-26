@@ -456,28 +456,48 @@ class fcpayone_ajax extends oxBase {
      */
     protected function _fcpoGetKlarnaWidgetJS($sClientToken, $sParamsJson)
     {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oUser = $oBasket->getUser();
+
         $aParams = json_decode($sParamsJson, true);
-        $aKlarnaData = $this->_fcpoGetKlarnaData();
-        $aKlarnaOrderData = $this->_fcpoGetKlarnaOrderdata();
-        $aKlarnaBasket = $aKlarnaOrderData['basket'];
-        $aKlarnaOrderlines = $aKlarnaOrderData['orderlines'];
+        $aCustomer = $this->_fcpoGetKlarnaCustomerParams();
+        $aBilling = $this->_fcpoGetKlarnaBillingParams();
+
+        // set params depending on private person / company
+        if ($oUser->oxuser__oxcompany->value != '') {
+            $aBilling['organization_name'] = $oUser->oxuser__oxcompany->value;
+            $aCustomer['organization_registration_id'] = $oUser->oxuser__oxustid->value;
+        }
+
+        $aShipping = $this->_fcpoGetKlarnaShippingParams();
+        $aPurchase = $this->_fcpoGetKlarnaPurchaseParams();
+        $aOrderlines = $this->_fcpoGetKlarnaOrderlinesParams();
+        $aOrder = $this->_fcpoGetKlarnaOrderParams();
+
 
         $aKlarnaWidgetSearch = array(
             '%%TOKEN%%',
             '%%PAYMENT_CONTAINER_ID%%',
             '%%PAYMENT_CATEGORY%%',
-            '%%KLARNA_DATA%%',
-            '%%KLARNA_BASKET%%',
+            '%%KLARNA_CUSTOMER%%',
+            '%%KLARNA_BILLING%%',
+            '%%KLARNA_SHIPPING%%',
+            '%%KLARNA_PURCHASE%%',
             '%%KLARNA_ORDERLINES%%',
+            '%%KLARNA_ORDER%%',
         );
 
         $aKlarnaWidgetReplace = array(
             $sClientToken,
             $aParams['payment_container_id'],
             $aParams['payment_category'],
-            json_encode($aKlarnaData),
-            json_encode($aKlarnaBasket),
-            json_encode($aKlarnaOrderlines),
+            json_encode($aCustomer, JSON_UNESCAPED_UNICODE),
+            json_encode($aBilling, JSON_UNESCAPED_UNICODE),
+            json_encode($aShipping, JSON_UNESCAPED_UNICODE),
+            json_encode($aPurchase, JSON_UNESCAPED_UNICODE),
+            json_encode($aOrderlines, JSON_UNESCAPED_UNICODE),
+            json_encode($aOrder, JSON_UNESCAPED_UNICODE),
         );
 
         $sKlarnaWidgetJS = file_get_contents($this->_fcpoGetKlarnaWidgetPath());
@@ -487,73 +507,107 @@ class fcpayone_ajax extends oxBase {
     }
 
     /**
+     * Returns customer params for klarna widget
+     *
+     * @param void
+     * @return array
+     */
+    protected function _fcpoGetKlarnaCustomerParams()
+    {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oUser = $oBasket->getUser();
+        $sGender = ($oUser->oxuser__oxsal->value == 'MR') ? 'male' : 'female';
+
+        return array(
+            'date_of_birth' => ($oUser->oxuser__oxbirthdate->value === '0000-00-00') ? '' : $oUser->oxuser__oxbirthdate->value,
+            'gender' => $sGender,
+        );
+    }
+
+    /**
+     * Returns customer billing address params for klarna widget
+     *
+     * @param void
+     * @return array
+     */
+    protected function _fcpoGetKlarnaBillingParams()
+    {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oUser = $oBasket->getUser();
+        // Todo landespez.
+        $sTitle = ($oUser->oxuser__oxsal->value == 'MR') ? 'Herr' : 'Frau';
+
+        return array(
+            'given_name' => $oUser->oxuser__oxfname->value,
+            'family_name' => $oUser->oxuser__oxlname->value,
+            'email' => $oUser->oxuser__oxusername->value,
+            'title' => $sTitle,
+            'street_address' => $oUser->oxuser__oxstreet->value . " " . $oUser->oxuser__oxstreetnr->value,
+            'street_address2' => $oUser->oxuser__oxaddinfo->value,
+            'postal_code' => $oUser->oxuser__oxzip->value,
+            'city' => $oUser->oxuser__oxcity->value,
+            'region' => $oUser->getStateTitle(),
+            'phone' => $oUser->oxuser__oxfon->value,
+            'country' => $oUser->fcpoGetUserCountryIso(),
+            'organization_name' => $oUser->oxuser__oxcompany->value,
+        );
+    }
+
+    /**
+     * Returns customer billing address params for klarna widget
+     *
+     * @param void
+     * @return array
+     */
+    protected function _fcpoGetKlarnaShippingParams()
+    {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oUser = $oBasket->getUser();
+        $oShippingAddress = $this->_fcpoGetShippingAddress();
+        $blHasShipping = (!$oShippingAddress) ? false : true;
+        // Todo landespez.
+        $sTitle = ($oUser->oxuser__oxsal->value == 'MR') ? 'Herr' : 'Frau';
+
+        if ($blHasShipping) {
+            return array(
+                'given_name' => $oShippingAddress->oxaddress__oxfname->value,
+                'family_name' => $oShippingAddress->oxaddress__oxlname->value,
+                'email' => $oUser->oxuser__oxusername->value,
+                'title' => $sTitle,
+                'street_address' => $oShippingAddress->oxaddress__oxstreet->value . " " . $oShippingAddress->oxaddress__oxstreetnr->value,
+                'street_address2' => $oShippingAddress->oxaddress__oxaddinfo->value,
+                'postal_code' => $oShippingAddress->oxaddress__oxzip->value,
+                'city' => $oShippingAddress->oxaddress__oxcity->value,
+                'region' => "",
+                'phone' => $oShippingAddress->oxaddress__oxfon->value,
+                'country' => $oShippingAddress->fcpoGetUserCountryIso(),
+                'organization_name' => $oShippingAddress->oxaddress__oxcompany->value
+            );
+        } else {
+            return $this->_fcpoGetKlarnaBillingParams();
+        }
+    }
+
+    /**
      * Return needed data for performing authorization
      *
      * @param void
      * @return array
      */
-    protected function _fcpoGetKlarnaData()
+    protected function _fcpoGetKlarnaPurchaseParams()
     {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $oSession = $this->_oFcpoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
         $oUser = $oBasket->getUser();
-        $oShippingAddress = $this->_fcpoGetShippingAddress();
-        $oCur = $oCur = $oConfig->getActShopCurrencyObject();
-        $blHasShipping = (!$oShippingAddress) ? false : true;
-        $sGender = ($oUser->oxuser__oxsal->value == 'MR') ? 'male' : 'female';
+        $oCur = $oConfig->getActShopCurrencyObject();
 
         $aKlarnaData = array(
             'purchase_country' => $oUser->fcpoGetUserCountryIso(),
             'purchase_currency' => $oCur->name,
-            'billing' => array(
-                'given_name' => $oUser->oxuser__oxfname->value,
-                'family_name' => $oUser->oxuser__oxlname->value,
-                'email' => $oUser->oxuser__oxusername->value,
-                'title' => $oUser->oxuser__oxsal->value,
-                'street_address' => $oUser->oxuser__oxstreet->value . " " . $oUser->oxuser__oxstreetnr->value,
-                'street_address2' => $oUser->oxuser__oxaddinfo->value,
-                'postal_code' => $oUser->oxuser__oxzip->value,
-                'city' => $oUser->oxuser__oxcity->value,
-                'region' => $oUser->getStateTitle(),
-                'phone' => $oUser->oxuser__oxfon->value,
-                'country' => $oUser->fcpoGetUserCountryIso(),
-            ),
-        );
-
-        if ($blHasShipping) {
-            $aKlarnaShippingData = array(
-                'shipping' => array(
-                    'given_name' => $oShippingAddress->oxaddress__oxfname->value,
-                    'family_name' => $oShippingAddress->oxaddress__oxlname->value,
-                    'email' => $oUser->oxuser__oxusername->value,
-                    'title' => "Herr",
-                    'street_address' => $oShippingAddress->oxaddress__oxstreet->value . " " . $oShippingAddress->oxaddress__oxstreetnr->value,
-                    'street_address2' => $oShippingAddress->oxaddress__oxaddinfo->value,
-                    'postal_code' => $oShippingAddress->oxaddress__oxzip->value,
-                    'city' => $oShippingAddress->oxaddress__oxcity->value,
-                    'region' => "",
-                    'phone' => $oShippingAddress->oxaddress__oxfon->value,
-                    'country' => $oShippingAddress->fcpoGetUserCountryIso(),
-                ),
-            );
-        } else {
-            $aKlarnaShippingData = array(
-                'shipping' => $aKlarnaData['billing']
-            );
-        }
-
-        $aKlarnaCustomer = array(
-            'customer' => array(
-                'date_of_birth' => ($oUser->oxuser__oxbirthdate->value === '0000-00-00') ? '' : $oUser->oxuser__oxbirthdate->value,
-                'gender' => $sGender,
-            )
-        );
-
-        $aKlarnaData = array_merge(
-            $aKlarnaData,
-            $aKlarnaShippingData,
-            $aKlarnaCustomer
         );
 
         return $aKlarnaData;
@@ -565,17 +619,10 @@ class fcpayone_ajax extends oxBase {
      * @param void
      * @return array
      */
-    protected function _fcpoGetKlarnaOrderdata()
+    protected function _fcpoGetKlarnaOrderlinesParams()
     {
         $oSession = $this->_oFcpoHelper->fcpoGetSession();
         $oBasket = $oSession->getBasket();
-
-        $dAmount = $oBasket->getPrice()->getBruttoPrice();
-        $dTaxAmount = $oBasket->getPrice()->getVat();
-        $aBasketData = array(
-            'order_amount' => $dAmount,
-            'order_tax_amount' => $dTaxAmount
-        );
 
         $aOrderlines = array();
         foreach ($oBasket->getContents() as $oBasketItem) {
@@ -584,18 +631,18 @@ class fcpayone_ajax extends oxBase {
                 'reference' => $oArticle->oxarticles__oxartnum->value,
                 'name' =>  $oBasketItem->getTitle(),
                 'quantity' => $oBasketItem->getAmount(),
-                'unit_price' => $oBasketItem->getUnitPrice()->getBruttoPrice(),
-                'tax_rate' => $oBasketItem->getVatPercent(),
-                'total_amount' => $oBasketItem->getPrice()->getBruttoPrice(),
+                'unit_price' => $oBasketItem->getUnitPrice()->getBruttoPrice() *100,
+                'tax_rate' => $oBasketItem->getVatPercent() * 100,
+                'total_amount' => $oBasketItem->getPrice()->getBruttoPrice() * 100 * $oBasketItem->getAmount(),
                 // 'product_url' => $oBasketItem->getLink(),
                 // 'image_url' => $oBasketItem->getIconUrl(),
             );
             $aOrderlines[] = $aOrderline;
         }
 
-        // add shipping
-        $sDeliveryCosts =
-            $this->_fcpoFetchDeliveryCostsFromBasket($oBasket);
+        // add shipping information to order
+        // ToDO check Datatypes and Conversion
+        $sDeliveryCosts = $this->_fcpoFetchDeliveryCostsFromBasket($oBasket);
 
         $oDelivery = $oBasket->getCosts('oxdelivery');
 
@@ -603,21 +650,37 @@ class fcpayone_ajax extends oxBase {
         if ($sDeliveryCosts > 0) {
             $aOrderlineShipping = array(
                 'reference' => 'delivery',
-                'name' =>  'Aufschlag Versandkosten',
+                'name' =>  'Standard Versand',
                 'quantity' => 1,
-                'unit_price' => $sDeliveryCosts,
-                'tax_rate' => (string)$oDelivery->getVat(),
-                'total_amount' => $sDeliveryCosts,
+                'unit_price' => $sDeliveryCosts * 100,
+                'tax_rate' => (string)$oDelivery->getVat() * 100,
+                'total_amount' => $sDeliveryCosts * 100,
                 // 'product_url' => $oBasketItem->getLink(),
                 // 'image_url' => $oBasketItem->getIconUrl(),
             );
             $aOrderlines[] = $aOrderlineShipping;
         }
 
+        return $aOrderlines;
+    }
+
+    /**
+     * Returns and brings basket positions into appropriate form
+     *
+     * @param void
+     * @return array
+     */
+    protected function _fcpoGetKlarnaOrderParams()
+    {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $dAmount = $oBasket->getPrice()->getBruttoPrice();
+        $dTaxAmount = $oBasket->getPrice()->getVat();
+
         return array(
-            'basket' => $aBasketData,
-            'orderlines' => $aOrderlines
-        );
+            'order_amount' => $dAmount *100,
+            'order_tax_amount' => $dTaxAmount
+        );;
     }
 
     /**
@@ -650,17 +713,7 @@ class fcpayone_ajax extends oxBase {
     protected function _fcpoGetKlarnaWidgetPath()
     {
         $oViewConf = $this->_oFcpoHelper->getFactoryObject('oxviewconfig');
-        $oSession = $this->_oFcpoHelper->fcpoGetSession();
-        $oBasket = $oSession->getBasket();
-        $oUser = $oBasket->getUser();
-        $sCountryIso2 = $oUser->fcpoGetUserCountryIso();
-
-        $sFileName = "fcpoKlarnaWidget_".$sCountryIso2.".txt";
-
-        $sPath =
-            $oViewConf->getModulePath('fcpayone') . '/out/snippets/'.$sFileName;
-
-        return $sPath;
+        return  $oViewConf->getModulePath('fcpayone') . '/out/snippets/fcpoKlarnaWidget.txt';
     }
 
     /**
