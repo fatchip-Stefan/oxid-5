@@ -22,7 +22,7 @@
                 <input class="form-control" placeholder="YYYY" autocomplete="off" type="text" size="8" maxlength="4" [{if $blKlv}]name="dynvalue[fcpo_klarna_birthday][year]" value="[{$dynvalue.fcpo_klv_birthday.year}]"[{else}]name="dynvalue[fcpo_klarna_birthday][year]" value="[{$dynvalue.fcpo_kls_birthday.year}]"[{/if}]>
             </div>
             <div class="col-lg-9">
-                <div [{if $blKlv}]id="fcpo_klv_birthday_invalid"[{else}]id="fcpo_kls_birthday_invalid"[{/if}] class="fcpo_check_error">
+                <div [{if $blKlv}]id="fcpo_klarna_birthday_invalid"[{else}]id="fcpo_klarna_birthday_invalid"[{/if}] class="fcpo_check_error">
                                 <span class="help-block">
                                     <ul role="alert" class="list-unstyled text-danger">
                                         <li>[{oxmultilang ident="FCPO_KLV_BIRTHDAY_INVALID"}]</li>
@@ -38,7 +38,7 @@
             <label class="req control-label col-lg-3">[{oxmultilang ident="FCPO_KLV_TELEPHONENUMBER"}]</label>
             <div class="col-lg-9">
                 <input class="form-control" autocomplete="off" type="text" size="20" maxlength="64" [{if $blKlv}]name="dynvalue[fcpo_klarna_telephone]" value="[{$dynvalue.fcpo_klv_fon}]"[{else}]name="dynvalue[fcpo_klarna_telephone]" value="[{$dynvalue.fcpo_kls_fon}]"[{/if}]>
-                <div [{if $blKlv}]id="fcpo_klv_fon_invalid"[{else}]id="fcpo_klarna_fon_invalid"[{/if}] class="fcpo_check_error">
+                <div [{if $blKlv}]id="fcpo_klarna_fon_invalid"[{else}]id="fcpo_klarna_fon_invalid"[{/if}] class="fcpo_check_error">
                                 <span class="help-block">
                                     <ul role="alert" class="list-unstyled text-danger">
                                         <li>[{oxmultilang ident="FCPO_KLV_TELEPHONENUMBER_INVALID"}]</li>
@@ -54,7 +54,7 @@
             <label class="req control-label col-lg-3">[{oxmultilang ident="FCPO_KLV_PERSONALID"}]</label>
             <div class="col-lg-9">
                 <input class="form-control" autocomplete="off" type="text" size="20" maxlength="64" [{if $blKlv}]name="dynvalue[fcpo_klarna_personalid]" value="[{$dynvalue.fcpo_klv_personalid}]"[{else}]name="dynvalue[fcpo_klarna_personalid]" value="[{$dynvalue.fcpo_klarna_personalid}]"[{/if}]>
-                <div [{if $blKlv}]id="fcpo_klv_personalid_invalid"[{else}]id="fcpo_kls_personalid_invalid"[{/if}] class="fcpo_check_error">
+                <div [{if $blKlv}]id="fcpo_klarna_personalid_invalid"[{else}]id="fcpo_klarna_personalid_invalid"[{/if}] class="fcpo_check_error">
                                 <span class="help-block">
                                     <ul role="alert" class="list-unstyled text-danger">
                                         <li>[{oxmultilang ident="FCPO_KLV_PERSONALID_INVALID"}]</li>

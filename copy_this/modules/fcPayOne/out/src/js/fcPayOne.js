@@ -360,6 +360,33 @@ function checkKlarna() {
     return true;
 }
 
+function checkKlarnaCombined() {
+    resetErrorContainers();
+    var oForm = getPaymentForm();
+
+    if(oForm['dynvalue[fcpo_klarna_telephone]']) {
+        oForm['dynvalue[fcpo_klarna_telephone]'].value = oForm['dynvalue[fcpo_klarna_telephone]'].value.trim();
+        if(oForm['dynvalue[fcpo_klarna_telephone]'].value == '') {
+            document.getElementById('fcpo_klarna_fon_invalid').style.display = 'block';
+            return false;
+        }
+    }
+    if(oForm['dynvalue[fcpo_klarna_birthday]']) {
+        if(oForm['dynvalue[fcpo_klarna_birthday][year]'].value == '' || oForm['dynvalue[fcpo_klarna_birthday][month]'].value == '' || oForm['dynvalue[fcpo_klarna_birthday][day]'].value == '') {
+            document.getElementById('fcpo_klarna_birthday_invalid').style.display = 'block';
+            return false;
+        }
+    }
+    if(oForm['dynvalue[fcpo_klv_personalid]']) {
+        oForm['dynvalue[fcpo_klv_personalid]'].value = oForm['dynvalue[fcpo_klv_personalid]'].value.trim();
+        if(oForm['dynvalue[fcpo_klv_personalid]'].value == '') {
+            document.getElementById('fcpo_kla').style.display = 'block';
+            return false;
+        }
+    }
+    return true;
+}
+
 function fcpoGetElvCountry() {
     var oForm = getPaymentForm();
     var sElvCountry = 'DE';
@@ -503,6 +530,8 @@ function startELVRequest() {
 
 function fcCheckPaymentSelection() {
     var sCheckedValue = getSelectedPaymentMethod();
+    console.log('sCheckedValue');
+    console.log(sCheckedValue);
     if(sCheckedValue != false) {
         var oForm = getPaymentForm();
         if(sCheckedValue == 'fcpocreditcard' && oForm.fcpo_cc_type.value == 'ajax') {
@@ -513,7 +542,7 @@ function fcCheckPaymentSelection() {
             return checkOnlineUeberweisung();
         } else if(sCheckedValue == 'fcpoklarna') {
             return checkKlarna();
-        } 
+        }
     }
     return true;
 }
@@ -754,17 +783,6 @@ $('#fcpo_klarna_combined_agreed, #klarna_payment_selector').change(
         var ajax_controller_url = $('#fcpo_ajax_controller_url').val();
         var oForm = getPaymentForm();
         console.log(oForm);
-        // TODO Validate
-        if (typeof(oForm['dynvalue[fcpo_klarna_birthday][year]']) !== 'undefined') {
-            var birthday = oForm['dynvalue[fcpo_klarna_birthday][year]'].value + '-'+ oForm['dynvalue[fcpo_klarna_birthday][month]'].value + '-' + oForm['dynvalue[fcpo_klarna_birthday][day]'].value;
-        }
-        if (typeof(oForm['dynvalue[fcpo_klarna_telephone]']) !== 'undefined') {
-            var telephone = oForm['dynvalue[fcpo_klarna_telephone]'].value;
-        }
-        if (typeof(oForm['dynvalue[fcpo_klarna_personalid]']) !== 'undefined') {
-            var personalid = oForm['dynvalue[fcpo_klarna_personalid]'].value;
-        }
-        $('#payment_klarna_combined').val(payment_id);
 
         if ($('#fcpo_klarna_combined_agreed').is(':checked') == false) {
             $('#klarna_widget_combined_container').empty();
@@ -773,6 +791,18 @@ $('#fcpo_klarna_combined_agreed, #klarna_payment_selector').change(
                 location.reload();
             }
             return;
+        } else {
+            var isValid = checkKlarnaCombined();
+            // TODO Validate
+            if (typeof(oForm['dynvalue[fcpo_klarna_birthday][year]']) !== 'undefined') {
+                var birthday = oForm['dynvalue[fcpo_klarna_birthday][year]'].value + '-'+ oForm['dynvalue[fcpo_klarna_birthday][month]'].value + '-' + oForm['dynvalue[fcpo_klarna_birthday][day]'].value;
+            }
+            if (typeof(oForm['dynvalue[fcpo_klarna_telephone]']) !== 'undefined') {
+                var telephone = oForm['dynvalue[fcpo_klarna_telephone]'].value;
+            }
+            if (typeof(oForm['dynvalue[fcpo_klarna_personalid]']) !== 'undefined') {
+                var personalid = oForm['dynvalue[fcpo_klarna_personalid]'].value;
+            }
         }
 
         let payment_category_list = {

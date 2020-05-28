@@ -519,7 +519,7 @@ class fcpoRequest extends oxSuperCfg {
                 $oUser = $oBasket->getUser();
                 if ($oUser->oxuser__oxcompany->value != '') {
                     $this->addParameter('add_paydata[organization_entity_type]', 'OTHER');
-                    $this->addParameter('add_paydata[organization_registry_id]', 'DE 265567757');
+                    $this->addParameter('add_paydata[organization_registry_id]', $oUser->oxuser__oxustid);
                     //unset($this->_aParameters['firstname']);
                     //unset($this->_aParameters['lastname']);
                 }
@@ -538,7 +538,7 @@ class fcpoRequest extends oxSuperCfg {
                 $oUser = $oBasket->getUser();
                 if ($oUser->oxuser__oxcompany->value != '') {
                     $this->addParameter('add_paydata[organization_entity_type]', 'OTHER');
-                    $this->addParameter('add_paydata[organization_registry_id]', 'DE 265567757');
+                    $this->addParameter('add_paydata[organization_registry_id]', $oUser->oxuser__oxustid);
                     //unset($this->_aParameters['firstname']);
                     //unset($this->_aParameters['lastname']);
                 }
@@ -559,7 +559,7 @@ class fcpoRequest extends oxSuperCfg {
                 $oUser = $oBasket->getUser();
                 if ($oUser->oxuser__oxcompany->value != '') {
                     $this->addParameter('add_paydata[organization_entity_type]', 'OTHER');
-                    $this->addParameter('add_paydata[organization_registry_id]', 'DE 265567757');
+                    $this->addParameter('add_paydata[organization_registry_id]', $oUser->oxuser__oxustid);
                     // unset($this->_aParameters['firstname']);
                     // unset($this->_aParameters['lastname']);
                 }
@@ -2300,6 +2300,7 @@ class fcpoRequest extends oxSuperCfg {
 
         $this->addParameter('firstname', $oUser->oxuser__oxfname->value);
         $this->addParameter('lastname', $oUser->oxuser__oxlname->value);
+        $this->addParameter('title', $this->_fcpoGetKlarnaTitleParam());
 
         if ($oUser->oxuser__oxcompany->value != '') {
             $this->addParameter('company', $oUser->oxuser__oxcompany->value);
@@ -2320,19 +2321,22 @@ class fcpoRequest extends oxSuperCfg {
             $this->addParameter('birthday', str_ireplace('-', '', $oUser->oxuser__oxbirthdate->value));
         }
 
-        if ($oUser->oxuser__fcpopersonalid->value != '0000-00-00' && $oUser->oxuser__fcpopersonalid->value != '') {
+        if ($oUser->oxuser__fcpopersonalid->value != '' && $oUser->oxuser__oxcompany->value != '') {
             $this->addParameter('personalid', $oUser->oxuser__fcpopersonalid->value);
         }
 
         $oShippingAddress = $this->_fcpoGetShippingAddress();
         $blHasShipping = (!$oShippingAddress) ? false : true;
         if ($blHasShipping) {
+            $oShippingCountry = oxNew('oxcountry');
+            $oShippingCountry->load($oShippingAddress->oxaddress__oxcountryid->value);
+
             $this->addParameter('shipping_firstname', $oUser->oxuser__oxfname->value);
             $this->addParameter('shipping_lastname',  $oUser->oxuser__oxlname->value);
             $this->addParameter('shipping_street', $oShippingAddress->oxaddress__oxstreet->rawValue . " " . $oShippingAddress->oxaddress__oxstreetnr->rawValue );
             $this->addParameter('shipping_zip', $oShippingAddress->oxaddress__oxzip->rawValue);
             $this->addParameter('shipping_city', $oShippingAddress->oxaddress__oxcity->rawValue);
-            $this->addParameter('shipping_country', $oCountry->oxcountry__oxisoalpha2->value);
+            $this->addParameter('shipping_country', $oShippingCountry->oxcountry__oxisoalpha2->value);
             $this->addParameter('add_paydata[shipping_title]', $this->_fcpoGetKlarnaTitleParam());
             $this->addParameter('add_paydata[shipping_telephonenumber]', $oShippingAddress->oxaddress__oxfon->rawValue);
             $this->addParameter('add_paydata[shipping_email]', $oUser->oxuser__oxusername->rawValue);
@@ -3321,7 +3325,7 @@ class fcpoRequest extends oxSuperCfg {
 
         if ($oUser->oxuser__oxcompany->value != '') {
             $this->addParameter('add_paydata[organization_entity_type]', 'OTHER');
-            $this->addParameter('add_paydata[organization_registry_id]', 'DE 265567757');
+            $this->addParameter('add_paydata[organization_registry_id]', $oUser->oxuser__oxustid);
         }
 
 
@@ -3345,6 +3349,8 @@ class fcpoRequest extends oxSuperCfg {
         switch ($sCountryIso2) {
             case 'AT':
             case 'DE':
+                $sTitle = ($sGender === 'male') ? 'Herr' : 'Frau';
+                break;
             case 'CH':
                 $sTitle = ($sGender === 'male') ? 'Herr' : 'Frau';
                 break;

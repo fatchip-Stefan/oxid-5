@@ -569,6 +569,8 @@ class fcpayone_ajax extends oxBase {
         switch ($sCountryIso2) {
             case 'AT':
             case 'DE':
+                $sTitle = ($sGender === 'male') ? 'Herr' : 'Frau';
+                break;
             case 'CH':
                 $sTitle = ($sGender === 'male') ? 'Herr' : 'Frau';
                 break;
@@ -607,6 +609,8 @@ class fcpayone_ajax extends oxBase {
             'title' => $this->_fcpoGetKlarnaTitleParam(),
             'street_address' => $oUser->oxuser__oxstreet->value . " " . $oUser->oxuser__oxstreetnr->value,
             'street_address2' => $oUser->oxuser__oxaddinfo->value,
+            // 'street_name' => $oUser->oxuser__oxstreet->value,
+            // 'streetNumber' => $oUser->oxuser__oxstreetnr->value,
             'postal_code' => $oUser->oxuser__oxzip->value,
             'city' => $oUser->oxuser__oxcity->value,
             'region' => $oUser->getStateTitle(),

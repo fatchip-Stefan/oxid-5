@@ -54,7 +54,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * Array of isoalpha2-countries for which birthday is needed
      * @var array
      */
-    protected $_aKlarnaBirthdayNeededCountries = array('DE', 'NL', 'AT');
+    protected $_aKlarnaBirthdayNeededCountries = array('DE', 'NL', 'AT', 'CH');
 
     /**
      * Datacontainer for all cc payment meta data
