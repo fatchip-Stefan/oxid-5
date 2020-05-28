@@ -119,7 +119,7 @@ class fcPayOneBasket extends fcPayOneBasket_parent {
         $aDeliveryList = oxRegistry::get("oxDeliveryList")->getDeliveryList(
             $this,
             $oUser,
-            $oUser->oxuser__oxcountryid->value,
+            $this->_findDelivCountry(),
             $this->getShippingId()
         );
 
