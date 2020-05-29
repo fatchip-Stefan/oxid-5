@@ -703,8 +703,6 @@ class fcpayone_ajax extends oxBase {
             $aOrderlines[] = $aOrderline;
         }
 
-        // add shipping information to order
-        // ToDO check Datatypes and Conversion
         $sDeliveryCosts = $this->_fcpoFetchDeliveryCostsFromBasket($oBasket);
 
         $oDelivery = $oBasket->getCosts('oxdelivery');
@@ -842,23 +840,4 @@ if ($sPaymentId) {
     {
         echo $oPayoneAjax->fcpoTriggerKlarnaAction($sPaymentId, $sAction, $sParamsJson);
     }
-
-    if (in_array($sPaymentId, $aKlarnaPayments) && $sAction == 'get_klarna_authorize_params')
-    {
-        $dataHelper = oxNew('fcpoRequest');
-
-        $klarnaOrder = [
-            'purchase_country' => '',
-            'purchase_currency' => '',
-            'locale' => '',
-            'order_amount' => $dataHelper->get,
-            'order_tax_amount' => '',
-        ];
-        $orderLines = [];
-        $customer = [];
-        $billingAddress = [];
-        $shippingAddress = [];
-        echo json_encode('Test');
-    }
-
 }

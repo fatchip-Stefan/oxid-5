@@ -266,6 +266,12 @@ class fcpoRequest extends oxSuperCfg {
                 $this->getConfig()->getConfigParam('blFCPOPayPalDelAddress') === true
         );
 
+        $blIsKlarnaCombinedPayment = (
+            $oOrder->oxorder__oxpaymenttype->value == 'fcpoklarna_invoice' ||
+            $oOrder->oxorder__oxpaymenttype->value == 'fcpoklarna_directdebit' ||
+            $oOrder->oxorder__oxpaymenttype->value == 'fcpoklarna_installments'
+        );
+
        if ($oOrder->oxorder__oxdellname->value != '') {
             $oDelCountry = oxNew('oxcountry');
             $oDelCountry->load($oOrder->oxorder__oxdelcountryid->value);
@@ -283,10 +289,11 @@ class fcpoRequest extends oxSuperCfg {
             if ($this->_stateNeeded($oDelCountry->oxcountry__oxisoalpha2->value)) {
                 $this->addParameter('shipping_state', $this->_getShortState($oOrder->oxorder__oxdelstateid->value));
             }
-            // Steftest Klarna
-            $this->addParameter('add_paydata[shipping_title]', $this->_fcpoGetKlarnaTitleParam());
-            $this->addParameter('add_paydata[shipping_telephonenumber]', $oOrder->oxorder__oxdelfon->value);
-            $this->addParameter('add_paydata[shipping_email]', $oOrder->oxorder__oxbillemail->value);
+            if ($blIsKlarnaCombinedPayment) {
+                $this->addParameter('add_paydata[shipping_title]', $this->_fcpoGetKlarnaTitleParam());
+                $this->addParameter('add_paydata[shipping_telephonenumber]', $oOrder->oxorder__oxdelfon->value);
+                $this->addParameter('add_paydata[shipping_email]', $oOrder->oxorder__oxbillemail->value);
+            }
         } elseif ($blIsWalletTypePaymentWithDelAddress) {
             $oDelCountry = oxNew('oxcountry');
             $oDelCountry->load($oOrder->oxorder__oxbillcountryid->value);
@@ -321,7 +328,6 @@ class fcpoRequest extends oxSuperCfg {
            if ($this->_stateNeeded($oDelCountry->oxcountry__oxisoalpha2->value)) {
                $this->addParameter('shipping_state', $this->_getShortState($oOrder->oxorder__oxbillstateid->value));
            }
-           // Steftest Klarna
            $this->addParameter('add_paydata[shipping_title]', $this->_fcpoGetKlarnaTitleParam());
            $this->addParameter('add_paydata[shipping_telephonenumber]', $oOrder->oxorder__oxbillfon->value);
            $this->addParameter('add_paydata[shipping_email]', $oOrder->oxorder__oxbillemail->value);
@@ -447,6 +453,9 @@ class fcpoRequest extends oxSuperCfg {
         $blAddRedirectUrls = false;
         $oConfig = $this->getConfig();
         $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oUser = $oBasket->getUser();
 
         switch ($sPaymentId) {
             case 'fcpocreditcard':
@@ -514,9 +523,6 @@ class fcpoRequest extends oxSuperCfg {
                 $sClientToken = $oSession->getVariable('klarna_authorization_token');
                 $this->addParameter('workorderid', $sWorkorderId);
                 $this->addParameter('add_paydata[authorization_token]', $sClientToken);
-                $oSession = $this->_oFcpoHelper->fcpoGetSession();
-                $oBasket = $oSession->getBasket();
-                $oUser = $oBasket->getUser();
                 if ($oUser->oxuser__oxcompany->value != '') {
                     $this->addParameter('add_paydata[organization_entity_type]', 'OTHER');
                     $this->addParameter('add_paydata[organization_registry_id]', $oUser->oxuser__oxustid);
@@ -533,9 +539,6 @@ class fcpoRequest extends oxSuperCfg {
                 $sClientToken = $oSession->getVariable('klarna_authorization_token');
                 $this->addParameter('workorderid', $sWorkorderId);
                 $this->addParameter('add_paydata[authorization_token]', $sClientToken);
-                $oSession = $this->_oFcpoHelper->fcpoGetSession();
-                $oBasket = $oSession->getBasket();
-                $oUser = $oBasket->getUser();
                 if ($oUser->oxuser__oxcompany->value != '') {
                     $this->addParameter('add_paydata[organization_entity_type]', 'OTHER');
                     $this->addParameter('add_paydata[organization_registry_id]', $oUser->oxuser__oxustid);
@@ -552,11 +555,6 @@ class fcpoRequest extends oxSuperCfg {
                 $sClientToken = $oSession->getVariable('klarna_authorization_token');
                 $this->addParameter('workorderid', $sWorkorderId);
                 $this->addParameter('add_paydata[authorization_token]', $sClientToken);
-                // StefTest:
-                // unset($this->_aParameters['telephonenumber']);
-                $oSession = $this->_oFcpoHelper->fcpoGetSession();
-                $oBasket = $oSession->getBasket();
-                $oUser = $oBasket->getUser();
                 if ($oUser->oxuser__oxcompany->value != '') {
                     $this->addParameter('add_paydata[organization_entity_type]', 'OTHER');
                     $this->addParameter('add_paydata[organization_registry_id]', $oUser->oxuser__oxustid);
@@ -3332,7 +3330,6 @@ class fcpoRequest extends oxSuperCfg {
         return $this->send();
     }
 
-    // ToDO duplicate code in ajax controller
     /**
      * Returns title param for klarna widget
      *

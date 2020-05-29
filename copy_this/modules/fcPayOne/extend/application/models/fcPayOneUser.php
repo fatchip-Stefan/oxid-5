@@ -941,7 +941,6 @@ class fcPayOneUser extends fcPayOneUser_parent {
         return $oCountry->$sField->value;
     }
 
-
     /**
      * Unsetting groups
      * 
