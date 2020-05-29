@@ -2790,9 +2790,10 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return bool
      */
     public function fcpoKlarnaIsTelephoneNumberNeeded() {
+        $sBillCountryIso2 = strtolower($this->fcGetBillCountry());
         $oUser = $this->getUser();
-        $blReturn = ($oUser->oxuser__oxfon->value) ? false : true;
-
+        $blCountryNeedsPhone = (array_search($sBillCountryIso2, array('no', 'se', 'dk')) !== false);
+        $blReturn = $blCountryNeedsPhone && $oUser->oxuser__oxfon->value == '';
         return $blReturn;
     }
 
@@ -3506,6 +3507,13 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         return $sLink;
     }
 
+    /**
+     * checks if chosen payment method is allowed according to
+     * consumer score setting
+     *
+     * @param $oPayment
+     * @return bool
+     */
     public function isPaymentMethodAllowedByBoniCheck($oPayment)
     {
         $oUser = $this->_fcpoGetUserFromSession();
