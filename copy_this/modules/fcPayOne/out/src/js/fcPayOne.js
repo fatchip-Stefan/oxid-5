@@ -360,33 +360,6 @@ function checkKlarna() {
     return true;
 }
 
-function checkKlarnaCombined() {
-    resetErrorContainers();
-    var oForm = getPaymentForm();
-
-    if(oForm['dynvalue[fcpo_klarna_telephone]']) {
-        oForm['dynvalue[fcpo_klarna_telephone]'].value = oForm['dynvalue[fcpo_klarna_telephone]'].value.trim();
-        if(oForm['dynvalue[fcpo_klarna_telephone]'].value == '') {
-            document.getElementById('fcpo_klarna_fon_invalid').style.display = 'block';
-            return false;
-        }
-    }
-    if(oForm['dynvalue[fcpo_klarna_birthday]']) {
-        if(oForm['dynvalue[fcpo_klarna_birthday][year]'].value == '' || oForm['dynvalue[fcpo_klarna_birthday][month]'].value == '' || oForm['dynvalue[fcpo_klarna_birthday][day]'].value == '') {
-            document.getElementById('fcpo_klarna_birthday_invalid').style.display = 'block';
-            return false;
-        }
-    }
-    if(oForm['dynvalue[fcpo_klv_personalid]']) {
-        oForm['dynvalue[fcpo_klv_personalid]'].value = oForm['dynvalue[fcpo_klv_personalid]'].value.trim();
-        if(oForm['dynvalue[fcpo_klv_personalid]'].value == '') {
-            document.getElementById('fcpo_kla').style.display = 'block';
-            return false;
-        }
-    }
-    return true;
-}
-
 function fcpoGetElvCountry() {
     var oForm = getPaymentForm();
     var sElvCountry = 'DE';
@@ -530,8 +503,6 @@ function startELVRequest() {
 
 function fcCheckPaymentSelection() {
     var sCheckedValue = getSelectedPaymentMethod();
-    console.log('sCheckedValue');
-    console.log(sCheckedValue);
     if(sCheckedValue != false) {
         var oForm = getPaymentForm();
         if(sCheckedValue == 'fcpocreditcard' && oForm.fcpo_cc_type.value == 'ajax') {
@@ -782,7 +753,6 @@ $('#fcpo_klarna_combined_agreed, #klarna_payment_selector').change(
         var payment_id = $('#klarna_payment_selector').children("option:selected").val();
         var ajax_controller_url = $('#fcpo_ajax_controller_url').val();
         var oForm = getPaymentForm();
-        console.log(oForm);
 
         if ($('#fcpo_klarna_combined_agreed').is(':checked') == false) {
             $('#klarna_widget_combined_container').empty();
@@ -792,8 +762,6 @@ $('#fcpo_klarna_combined_agreed, #klarna_payment_selector').change(
             }
             return;
         } else {
-            var isValid = checkKlarnaCombined();
-            // TODO Validate
             if (typeof(oForm['dynvalue[fcpo_klarna_birthday][year]']) !== 'undefined') {
                 var birthday = oForm['dynvalue[fcpo_klarna_birthday][year]'].value + '-'+ oForm['dynvalue[fcpo_klarna_birthday][month]'].value + '-' + oForm['dynvalue[fcpo_klarna_birthday][day]'].value;
             }
@@ -1124,74 +1092,10 @@ function resetCardTypeCCHosted() {
 }
 
 /**
- * send authorize call to klarna
- *
- * @param e
- */
-function authorizeKlarna(e) {
-    var paymentId = $('input[name=paymentid]:checked').val();
-    var ajax_controller_url = $('#fcpo_ajax_controller_url').val();
-    var oForm = getPaymentForm();
-    var jsonParams;
-
-    if (paymentId == 'fcpoklarna_invoice' ||
-        paymentId == 'fcpoklarna_installments' ||
-        paymentId == 'fcpoklarna_directdebit'
-
-    ) {
-        alert('Klarna');
-        e.preventDefault();
-        var jsonKlarnaData;
-        let payment_category_list = {
-            "fcpoklarna_invoice" : "pay_later",
-            "fcpoklarna_directdebit" : "pay_now",
-            "fcpoklarna_installments" : "pay_over_time",
-        }
-
-        var payment_category = payment_category_list[paymentId];
-
-        var formParams = '{' +
-            '"payment_container_id":"klarna_widget_combined_container", ' +
-            '"payment_category":"' + payment_category + '"' +
-            '}';
-
-        $.ajax(
-            {
-                url: ajax_controller_url,
-                method: 'POST',
-                type: 'POST',
-                dataType: 'json',
-                data: {
-                    paymentid: paymentId,
-                    action: "get_klarna_authorize_params",
-                    params: formParams
-                },
-                success: function(Response) {
-                    jsonParams = Response;
-                    alert(Response);
-                },
-                error: function () {
-                    location.reload();
-                }
-            }
-        );
-
-        Klarna.Payments.authorize({
-            payment_method_category: "pay_later"
-        }, jsonParams
-        , function(res) {
-            console.debug("After Auth");
-            console.debug(res);
-            oForm.submit();
-        })
-    }
-}
-
-/**
  * handles form submission if method is credit card hosted iframe
  */
-$( document).ready(function() {
-    var paymentForm = $( '#payment' );
+$(document).ready(function() {
+    var paymentForm = $('#payment');
 
     resetCardTypeCCHosted();
 
@@ -1200,6 +1104,5 @@ $( document).ready(function() {
         hideCCHostedErrorsAtSubmit();
         validateCardTypeCCHosted(e);
         validateInputCCHosted(e);
-        // authorizeKlarna(e);
     });
 });
