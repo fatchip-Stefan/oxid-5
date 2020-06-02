@@ -25,8 +25,7 @@
 if (!function_exists('getShopBasePath')) {
     function getShopBasePath()
     {
-        $test = realpath(dirname(__FILE__).'/../../../../../../../').'/';
-        return realpath(dirname(__FILE__).'/../../../../../../../').'/';
+        return dirname(__FILE__).'/../../../../';
     }
 }
 
