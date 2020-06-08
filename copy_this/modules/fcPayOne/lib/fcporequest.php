@@ -2311,9 +2311,7 @@ class fcpoRequest extends oxSuperCfg {
             $this->addParameter('state', $this->_getShortState($oUser->oxuser__oxstateid->value));
         }
 
-        if ($oUser->oxuser__oxfon->value != '') {
-            $this->addParameter('telephonenumber', $oUser->oxuser__oxfon->value);
-        }
+        $this->addParameter('telephonenumber', $oUser->oxuser__oxfon->value);
 
         if ($oUser->oxuser__oxbirthdate->value != '0000-00-00' && $oUser->oxuser__oxbirthdate != '') {
             $this->addParameter('birthday', str_ireplace('-', '', $oUser->oxuser__oxbirthdate->value));
