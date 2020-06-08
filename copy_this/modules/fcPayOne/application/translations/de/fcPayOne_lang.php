@@ -206,6 +206,9 @@ $aLang = array(
     'FCPO_KLARNA_COMBINED_DATA_AGREEMENT'           => 'Ich stimme zu, dass meine persönlichen Daten zur Durchführung der Zahlung der Klarna GmbH gesendet werden dürfen.',
     'FCPO_KLARNA_NOT_AGREED'                        => 'Sie müssen der Übermittlung ihrer Daten zustimmen, um mit Klarna zu bezahlen.',
     'FCPO_KLARNA_NO_AUTHORIZATION'                  => 'Es ist ein unerwarteter Fehler aufgetreten.',
+    // missing in order email to shop owner
+    'EMAIL_ORDER_CUST_HTML_PLUSTAX1'                              => "zzgl. MwSt.",
+    'SHIPPING_VAT2'                                               => "% Betrag",
 );
 
 /*
