@@ -804,6 +804,8 @@ $('#fcpo_klarna_combined_agreed, #klarna_payment_selector').change(
                 success: function(Response) {
                     $('#klarna_widget_combined_container').empty();
                     $('#klarna_combined_js_inject').empty().html(Response);
+                    // Update paymentid in template
+                    $('#payment_klarna_combined').val(payment_id);
                 },
                 error: function () {
                     location.reload();

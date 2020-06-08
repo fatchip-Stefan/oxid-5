@@ -489,6 +489,9 @@ $aLang = array(
     'FCPO_ORDER_ADVANCEMENT'                    => 'Advancement',
     'FCPO_HASH_METHOD'                          => 'Hash Method',
     'FCPO_HELP_HASH_METHOD'                     => 'Here you can setup the hash method which will be used for communication with Payone-API. If possible, use sha2-384',
+    'fcpo_clearingtype_fcpoklarna_invoice'      => 'Klarna pay later',
+    'fcpo_clearingtype_fcpoklarna_installments' => 'Klarna slice it',
+    'fcpo_clearingtype_fcpoklarna_directdebit'  => 'Klarna pay now',
 );
 
 /*

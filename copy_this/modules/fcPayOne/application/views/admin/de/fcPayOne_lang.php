@@ -496,6 +496,9 @@ $aLang = array(
     'FCPO_ORDER_ADVANCEMENT'                    => 'Forderung',
     'FCPO_HASH_METHOD'                          => 'Key-Verschlüsselungsverfahren',
     'FCPO_HELP_HASH_METHOD'                     => 'Hier können Sie einstellen, welches Key-Verschlüsselungsverfahren zur Kommunikation mit der Payone-API verwendet wird. Wenn möglich, wird die Verwendung von sha2-384 empfohlen.',
+    'fcpo_clearingtype_fcpoklarna_invoice'      => 'Klarna pay later',
+    'fcpo_clearingtype_fcpoklarna_installments' => 'Klarna slice it',
+    'fcpo_clearingtype_fcpoklarna_directdebit'  => 'Klarna pay now',
 );
 
 /*
