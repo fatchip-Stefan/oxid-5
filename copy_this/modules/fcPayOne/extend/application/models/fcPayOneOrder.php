@@ -72,13 +72,28 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * List of Payment IDs which need to save workorderid
      * @var array
      */
-    protected $_aPaymentsWorkorderIdSave = array('fcpopo_bill', 'fcpopo_debitnote', 'fcpopo_installment');
+    protected $_aPaymentsWorkorderIdSave = array(
+        'fcpopo_bill',
+        'fcpopo_debitnote',
+        'fcpopo_installment',
+        'fcpoklarna_invoice',
+        'fcpoklarna_directdebit',
+        'fcpoklarna_installments',
+    );
 
     /**
      * List of Payment IDs which are foreseen for saving clearing reference
      * @var array
      */
-    protected $_aPaymentsClearingReferenceSave = array('fcporp_bill', 'fcpopo_bill', 'fcpopo_debitnote', 'fcpopo_installment');
+    protected $_aPaymentsClearingReferenceSave = array(
+        'fcporp_bill',
+        'fcpopo_bill',
+        'fcpopo_debitnote',
+        'fcpopo_installment',
+        'fcpoklarna_invoice',
+        'fcpoklarna_directdebit',
+        'fcpoklarna_installments',
+        );
 
     /**
      * List of Payment IDs which are foreseen for saving external shopid
@@ -755,7 +770,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
     /** Determine if finalizing order will be done by exiting with orderexists statement
      *
      * @param bool $blSaveAfterRedirect
-     * @return void
+     * @return bool
      */
     protected function _fcpoCheckReturnOrderExists($blSaveAfterRedirect) {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
@@ -1116,14 +1131,22 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      * @return bool
      */
     public function isDetailedProductInfoNeeded() {
-        $blReturn = (
-            $this->oxorder__oxpaymenttype->value == 'fcpoklarna' ||
-            $this->oxorder__oxpaymenttype->value == 'fcpo_secinvoice' ||
-            $this->oxorder__oxpaymenttype->value == 'fcporp_bill' ||
-            $this->oxorder__oxpaymenttype->value == 'fcpopaydirekt_express'
+
+        $blForcedByPaymentMethod = in_array(
+            $this->oxorder__oxpaymenttype->value,
+            array(
+                'fcpobillsafe',
+                'fcpoklarna',
+                'fcpoklarna_invoice',
+                'fcpoklarna_installments',
+                'fcpoklarna_directdebit',
+                'fcpo_secinvoice',
+                'fcporp_bill',
+                'fcpopaydirekt_express',
+            )
         );
 
-        return $blReturn;
+        return $blForcedByPaymentMethod;
     }
 
     /**
@@ -1642,6 +1665,7 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
             if ($sWorkorderId) {
                 $this->oxorder__fcpoworkorderid = new oxField($sWorkorderId, oxField::T_RAW);
                 $this->_oFcpoHelper->fcpoDeleteSessionVariable('payolution_workorderid');
+                $this->_oFcpoHelper->fcpoDeleteSessionVariable('klarna_workorderid');
             }
         }
     }

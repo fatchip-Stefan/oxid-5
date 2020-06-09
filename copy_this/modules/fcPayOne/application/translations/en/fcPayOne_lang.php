@@ -198,6 +198,11 @@ $aLang = array(
     'FCPO_CC_HOSTED_ERROR_CARDTYPE'                 => 'Please select a cardtype',
     'FCPO_CC_HOSTED_ERROR_CVC'                      => 'Please check CVC',
     'FCPO_CC_HOSTED_ERROR_INCOMPLETE'               => 'Input incomplete',
+    'FCPO_KLARNA_COMBINED_DATA_AGREEMENT'           => 'I agree, sending my personal data to Klarna GmbH for the purpose of processing the payment.',
+    'FCPO_KLARNA_NOT_AGREED'                        => 'You have to agree to submit your data to pay with klarna.',
+    'FCPO_KLARNA_NO_AUTHORIZATION'                  => 'An unexpected error occurred.',
+    'EMAIL_ORDER_CUST_HTML_PLUSTAX1'                =>"plus tax",
+    'SHIPPING_VAT2'                                 => "% Amount",
 );
 
 /*

@@ -22,7 +22,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
 
     /**
      * Helper object for dealing with different shop versions
-     * @var object
+     * @var fcpohelper
      */
     protected $_oFcpoHelper = null;
 
@@ -54,7 +54,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * Array of isoalpha2-countries for which birthday is needed
      * @var array
      */
-    protected $_aKlarnaBirthdayNeededCountries = array('DE', 'NL', 'AT');
+    protected $_aKlarnaBirthdayNeededCountries = array('DE', 'NL', 'AT', 'CH');
 
     /**
      * Datacontainer for all cc payment meta data
@@ -124,6 +124,12 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     protected $_aPayolutionInstallmentBankDataExeptionCountries = array(
         'a7c40f6321c6f6109.43859248'
     );
+
+    /**
+     * Flag for checking if klarna payment combined payment widget is already present
+     * @var bool
+     */
+    public $_blKlarnaCombinedIsPresent = false;
 
     /**
      * init object construction
@@ -1333,11 +1339,55 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
 
             $this->_fcCleanupSessionFragments($oPayment);
 
+            $mReturn = $this->_fcpoKlarnaCombinedValidate($mReturn, $sPaymentId);
+
             $mReturn = $this->_fcpoPayolutionPreCheck($mReturn, $sPaymentId);
             if ($sPaymentId == 'fcporp_bill') {
                 $mReturn = $this->_fcpoCheckRatePayBillMandatoryUserData($mReturn, $sPaymentId);
             }
             $mReturn = $this->_fcpoAdultCheck($mReturn, $sPaymentId);
+        }
+
+        return $mReturn;
+    }
+
+    /**
+     * Sets a error message into session, so it will be displayed in frontend
+     *
+     * @param  $sLangString
+     * @return void
+     */
+    protected function _fcpoSetErrorMessage($sLangString)
+    {
+        if ($sLangString) {
+            $oLang = $this->_oFcpoHelper->fcpoGetLang();
+            $sTranslatedString = $oLang->translateString($sLangString);
+            $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
+            $this->_oFcpoHelper->fcpoSetSessionVariable('payerrortext', $sTranslatedString);
+        }
+    }
+
+    /**
+     * Validating new klarna payment
+     *
+     * @param $mReturn
+     * @param $sPaymentId
+     * @return mixed
+     */
+    protected function _fcpoKlarnaCombinedValidate($mReturn, $sPaymentId)
+    {
+        if ($this->fcpoIsKlarnaCombined($sPaymentId)) {
+            $aDynValues = $this->_fcpoGetDynValues();
+            if (!$aDynValues['fcpo_klarna_combined_agreed']) {
+                $this->_fcpoSetErrorMessage('FCPO_KLARNA_NOT_AGREED');
+                return null;
+            }
+            if (empty($aDynValues['klarna_authorization_token'])) {
+                $this->_fcpoSetErrorMessage('FCPO_KLARNA_NO_AUTHORIZATION');
+                return null;
+            } else {
+                $this->_oFcpoHelper->fcpoSetSessionVariable('klarna_authorization_token', $aDynValues['klarna_authorization_token']);
+            }
         }
 
         return $mReturn;
@@ -2740,9 +2790,10 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return bool
      */
     public function fcpoKlarnaIsTelephoneNumberNeeded() {
+        $sBillCountryIso2 = strtolower($this->fcGetBillCountry());
         $oUser = $this->getUser();
-        $blReturn = ($oUser->oxuser__oxfon->value) ? false : true;
-
+        $blCountryNeedsPhone = (array_search($sBillCountryIso2, array('no', 'se', 'dk')) !== false);
+        $blReturn = $blCountryNeedsPhone && $oUser->oxuser__oxfon->value == '';
         return $blReturn;
     }
 
@@ -3316,7 +3367,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     }
 
     /**
-     * Method saves a single value to a cerrtain field of user table
+     * Method saves a single value to a certain field of user table
      *
      * @param $sField
      * @param $sValue
@@ -3454,5 +3505,110 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         $sLink = 'https://www.ratepay.com/zgb-dse';
 
         return $sLink;
+    }
+
+    /**
+     * checks if chosen payment method is allowed according to
+     * consumer score setting
+     *
+     * @param $oPayment
+     * @return bool
+     */
+    public function isPaymentMethodAllowedByBoniCheck($oPayment)
+    {
+        $oUser = $this->_fcpoGetUserFromSession();
+        return ((int)$oPayment->oxpayments__oxfromboni->value <= (int)$oUser->oxuser__oxboni->value);
+    }
+
+    /**
+     * Returns if given paymentid represents an active payment
+     *
+     * @param $sPaymentId
+     * @return bool
+     */
+    public function fcpoPaymentActive($sPaymentId)
+    {
+        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxPayment');
+        $oPayment->load($sPaymentId);
+        $blPaymentActive = (bool) ($oPayment->oxpayments__oxactive->value);
+        // also check boni score
+        $blPaymentAllowed = $this->isPaymentMethodAllowedByBoniCheck($oPayment);
+        return ($blPaymentActive && $blPaymentAllowed );
+    }
+
+    /**
+     * Checks if given payment id is of type of new klarna
+     * implementation
+     *
+     * @param $sPaymentId
+     * @return bool
+     */
+    public function fcpoIsKlarnaCombined($sPaymentId)
+    {
+        return (
+        in_array($sPaymentId, array(
+            'fcpoklarna_invoice',
+            'fcpoklarna_directdebit',
+            'fcpoklarna_installments',
+        ))
+        );
+    }
+
+    /**
+     * Method decides if certain paymentid is of newer klarna type,
+     * the currency and country is supported and
+     * the combined widget already has been displayed.
+     *
+     * @param $sPaymentId
+     * @return bool
+     */
+    public function fcpoShowKlarnaCombined($sPaymentId)
+    {
+        $blIsKlarnaCombined = $this->fcpoIsKlarnaCombined($sPaymentId);
+        $blIsCountryCurrencySupportedFromKlarna = $this->_fcpoIsCountryCurrencySupportedFromKlarna();
+        if (
+            $blIsKlarnaCombined &&
+            $blIsCountryCurrencySupportedFromKlarna &&
+            $this->_blKlarnaCombinedIsPresent === false
+        ) {
+            $this->_blKlarnaCombinedIsPresent = true;
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if klarna supports the user's billing country in combination
+     * with currency
+     * @see https://developers.klarna.com/documentation/klarna-payments/in-depth-knowledge/puchase-countries-currencies-locales/
+     * @return bool
+     */
+    protected function _fcpoIsCountryCurrencySupportedFromKlarna()
+    {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oUser = $oBasket->getUser();
+
+        $sCountry = $oUser->fcpoGetUserCountryIso();
+        $oConfig = $this->_oFcpoHelper->getConfig();
+        $oActCurrency = $oConfig->getActShopCurrencyObject();
+        $sCurrency = $oActCurrency->name;
+
+        $aMap = array (
+            'DE' => 'EUR',
+            'AT' => 'EUR',
+            'CH' => 'CHF',
+            'NL' => 'EUR',
+            'DK' => 'DKK',
+            'NO' => 'NOK',
+            'SE' => 'SEK',
+            'FI' => 'EUR',
+            'GB' => 'GBP',
+            'US' => 'USD',
+            'AU' => 'AUD',
+        );
+
+        return ($aMap[$sCountry] === $sCurrency);
     }
 }

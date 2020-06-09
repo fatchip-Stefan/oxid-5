@@ -266,7 +266,13 @@ class fcpoRequest extends oxSuperCfg {
                 $this->getConfig()->getConfigParam('blFCPOPayPalDelAddress') === true
         );
 
-        if ($oOrder->oxorder__oxdellname->value != '') {
+        $blIsKlarnaCombinedPayment = (
+            $oOrder->oxorder__oxpaymenttype->value == 'fcpoklarna_invoice' ||
+            $oOrder->oxorder__oxpaymenttype->value == 'fcpoklarna_directdebit' ||
+            $oOrder->oxorder__oxpaymenttype->value == 'fcpoklarna_installments'
+        );
+
+       if ($oOrder->oxorder__oxdellname->value != '') {
             $oDelCountry = oxNew('oxcountry');
             $oDelCountry->load($oOrder->oxorder__oxdelcountryid->value);
 
@@ -282,6 +288,11 @@ class fcpoRequest extends oxSuperCfg {
             $this->addParameter('shipping_country', $oDelCountry->oxcountry__oxisoalpha2->value);
             if ($this->_stateNeeded($oDelCountry->oxcountry__oxisoalpha2->value)) {
                 $this->addParameter('shipping_state', $this->_getShortState($oOrder->oxorder__oxdelstateid->value));
+            }
+            if ($blIsKlarnaCombinedPayment) {
+                $this->addParameter('add_paydata[shipping_title]', $this->_fcpoGetKlarnaTitleParam());
+                $this->addParameter('add_paydata[shipping_telephonenumber]', $oOrder->oxorder__oxdelfon->value);
+                $this->addParameter('add_paydata[shipping_email]', $oOrder->oxorder__oxbillemail->value);
             }
         } elseif ($blIsWalletTypePaymentWithDelAddress) {
             $oDelCountry = oxNew('oxcountry');
@@ -300,7 +311,28 @@ class fcpoRequest extends oxSuperCfg {
             if ($this->_stateNeeded($oDelCountry->oxcountry__oxisoalpha2->value)) {
                 $this->addParameter('shipping_state', $this->_getShortState($oOrder->oxorder__oxbillstateid->value));
             }
-        }
+        } else {
+           $oDelCountry = oxNew('oxcountry');
+           $oDelCountry->load($oOrder->oxorder__oxbillcountryid->value);
+
+           $this->addParameter('shipping_firstname', $oOrder->oxorder__oxbillfname->value);
+           $this->addParameter('shipping_lastname', $oOrder->oxorder__oxbilllname->value);
+           if ($oOrder->oxorder__oxbillcompany->value)
+               $this->addParameter('shipping_company', $oOrder->oxorder__oxbillcompany->value);
+           $this->addParameter('shipping_street', trim($oOrder->oxorder__oxbillstreet->value . ' ' . $oOrder->oxorder__oxbillstreetnr->value));
+           if ($oOrder->oxorder__oxbilladdinfo->value)
+               $this->addParameter('shipping_addressaddition', $oOrder->oxorder__oxbilladdinfo->value);
+           $this->addParameter('shipping_zip', $oOrder->oxorder__oxbillzip->value);
+           $this->addParameter('shipping_city', $oOrder->oxorder__oxbillcity->value);
+           $this->addParameter('shipping_country',  $oDelCountry->oxcountry__oxisoalpha2->value);
+           if ($this->_stateNeeded($oDelCountry->oxcountry__oxisoalpha2->value)) {
+               $this->addParameter('shipping_state', $this->_getShortState($oOrder->oxorder__oxbillstateid->value));
+           }
+           $this->addParameter('add_paydata[shipping_title]', $this->_fcpoGetKlarnaTitleParam());
+           $this->addParameter('add_paydata[shipping_telephonenumber]', $oOrder->oxorder__oxbillfon->value);
+           $this->addParameter('add_paydata[shipping_email]', $oOrder->oxorder__oxbillemail->value);
+
+       }
 
         $blPaymentTypeKnown = $this->setPaymentParameters($oOrder, $aDynvalue, $sRefNr);
 
@@ -421,6 +453,9 @@ class fcpoRequest extends oxSuperCfg {
         $blAddRedirectUrls = false;
         $oConfig = $this->getConfig();
         $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oUser = $oBasket->getUser();
 
         switch ($sPaymentId) {
             case 'fcpocreditcard':
@@ -479,6 +514,53 @@ class fcpoRequest extends oxSuperCfg {
                 $this->addParameter('clearingtype', 'fnc'); //Payment method
                 $this->addParameter('financingtype', 'KLV');
                 break;
+            case 'fcpoklarna_directdebit':
+                $this->addParameter('clearingtype', 'fnc'); //Payment method
+                $this->addParameter('financingtype', 'KDD');
+                $blAddRedirectUrls = true;
+                $oSession = $this->_oFcpoHelper->fcpoGetSession();
+                $sWorkorderId = $oSession->getVariable('fcpoWorkorderId');
+                $sClientToken = $oSession->getVariable('klarna_authorization_token');
+                $this->addParameter('workorderid', $sWorkorderId);
+                $this->addParameter('add_paydata[authorization_token]', $sClientToken);
+                if ($oUser->oxuser__oxcompany->value != '') {
+                    $this->addParameter('add_paydata[organization_entity_type]', 'OTHER');
+                    $this->addParameter('add_paydata[organization_registry_id]', $oUser->oxuser__oxustid);
+                    //unset($this->_aParameters['firstname']);
+                    //unset($this->_aParameters['lastname']);
+                }
+                break;
+            case 'fcpoklarna_invoice':
+                $this->addParameter('clearingtype', 'fnc'); //Payment method
+                $this->addParameter('financingtype', 'KIV');
+                $blAddRedirectUrls = true;
+                $oSession = $this->_oFcpoHelper->fcpoGetSession();
+                $sWorkorderId = $oSession->getVariable('fcpoWorkorderId');
+                $sClientToken = $oSession->getVariable('klarna_authorization_token');
+                $this->addParameter('workorderid', $sWorkorderId);
+                $this->addParameter('add_paydata[authorization_token]', $sClientToken);
+                if ($oUser->oxuser__oxcompany->value != '') {
+                    $this->addParameter('add_paydata[organization_entity_type]', 'OTHER');
+                    $this->addParameter('add_paydata[organization_registry_id]', $oUser->oxuser__oxustid);
+                    //unset($this->_aParameters['firstname']);
+                    //unset($this->_aParameters['lastname']);
+                }
+                break;
+            case 'fcpoklarna_installments':
+                $this->addParameter('clearingtype', 'fnc'); //Payment method
+                $this->addParameter('financingtype', 'KIS');
+                $blAddRedirectUrls = true;
+                $oSession = $this->_oFcpoHelper->fcpoGetSession();
+                $sWorkorderId = $oSession->getVariable('fcpoWorkorderId');
+                $sClientToken = $oSession->getVariable('klarna_authorization_token');
+                $this->addParameter('workorderid', $sWorkorderId);
+                $this->addParameter('add_paydata[authorization_token]', $sClientToken);
+                if ($oUser->oxuser__oxcompany->value != '') {
+                    $this->addParameter('add_paydata[organization_entity_type]', 'OTHER');
+                    $this->addParameter('add_paydata[organization_registry_id]', $oUser->oxuser__oxustid);
+                    // unset($this->_aParameters['firstname']);
+                    // unset($this->_aParameters['lastname']);
+                }
                 break;
             case 'fcpobarzahlen':
                 $this->addParameter('clearingtype', 'csh'); //Payment method
@@ -1175,12 +1257,15 @@ class fcpoRequest extends oxSuperCfg {
         $sDeliveryCosts =
             $this->_fcpoFetchDeliveryCostsFromBasket($oBasket);
 
-        $dDelveryCosts = (double) str_replace(',', '.', $sDeliveryCosts);
-        $this->addParameter('it[' . (string) $iIndex . ']', 'shipment');
-        $this->addParameter('id[' . (string) $iIndex . ']', 'Standard Versand');
-        $this->addParameter('pr[' . (string) $iIndex . ']', $this->_fcpoGetCentPrice($dDelveryCosts));
-        $this->addParameter('no[' . (string) $iIndex . ']', '1');
-        $this->addParameter('de[' . (string) $iIndex . ']', 'Standard Versand');
+        $sDeliveryCosts = (double) str_replace(',', '.', $sDeliveryCosts);
+        if ($sDeliveryCosts > 0) {
+            $this->addParameter('it[' . (string) $iIndex . ']', 'shipment');
+            $this->addParameter('id[' . (string) $iIndex . ']', 'delivery');
+            $this->addParameter('pr[' . (string) $iIndex . ']', $this->_fcpoGetCentPrice($sDeliveryCosts));
+            $this->addParameter('no[' . (string) $iIndex . ']', '1');
+            $this->addParameter('de[' . (string) $iIndex . ']', 'Standard Versand');
+            $this->addParameter('va[' . (string) $iIndex . ']', $this->_fcpoGetCentPrice($oDeliveryCosts->getVat()));
+        }
 
         return $oBasket;
     }
@@ -1196,9 +1281,7 @@ class fcpoRequest extends oxSuperCfg {
         $oDelivery = $oBasket->getCosts('oxdelivery');
         if ($oDelivery === null) return 0.0;
 
-        $sDeliveryCosts = $oDelivery->getBruttoPrice();
-
-        return $sDeliveryCosts;
+        return $oDelivery->getBruttoPrice();
     }
 
     /**
@@ -2211,6 +2294,7 @@ class fcpoRequest extends oxSuperCfg {
 
         $this->addParameter('firstname', $oUser->oxuser__oxfname->value);
         $this->addParameter('lastname', $oUser->oxuser__oxlname->value);
+        $this->addParameter('title', $this->_fcpoGetKlarnaTitleParam());
 
         if ($oUser->oxuser__oxcompany->value != '') {
             $this->addParameter('company', $oUser->oxuser__oxcompany->value);
@@ -2223,10 +2307,67 @@ class fcpoRequest extends oxSuperCfg {
             $this->addParameter('state', $this->_getShortState($oUser->oxuser__oxstateid->value));
         }
 
-        if ($oUser->oxuser__oxfon->value != '') {
-            $this->addParameter('telephonenumber', $oUser->oxuser__oxfon->value);
+        $this->addParameter('telephonenumber', $oUser->oxuser__oxfon->value);
+
+        if ($oUser->oxuser__oxbirthdate->value != '0000-00-00' && $oUser->oxuser__oxbirthdate != '') {
+            $this->addParameter('birthday', str_ireplace('-', '', $oUser->oxuser__oxbirthdate->value));
+        }
+
+        if ($oUser->oxuser__fcpopersonalid->value != '' && $oUser->oxuser__oxcompany->value != '') {
+            $this->addParameter('personalid', $oUser->oxuser__fcpopersonalid->value);
+        }
+
+        $oShippingAddress = $this->_fcpoGetShippingAddress();
+        $blHasShipping = (!$oShippingAddress) ? false : true;
+        if ($blHasShipping) {
+            $oShippingCountry = oxNew('oxcountry');
+            $oShippingCountry->load($oShippingAddress->oxaddress__oxcountryid->value);
+
+            $this->addParameter('shipping_firstname', $oUser->oxuser__oxfname->value);
+            $this->addParameter('shipping_lastname',  $oUser->oxuser__oxlname->value);
+            $this->addParameter('shipping_street', $oShippingAddress->oxaddress__oxstreet->rawValue . " " . $oShippingAddress->oxaddress__oxstreetnr->rawValue );
+            $this->addParameter('shipping_zip', $oShippingAddress->oxaddress__oxzip->rawValue);
+            $this->addParameter('shipping_city', $oShippingAddress->oxaddress__oxcity->rawValue);
+            $this->addParameter('shipping_country', $oShippingCountry->oxcountry__oxisoalpha2->value);
+            $this->addParameter('add_paydata[shipping_title]', $this->_fcpoGetKlarnaTitleParam());
+            $this->addParameter('add_paydata[shipping_telephonenumber]', $oShippingAddress->oxaddress__oxfon->rawValue);
+            $this->addParameter('add_paydata[shipping_email]', $oUser->oxuser__oxusername->rawValue);
+        } else {
+            $this->addParameter('shipping_firstname', $oUser->oxuser__oxfname->value);
+            $this->addParameter('shipping_lastname', $oUser->oxuser__oxlname->value);
+            $this->addParameter('shipping_street', trim($oUser->oxuser__oxstreet->rawValue . ' ' . $oUser->oxuser__oxstreetnr->value));
+            $this->addParameter('shipping_zip', $oUser->oxuser__oxzip->value);
+            $this->addParameter('shipping_city', $oUser->oxuser__oxcity->value);
+            $this->addParameter('shipping_country', $oCountry->oxcountry__oxisoalpha2->value);
+            $this->addParameter('add_paydata[shipping_title]', $this->_fcpoGetKlarnaTitleParam());
+            $this->addParameter('add_paydata[shipping_telephonenumber]', $oUser->oxuser__oxfon->value);
+            $this->addParameter('add_paydata[shipping_email]', $oUser->oxuser__oxusername->rawValue);
         }
     }
+
+    /**
+     * Returns an object with the shipping address.
+     *
+     * @param void
+     * @return mixed false|object
+     */
+    protected function _fcpoGetShippingAddress()
+    {
+        if (!($sAddressId = $this->_oFcpoHelper->fcpoGetRequestParameter('deladrid'))) {
+            $sAddressId = $this->_oFcpoHelper->fcpoGetSessionVariable('deladrid');
+        }
+
+        if (!$sAddressId) {
+            return false;
+        }
+
+        $oShippingAddress = oxNew('oxaddress');
+        $oShippingAddress->load($sAddressId);
+
+        return $oShippingAddress;
+    }
+
+
 
     /**
      * Get ISO2 country code by given country ID
@@ -2973,10 +3114,11 @@ class fcpoRequest extends oxSuperCfg {
         if ($this->_stateNeeded($oCountry->oxcountry__oxisoalpha2->value)) {
             $this->addParameter('state', $this->_getShortState($oOrder->oxorder__oxbillstateid->value));
         }
+        $this->addParameter('birthday', str_ireplace('-', '', $oUser->oxuser__oxbirthdate->value), $blIsUpdateUser);
         $this->addParameter('email', $oOrder->oxorder__oxbillemail->value, $blIsUpdateUser);
-        if ($blIsUpdateUser || $oOrder->oxorder__oxbillfon->value != '')
+        if ($blIsUpdateUser || $oOrder->oxorder__oxbillfon->value != '') {
             $this->addParameter('telephonenumber', $oOrder->oxorder__oxbillfon->value, $blIsUpdateUser);
-
+        }
         if ((
                 in_array($oOrder->oxorder__oxpaymenttype->value, array('fcpoklarna')) &&
                 in_array($oCountry->oxcountry__oxisoalpha2->value, array('DE', 'NL', 'AT'))
@@ -2984,7 +3126,7 @@ class fcpoRequest extends oxSuperCfg {
         ) {
             $this->addParameter('birthday', str_ireplace('-', '', $oUser->oxuser__oxbirthdate->value), $blIsUpdateUser);
         }
-        if (in_array($oOrder->oxorder__oxpaymenttype->value, array('fcpoklarna'))) {
+        if (in_array($oOrder->oxorder__oxpaymenttype->value, array('fcpoklarna', 'fcpoklarna_invoice', 'fcpoklarna_installments', 'fcpoklarna_directdebit'))) {
             if ($blIsUpdateUser || $oUser->oxuser__fcpopersonalid->value != '')
                 $this->addParameter('personalid', $oUser->oxuser__fcpopersonalid->value, $blIsUpdateUser);
         }
@@ -3136,6 +3278,106 @@ class fcpoRequest extends oxSuperCfg {
         $this->_oFcpoHelper->fcpoSetSessionVariable('fcpoRefNr', $sRefNr);
 
         return $sRefNrComplete;
+    }
+
+    /**
+     * Sending start session call
+     *
+     * @param $sPaymentId
+     * @return array
+     */
+    public function sendRequestKlarnaStartSession($sPaymentId)
+    {
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oUser = $oBasket->getUser();
+        $sShippingId = $oBasket->getShippingId();
+
+        $this->addParameter('request', 'genericpayment'); //Request method
+        $this->addParameter('mode', $this->getOperationMode($sPaymentId)); //PayOne Portal Operation Mode (live or test)
+        $this->addParameter('aid', $oConfig->getConfigParam('sFCPOSubAccountID')); //ID of PayOne Sub-Account
+
+        $this->addParameter('add_paydata[action]', 'start_session');
+        $this->addParameter('clearingtype', 'fnc');
+        $this->addParameter('financingtype', $this->_fcpoGetKlarnaFinancingType($sPaymentId));
+
+        $oCurr = $oConfig->getActShopCurrencyObject();
+        $this->addParameter('currency', $oCurr->name);
+
+        $this->addAddressParamsByUser($oUser);
+        $this->_fcpoAddBasketItemsFromSession($sShippingId);
+        $oPrice = $oBasket->getPrice();
+        $this->addParameter('amount', number_format($oPrice->getBruttoPrice(), 2, '.', '') * 100);
+
+        if ($sCampaign = $this->_oFcpoHelper->fcpoGetSessionVariable('fcpo_klarna_campaign')) {
+            $this->addParameter('add_paydata[klsid]', $sCampaign);
+            $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpo_klarna_campaign');
+        }
+
+        if ($oUser->oxuser__oxcompany->value != '') {
+            $this->addParameter('add_paydata[organization_entity_type]', 'OTHER');
+            $this->addParameter('add_paydata[organization_registry_id]', $oUser->oxuser__oxustid);
+        }
+
+
+        return $this->send();
+    }
+
+    /**
+     * Returns title param for klarna widget
+     *
+     * @param void
+     * @return string
+     */
+    protected function _fcpoGetKlarnaTitleParam()
+    {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oUser = $oBasket->getUser();
+        $sGender = ($oUser->oxuser__oxsal->value == 'MR') ? 'male' : 'female';
+        $sCountryIso2 = $oUser->fcpoGetUserCountryIso();
+        switch ($sCountryIso2) {
+            case 'AT':
+            case 'DE':
+                $sTitle = ($sGender === 'male') ? 'Herr' : 'Frau';
+                break;
+            case 'CH':
+                $sTitle = ($sGender === 'male') ? 'Herr' : 'Frau';
+                break;
+            case 'GB':
+            case 'US':
+                $sTitle = ($sGender === 'male') ? 'Mr' : 'Ms';
+                break;
+            case 'DK':
+            case 'FI':
+            case 'SE':
+            case 'NL':
+            case 'NO':
+                $sTitle = ($sGender === 'male') ? 'Dhr.' : 'Mevr.';
+                break;
+        }
+        return $sTitle;
+    }
+
+    /**
+     * Returning klarna financingtype by paymentid
+     *
+     * @param string $sPaymentId
+     * @return string
+     */
+    protected function _fcpoGetKlarnaFinancingType($sPaymentId)
+    {
+        $aMap = array(
+            'fcpoklarna_installments' => 'KIS',
+            'fcpoklarna_invoice' => 'KIV',
+            'fcpoklarna_directdebit' => 'KDD',
+        );
+
+        $sFinancingType =
+            (isset($aMap[$sPaymentId])) ? $aMap[$sPaymentId] : '';
+
+        return $sFinancingType;
     }
 
 }

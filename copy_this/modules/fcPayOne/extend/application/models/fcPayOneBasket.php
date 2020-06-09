@@ -109,8 +109,9 @@ class fcPayOneBasket extends fcPayOneBasket_parent {
             $oDeliveryPrice->setBruttoPriceMode();
         }
 
-        $oUser = oxNew('oxUser');
-        $oUser->oxuser__oxcountryid = new oxField('a7c40f631fc920687.20179984');
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oUser = $oBasket->getUser();
 
         $fDelVATPercent = $this->getAdditionalServicesVatPercent();
         $oDeliveryPrice->setVat($fDelVATPercent);
@@ -118,7 +119,7 @@ class fcPayOneBasket extends fcPayOneBasket_parent {
         $aDeliveryList = oxRegistry::get("oxDeliveryList")->getDeliveryList(
             $this,
             $oUser,
-            $oUser->oxuser__oxcountryid->value,
+            $this->_findDelivCountry(),
             $this->getShippingId()
         );
 

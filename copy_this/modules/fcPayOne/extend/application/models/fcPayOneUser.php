@@ -920,10 +920,25 @@ class fcPayOneUser extends fcPayOneUser_parent {
                 }
                 $this->save();
             }
-            #Country auch noch ?!? ( umwandlung iso nach id )
-            #$this->oxuser__oxfname->value = $aResponse['country'];
             return true;
         }
+    }
+
+    /**
+     * Returns country iso code of users country
+     *
+     * @param int $iVersion
+     * @return string
+     */
+    public function fcpoGetUserCountryIso($iVersion=2)
+    {
+        $oCountry = $this->_oFcpoHelper->getFactoryObject('oxCountry');
+        if(!$oCountry->load($this->oxuser__oxcountryid->value)) {
+            return '';
+        }
+        $sField = "oxcountry__oxisoalpha".$iVersion;
+
+        return $oCountry->$sField->value;
     }
 
     /**

@@ -57,6 +57,7 @@ $aModule = array(
         'oxuser'                            => 'fcPayOne/extend/application/models/fcPayOneUser',
         // core
         'oxviewconfig'                      => 'fcPayOne/extend/core/fcPayOneViewConf',
+        'oxaddress'                         => 'fcPayOne/extend/application/models/fcPayOneAddress',
     ),
     'files'         => array(
         // controllers -> admin

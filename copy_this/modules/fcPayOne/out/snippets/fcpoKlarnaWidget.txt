@@ -1,0 +1,37 @@
+<script>
+window.klarnaAsyncCallback = function () {
+    Klarna.Payments.init({
+        client_token: "%%TOKEN%%"
+    });
+
+    Klarna.Payments.load({
+        container: '#%%PAYMENT_CONTAINER_ID%%',
+        payment_method_category: '%%PAYMENT_CATEGORY%%'
+    }, function (res) {
+        var customer = $.parseJSON('%%KLARNA_CUSTOMER%%');
+        var billing = $.parseJSON('%%KLARNA_BILLING%%');
+        var shipping = $.parseJSON('%%KLARNA_SHIPPING%%');
+        var purchase = $.parseJSON('%%KLARNA_PURCHASE%%');
+        var orderlines = $.parseJSON('%%KLARNA_ORDERLINES%%');
+        var order = $.parseJSON('%%KLARNA_ORDER%%');
+
+        Klarna.Payments.authorize({
+            payment_method_category: '%%PAYMENT_CATEGORY%%',
+        }, {
+            purchase_country: purchase.purchase_country,
+            purchase_currency: purchase.purchase_currency,
+            customer: %%KLARNA_CUSTOMER%%,
+            billing_address: %%KLARNA_BILLING%%,
+            shipping_address: %%KLARNA_SHIPPING%%,
+            orderlines: %%KLARNA_ORDERLINES%%,
+        }, function (res) {
+            $("#fcpo_klarna_auth_token").val(res.authorization_token);
+            // reset agreement box on errors
+            if (typeof(res.error) !== 'undefined' || res.approved == false) {
+                $('#fcpo_klarna_combined_agreed').prop('checked', false);
+            }
+        });
+    });
+};
+</script>
+<script src="https://x.klarnacdn.net/kp/lib/v1/api.js" async></script>
