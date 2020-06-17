@@ -18,7 +18,7 @@ function klarnaAuthorize (e) {
     var purchase = $.parseJSON('%%KLARNA_PURCHASE%%');
     var orderlines = $.parseJSON('%%KLARNA_ORDERLINES%%');
     var order = $.parseJSON('%%KLARNA_ORDER%%');
-    var payment_category = '%%PAYMENT_CATEGORY%%'
+    var payment_category = '%%PAYMENT_CATEGORY%%';
     var auto_finalize = (payment_category === 'pay_now') ? false : true;
 
     Klarna.Payments.authorize({
@@ -39,7 +39,7 @@ function klarnaAuthorize (e) {
         if (typeof(res.error) !== 'undefined' || res.approved == false) {
             $('#fcpo_klarna_combined_agreed').prop('checked', false);
         }
-        paymentForm.submit()
+        paymentForm.submit();
     });
 };
 </script>
