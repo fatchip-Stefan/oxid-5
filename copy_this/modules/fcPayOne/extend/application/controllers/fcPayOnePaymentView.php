@@ -1382,7 +1382,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
                 $this->_fcpoSetErrorMessage('FCPO_KLARNA_NOT_AGREED');
                 return null;
             }
-            if (empty($aDynValues['klarna_authorization_token'])) {
+            if (empty($aDynValues['klarna_authorization_token']) && ! $sPaymentId === 'fcpoklarna_directdebit') {
                 $this->_fcpoSetErrorMessage('FCPO_KLARNA_NO_AUTHORIZATION');
                 return null;
             } else {
