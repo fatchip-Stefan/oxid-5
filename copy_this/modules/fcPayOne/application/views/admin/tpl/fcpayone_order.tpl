@@ -6,25 +6,25 @@
 [{oxscript include=$oViewConf->fcpoGetModuleJsPath('fcpayone_order.js')}]
 
 
-[{ if $readonly }]
+[{if $readonly}]
     [{assign var="readonly" value="readonly disabled"}]
 [{else}]
     [{assign var="readonly" value=""}]
 [{/if}]
 
-<form autocomplete="off" name="transfer" id="transfer" action="[{ $oViewConf->getSelfLink() }]" method="post">
-    [{ $oViewConf->getHiddenSid() }]
-    <input type="hidden" name="oxid" value="[{ $oxid }]">
-    <input type="hidden" name="status_oxid" value="[{ $status_oxid }]">
+<form autocomplete="off" name="transfer" id="transfer" action="[{$oViewConf->getSelfLink()}]" method="post">
+    [{$oViewConf->getHiddenSid()}]
+    <input type="hidden" name="oxid" value="[{$oxid }]">
+    <input type="hidden" name="status_oxid" value="[{$status_oxid}]">
     <input type="hidden" name="cl" value="fcpayone_order">
 </form>
 
-<form autocomplete="off" name="myedit" id="myedit" action="[{ $oViewConf->getSelfLink() }]" method="post">
-    [{ $oViewConf->getHiddenSid() }]
+<form autocomplete="off" name="myedit" id="myedit" action="[{$oViewConf->getSelfLink()}]" method="post">
+    [{$oViewConf->getHiddenSid()}]
     <input type="hidden" name="cl" value="fcpayone_order">
     <input type="hidden" name="fnc" value="">
-    <input type="hidden" name="oxid" value="[{ $oxid }]">
-    <input type="hidden" name="status_oxid" value="[{ $status_oxid }]">
+    <input type="hidden" name="oxid" value="[{$oxid}]">
+    <input type="hidden" name="status_oxid" value="[{$status_oxid }]">
     <input type="hidden" id="fc_error_message_capture_greater_null" value="[{oxmultilang ident="FCPO_CAPTURE_AMOUNT_GREATER_NULL"}]">
     <input type="hidden" id="fc_confirm_message" value="[{oxmultilang ident="FCPO_ARE_YOU_SURE"}]">
     
@@ -35,7 +35,7 @@
                     [{if $edit->oxorder__fcpoordernotchecked->value == 1}]
                         <tr>
                             <td class="edittext" colspan="2">
-                                <strong style="color:red;">[{ oxmultilang ident="FCPO_ORDERNOTCHECKED" }]</strong>
+                                <strong style="color:red;">[{oxmultilang ident="FCPO_ORDERNOTCHECKED" }]</strong>
                             </td>
                         </tr>
                     [{/if}]
@@ -48,107 +48,107 @@
                     [{/if}]
                     <tr>
                         <td class="edittext" style="width: 200px;">
-                            [{ oxmultilang ident="FCPO_REFNR" }]
+                            [{oxmultilang ident="FCPO_REFNR"}]
                         </td>
                         <td class="edittext">
-                            [{ $edit->oxorder__fcporefnr->value }]
+                            [{$edit->oxorder__fcporefnr->value}]
                         </td>
                     </tr>
 
                     <tr>
                         <td class="edittext" >
-                            [{ oxmultilang ident="FCPO_TXID" }]
+                            [{oxmultilang ident="FCPO_TXID"}]
                         </td>
                         <td class="edittext">
-                            [{ $edit->oxorder__fcpotxid->value }]
+                            [{$edit->oxorder__fcpotxid->value}]
                         </td>
                     </tr>
                     [{assign var=sMandateUrl value=$oView->fcpoGetMandatePdfUrl()}]
                     [{if $sMandateUrl}]
                         <tr>
                             <td class="edittext" >
-                                [{ oxmultilang ident="FCPO_MANDATE_PDF" }]
+                                [{oxmultilang ident="FCPO_MANDATE_PDF"}]
                             </td>
                             <td class="edittext">
-                                <a href="[{ $sMandateUrl }]" target="_blank" style="text-decoration:underline;">[{ oxmultilang ident="FCPO_MANDATE_DOWNLOAD" }]</a>
+                                <a href="[{$sMandateUrl}]" target="_blank" style="text-decoration:underline;">[{oxmultilang ident="FCPO_MANDATE_DOWNLOAD"}]</a>
                             </td>
                         </tr>                        
                     [{/if}]
 
-                    [{ assign var="lastStatus" value=$edit->getLastStatus() }]
+                    [{assign var="lastStatus" value=$edit->getLastStatus() }]
                     [{if $lastStatus }]
                         <tr>
                             <td class="edittext">
-                                [{ oxmultilang ident="FCPO_PAYMENTTYPE" }]
+                                [{oxmultilang ident="FCPO_PAYMENTTYPE"}]
                             </td>
                             <td class="edittext">
-                                [{ $lastStatus->getClearingtype() }]
+                                [{$lastStatus->getClearingtype()}]
                             </td>
 
                         </tr>
 
-                        [{ if $lastStatus->fcpotransactionstatus__fcpo_bankaccount->value != '' }]
+                        [{if $lastStatus->fcpotransactionstatus__fcpo_bankaccount->value != '' }]
                             <tr>
                                 <td class="edittext" >
-                                    [{ oxmultilang ident="FCPO_BANKACCOUNT" }]
+                                    [{oxmultilang ident="FCPO_BANKACCOUNT" }]
                                 </td>
                                 <td class="edittext">
-                                    [{ $lastStatus->fcpotransactionstatus__fcpo_bankaccount->value }]
+                                    [{$lastStatus->fcpotransactionstatus__fcpo_bankaccount->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $lastStatus->fcpotransactionstatus__fcpo_bankcode->value != '' }]
+                        [{if $lastStatus->fcpotransactionstatus__fcpo_bankcode->value != ''}]
                             <tr>
                                 <td class="edittext" >
-                                    [{ oxmultilang ident="FCPO_BANKCODE" }]
+                                    [{oxmultilang ident="FCPO_BANKCODE" }]
                                 </td>
                                 <td class="edittext">
-                                    [{ $lastStatus->fcpotransactionstatus__fcpo_bankcode->value }]
+                                    [{$lastStatus->fcpotransactionstatus__fcpo_bankcode->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $lastStatus->fcpotransactionstatus__fcpo_bankaccountholder->value != '' }]
+                        [{if $lastStatus->fcpotransactionstatus__fcpo_bankaccountholder->value != ''}]
                             <tr>
                                 <td class="edittext" >
-                                    [{ oxmultilang ident="FCPO_BANKACCOUNTHOLDER" }]
+                                    [{oxmultilang ident="FCPO_BANKACCOUNTHOLDER"}]
                                 </td>
                                 <td class="edittext">
-                                    [{ $lastStatus->fcpotransactionstatus__fcpo_bankaccountholder->value }]
+                                    [{$lastStatus->fcpotransactionstatus__fcpo_bankaccountholder->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $lastStatus->fcpotransactionstatus__fcpo_cardexpiredate->value != '' }]
+                        [{if $lastStatus->fcpotransactionstatus__fcpo_cardexpiredate->value != '' }]
                             <tr>
                                 <td class="edittext" >
-                                    [{ oxmultilang ident="FCPO_CARDEXPIREDATE" }]
+                                    [{oxmultilang ident="FCPO_CARDEXPIREDATE" }]
                                 </td>
                                 <td class="edittext">
-                                    [{ $lastStatus->fcpotransactionstatus__fcpo_cardexpiredate->value }]
+                                    [{$lastStatus->fcpotransactionstatus__fcpo_cardexpiredate->value }]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $lastStatus->fcpotransactionstatus__fcpo_cardtype->value != '' }]
+                        [{if $lastStatus->fcpotransactionstatus__fcpo_cardtype->value != ''}]
                             <tr>
                                 <td class="edittext" >
-                                    [{ oxmultilang ident="FCPO_CARDTYPE" }]
+                                    [{oxmultilang ident="FCPO_CARDTYPE"}]
                                 </td>
                                 <td class="edittext">
-                                    [{ $lastStatus->getCardtype() }]
+                                    [{$lastStatus->getCardtype()}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $lastStatus->fcpotransactionstatus__fcpo_cardpan->value != '' }]
+                        [{if $lastStatus->fcpotransactionstatus__fcpo_cardpan->value != ''}]
                             <tr>
                                 <td class="edittext" >
-                                    [{ oxmultilang ident="FCPO_CARDPAN" }]
+                                    [{oxmultilang ident="FCPO_CARDPAN" }]
                                 </td>
                                 <td class="edittext">
-                                    [{ $lastStatus->fcpotransactionstatus__fcpo_cardpan->value }]
+                                    [{$lastStatus->fcpotransactionstatus__fcpo_cardpan->value}]
                                 </td>
                             </tr>
                         [{/if}]
@@ -168,36 +168,41 @@
                             [{/foreach}]
                             [{if $blShowCapture == true}]
                                 <tr><td colspan="2" style="border-bottom: 1px solid black;"></td></tr>
-                                <tr><td class="edittext" colspan="2"><strong>[{ oxmultilang ident="FCPO_CAPTURE" }]</strong></td></tr>
+                                <tr><td class="edittext" colspan="2"><strong>[{oxmultilang ident="FCPO_CAPTURE"}]</strong></td></tr>
                                 <tr><td colspan="2">&nbsp;</td></tr>
                                 <tr>
                                     <td class="edittext">
-                                        <strong>[{ oxmultilang ident="FCPO_PREAUTHORIZED_AMOUNT" }]</strong>
+                                        <strong>[{oxmultilang ident="FCPO_PREAUTHORIZED_AMOUNT"}]</strong>
                                     </td>
                                     <td class="edittext">
-                                        [{ $edit->oxorder__oxtotalordersum->value|number_format:2:",":"" }] [{ $edit->oxorder__oxcurrency->value }]
+                                        [{$edit->oxorder__oxtotalordersum->value|number_format:2:",":""}] [{$edit->oxorder__oxcurrency->value}]
                                     </td>
                                 </tr>                                   
                                 <tr>
                                     <td colspan="2">
                                         <table border="1" cellpadding="5" callspacing="5">
                                             <tr>
-                                                <th>[{ oxmultilang ident="FCPO_PRODUCT_CAPTURE" }]</th>
-                                                <th>[{ oxmultilang ident="FCPO_PRODUCT_AMOUNT" }]</th>
-                                                <th>[{ oxmultilang ident="FCPO_PRODUCT_PRICE" }]</th>
-                                                <th>[{ oxmultilang ident="FCPO_PRODUCT_TITLE" }]</th>
+                                                <th>[{oxmultilang ident="FCPO_PRODUCT_CAPTURE"}]</th>
+                                                <th>[{oxmultilang ident="FCPO_PRODUCT_AMOUNT"}]</th>
+                                                <th>[{oxmultilang ident="FCPO_PRODUCT_PRICE"}]</th>
+                                                <th>[{oxmultilang ident="FCPO_PRODUCT_TITLE"}]</th>
                                             </tr>
                                             [{foreach from=$oOrderarticles item=oOrderArt}]
                                                 [{assign var="iLeftAmount" value=$oOrderArt->oxorderarticles__oxamount->value-$oOrderArt->oxorderarticles__fcpocapturedamount->value}]
                                                 [{if $iLeftAmount > 0}]
                                                     <tr>
                                                         <td>
+                                                        [{assign var="blAllowCustomCapture" value=true}]
+                                                        [{if ! $blAllowCustomCapture}]
                                                             <input type="hidden" name="capture_positions[[{$oOrderArt->getId()}]][price]" value="[{$oOrderArt->oxorderarticles__oxbprice->value}]">
+                                                        [{/if}]
                                                             <input type="hidden" name="capture_positions[[{$oOrderArt->getId()}]][capture]" value="0">
                                                             <input type="checkbox" name="capture_positions[[{$oOrderArt->getId()}]][capture]" value="1" checked>
                                                         </td>
+                                                        [{if $blAllowCustomCapture}]
                                                         <td><input type="text" size="3" name="capture_positions[[{$oOrderArt->getId()}]][amount]" value="[{$iLeftAmount}]"></td>
-                                                        <td>[{$oOrderArt->oxorderarticles__oxbprice->value|number_format:2:",":""}] [{ $edit->oxorder__oxcurrency->value }]</td>
+                                                        [{/if}]
+                                                        <td><input name="capture_positions[[{$oOrderArt->getId()}]][price]" value="[{$oOrderArt->oxorderarticles__oxbprice->value}]"></td>
                                                         <td>[{$oOrderArt->oxorderarticles__oxtitle->value}]</td>
                                                     </tr>
                                                 [{/if}]
@@ -207,7 +212,7 @@
                                 </tr>
                                 <tr>
                                     <td class="edittext">
-                                        <strong>[{ oxmultilang ident="FCPO_COMPLETE_ORDER" }]</strong>
+                                        <strong>[{oxmultilang ident="FCPO_COMPLETE_ORDER"}]</strong>
                                     </td>
                                     <td class="edittext">
                                         <input type="hidden" name="capture_completeorder" value="0">
@@ -242,7 +247,7 @@
                             </tr>
                         [{/if}]
                     [{/if}]
-                    [{ if $edit->allowAccountSettlement() && $blShowCapture == true }]
+                    [{if $edit->allowAccountSettlement() && $blShowCapture == true }]
                         <tr>
                             <td class="edittext">
                                 <strong>[{oxmultilang ident="FCPO_SETTLE_ACCOUNT"}]</strong>
@@ -518,7 +523,7 @@
                             <td class="edittext" colspan="2"><strong>TransactionStatus</strong></td>
                         </tr>
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_txaction->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_txaction->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     TXACTION
@@ -529,18 +534,18 @@
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_portalid->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_portalid->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     PORTALID
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_portalid->value }]
+                                    [{ $currStatus->fcpotransactionstatus__fcpo_portalid->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_aid->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_aid->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     AID
@@ -551,18 +556,18 @@
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_clearingtype->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_clearingtype->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     CLEARINGTYPE
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_clearingtype->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_clearingtype->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_txtime->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_txtime->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     TXTIME
@@ -573,7 +578,7 @@
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_currency->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_currency->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     CURRENCY
@@ -584,365 +589,365 @@
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_userid->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_userid->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     USERID
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_userid->value }]
+                                    [{ $currStatus->fcpotransactionstatus__fcpo_userid->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_accessname->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_accessname->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     ACCESSNAME
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_accessname->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_accessname->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_accesscode->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_accesscode->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     ACCESSCODE
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_accesscode->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_accesscode->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_mode->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_mode->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     MODE
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_mode->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_mode->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_price->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_price->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     PRICE
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_price->value|number_format:2:',':'' }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_price->value|number_format:2:',':''}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_txid->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_txid->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     TXID
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_txid->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_txid->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_reference->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_reference->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     REFERENCE
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_reference->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_reference->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_sequencenumber->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_sequencenumber->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     SEQUENCENUMBER
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_sequencenumber->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_sequencenumber->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_company->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_company->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     COMPANY
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_company->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_company->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_firstname->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_firstname->value != '' }]
                             <tr>
                                 <td class="edittext" >
                                     FIRSTNAME
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_firstname->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_firstname->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_lastname->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_lastname->value != '' }]
                             <tr>
                                 <td class="edittext" >
                                     LASTNAME
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_lastname->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_lastname->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_street->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_street->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     STREET
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_street->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_street->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_zip->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_zip->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     ZIP
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_zip->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_zip->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_city->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_city->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     CITY
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_city->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_city->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_email->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_email->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     EMAIL
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_email->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_email->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_country->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_country->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     COUNTRY
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_country->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_country->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_shipping_company->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_shipping_company->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     SHIPPING_COMPANY
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_shipping_company->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_shipping_company->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_shipping_firstname->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_shipping_firstname->value != '' }]
                             <tr>
                                 <td class="edittext" >
                                     SHIPPING_FIRSTNAME
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_shipping_firstname->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_shipping_firstname->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_shipping_lastname->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_shipping_lastname->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     SHIPPING_LASTNAME
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_shipping_lastname->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_shipping_lastname->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_shipping_street->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_shipping_street->value != '' }]
                             <tr>
                                 <td class="edittext" >
                                     SHIPPING_STREET
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_shipping_street->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_shipping_street->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_shipping_zip->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_shipping_zip->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     SHIPPING_ZIP
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_shipping_zip->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_shipping_zip->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_shipping_city->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_shipping_city->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     SHIPPING_CITY
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_shipping_city->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_shipping_city->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_shipping_country->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_shipping_country->value != '' }]
                             <tr>
                                 <td class="edittext" >
                                     SHIPPING_COUNTRY
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_shipping_country->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_shipping_country->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_bankcountry->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_bankcountry->value != '' }]
                             <tr>
                                 <td class="edittext" >
                                     BANKCOUNTRY
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_bankcountry->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_bankcountry->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_bankaccount->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_bankaccount->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     BANKACCOUNT
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_bankaccount->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_bankaccount->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_bankcode->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_bankcode->value != '' }]
                             <tr>
                                 <td class="edittext" >
                                     BANKCODE
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_bankcode->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_bankcode->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_bankaccountholder->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_bankaccountholder->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     BANKACCOUNTHOLDER
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_bankaccountholder->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_bankaccountholder->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_cardexpiredate->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_cardexpiredate->value != '' }]
                             <tr>
                                 <td class="edittext" >
                                     CARDEXPIREDATE
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_cardexpiredate->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_cardexpiredate->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_cardtype->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_cardtype->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     CARDTYPE
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_cardtype->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_cardtype->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_cardpan->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_cardpan->value != '' }]
                             <tr>
                                 <td class="edittext" >
                                     CARDPAN
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_cardpan->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_cardpan->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_customerid->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_customerid->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     CUSTOMERID
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_customerid->value }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_customerid->value}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_balance->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_balance->value != '' }]
                             <tr>
                                 <td class="edittext" >
                                     BALANCE
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_balance->value|number_format:2:',':'' }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_balance->value|number_format:2:',':''}]
                                 </td>
                             </tr>
                         [{/if}]
 
-                        [{ if $currStatus->fcpotransactionstatus__fcpo_receivable->value != '' }]
+                        [{if $currStatus->fcpotransactionstatus__fcpo_receivable->value != ''}]
                             <tr>
                                 <td class="edittext" >
                                     RECEIVABLE
                                 </td>
                                 <td class="edittext">
-                                    [{ $currStatus->fcpotransactionstatus__fcpo_receivable->value|number_format:2:',':'' }]
+                                    [{$currStatus->fcpotransactionstatus__fcpo_receivable->value|number_format:2:',':''}]
                                 </td>
                             </tr>
                         [{/if}]
@@ -979,17 +984,17 @@
                                 </td>
                             </tr>
                             [{assign var="listclass" value="listitem" }]
-                            [{ assign var="last_receivable" value=0 }]
-                            [{ assign var="last_payment" value=0 }]
+                            [{assign var="last_receivable" value=0 }]
+                            [{assign var="last_payment" value=0 }]
                             [{foreach from=$status item=stat name=transactions}]
-                                [{ assign var="receivable" value=$stat->fcpotransactionstatus__fcpo_receivable->value }]
-                                [{ assign var="payment" value=$stat->fcpotransactionstatus__fcpo_receivable->value-$stat->fcpotransactionstatus__fcpo_balance->value }]
+                                [{assign var="receivable" value=$stat->fcpotransactionstatus__fcpo_receivable->value}]
+                                [{assign var="payment" value=$stat->fcpotransactionstatus__fcpo_receivable->value-$stat->fcpotransactionstatus__fcpo_balance->value}]
 
                                 [{if $last_receivable != $receivable || ($last_receivable == $receivable && $last_payment == $payment)}]
                                     <tr>
-                                        <td class="[{$listclass}]" style="padding-left: 5px;"><a href="Javascript:editThisStatus('[{ $stat->fcpotransactionstatus__oxid->value }]', '[{ $oxid }]');">[{ $stat->fcpotransactionstatus__fcpo_timestamp->value }]</a>&nbsp;</td>
+                                        <td class="[{$listclass}]" style="padding-left: 5px;"><a href="Javascript:editThisStatus('[{$stat->fcpotransactionstatus__oxid->value }]', '[{ $oxid }]');">[{ $stat->fcpotransactionstatus__fcpo_timestamp->value}]</a>&nbsp;</td>
                                         <td class="[{$listclass}]" style="padding-left: 5px;">[{$stat->getDisplayNameReceivable($receivable-$last_receivable)}]&nbsp;</td>
-                                        <td class="[{$listclass}]" style="padding-left: 5px; [{if $receivable-$last_receivable < 0}]color: red;[{/if}]">[{ $receivable-$last_receivable|number_format:2:',':'' }]&nbsp;[{$stat->fcpotransactionstatus__fcpo_currency->value}]</td>
+                                        <td class="[{$listclass}]" style="padding-left: 5px; [{if $receivable-$last_receivable < 0}]color: red;[{/if}]">[{$receivable-$last_receivable|number_format:2:',':'' }]&nbsp;[{$stat->fcpotransactionstatus__fcpo_currency->value}]</td>
                                         <td class="[{$listclass}]" style="padding-left: 5px;"></td>
                                     </tr>
                                     [{if $listclass == "listitem2"}]
@@ -1001,10 +1006,10 @@
 
                                 [{if $last_payment != $payment}]
                                     <tr>
-                                        <td class="[{$listclass}]" style="padding-left: 5px;"><a href="Javascript:editThisStatus('[{ $stat->fcpotransactionstatus__oxid->value }]', '[{ $oxid }]');">[{ $stat->fcpotransactionstatus__fcpo_timestamp->value }]</a>&nbsp;</td>
+                                        <td class="[{$listclass}]" style="padding-left: 5px;"><a href="Javascript:editThisStatus('[{$stat->fcpotransactionstatus__oxid->value}]', '[{$oxid}]');">[{$stat->fcpotransactionstatus__fcpo_timestamp->value}]</a>&nbsp;</td>
                                         <td class="[{$listclass}]" style="padding-left: 5px;">[{$stat->getDisplayNamePayment($payment-$last_payment)}]&nbsp;</td>
                                         <td class="[{$listclass}]" style="padding-left: 5px;">&nbsp;</td>
-                                        <td class="[{$listclass}]" style="padding-left: 5px; [{if $payment-$last_payment < 0}]color: red;[{/if}]">[{ $payment-$last_payment|number_format:2:',':'' }]&nbsp;[{$stat->fcpotransactionstatus__fcpo_currency->value}]</td>
+                                        <td class="[{$listclass}]" style="padding-left: 5px; [{if $payment-$last_payment < 0}]color: red;[{/if}]">[{$payment-$last_payment|number_format:2:',':''}]&nbsp;[{$stat->fcpotransactionstatus__fcpo_currency->value}]</td>
                                     </tr>
                                     [{if $listclass == "listitem2"}]
                                         [{assign var="listclass" value="listitem"}]
@@ -1013,14 +1018,14 @@
                                     [{/if}]
                                 [{/if}]
 
-                                [{ assign var="last_receivable" value=$receivable }]
-                                [{ assign var="last_payment" value=$payment }]
-                                [{if $smarty.foreach.transactions.last }]
+                                [{assign var="last_receivable" value=$receivable}]
+                                [{assign var="last_payment" value=$payment}]
+                                [{if $smarty.foreach.transactions.last}]
                                     </table>
                                     <table cellspacing="0" cellpadding="0" border="0" width="100%">
                                         <tr>
                                             <td align="right">
-                                                <strong>[{oxmultilang ident="FCPO_BALANCE"}]: <span [{if $stat->fcpotransactionstatus__fcpo_balance->value < 0}]style="color: red;"[{/if}]>[{ $stat->fcpotransactionstatus__fcpo_balance->value|number_format:2:',':'' }]&nbsp;[{$stat->fcpotransactionstatus__fcpo_currency->value}]</span></strong>
+                                                <strong>[{oxmultilang ident="FCPO_BALANCE"}]: <span [{if $stat->fcpotransactionstatus__fcpo_balance->value < 0}]style="color: red;"[{/if}]>[{$stat->fcpotransactionstatus__fcpo_balance->value|number_format:2:',':''}]&nbsp;[{$stat->fcpotransactionstatus__fcpo_currency->value}]</span></strong>
                                             </td>
                                         </tr>
                                     </table>
