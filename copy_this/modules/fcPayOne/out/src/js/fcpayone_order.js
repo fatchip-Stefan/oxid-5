@@ -40,13 +40,36 @@ function onClickCapture(oElement) {
     var dCaptureAmount          = parseFloat(document.getElementById('fc_capture_amount').value.replace(',', '.'));;
     var sErrorMessageCapture    = document.getElementById('fc_error_message_capture_greater_null').value;
     var sConfirmSure            = document.getElementById('fc_confirm_message').value;
-    
+
     if(dCaptureAmount == 0) {
         alert(sErrorMessageCapture);
     } else {
         if(confirm(sConfirmSure)) {
             oElement.form.fnc.value='capture';
             oElement.form.submit();
+        }
+    }
+}
+
+function onClickCaptureComplete(checkboxValue) {
+    console.log(checkboxValue);
+    if (checkboxValue === true) {
+        console.log('checked');
+        setPriceEdit(false);
+    } else {
+        setPriceEdit(true);
+    }
+}
+
+function setPriceEdit(toggle) {
+    var formInputFields = document.getElementsByClassName("fcpoCapture");
+    for (var i = 0; i < formInputFields.length; i++) {
+        // console.log(formInputFields[i]);
+        formInputFields[i].readOnly = toggle;
+        if (toggle === false) {
+            formInputFields[i].style.borderColor = "red";
+        } else {
+            formInputFields[i].style.borderColor = "";
         }
     }
 }

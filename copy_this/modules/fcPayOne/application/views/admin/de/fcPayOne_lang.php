@@ -228,6 +228,7 @@ $aLang = array(
     'FCPO_PRODUCT_PRICE'                        => "Einzelpreis",
     'FCPO_PRODUCT_TITLE'                        => "Produkt",
     'FCPO_COMPLETE_ORDER'                       => "Bestellung abschließen",
+    'FCPO_COMPLETE_WARNING_ORDER'               => "Achtung! Dies ermöglicht den Einzug mit abweichenden Artikelpreisen. Bei Nutzung dieser Funktion ist aber nur ein einziger Einzug möglich!",
     'FCPO_CONSUMERSCORE_MOMENT'                 => "Moment der Bonitätsprüfung",
     'FCPO_CONSUMERSCORE_BEFORE'                 => "Vor Zahlartauswahl",
     'FCPO_CONSUMERSCORE_AFTER'                  => "Nach Zahlartauswahl",

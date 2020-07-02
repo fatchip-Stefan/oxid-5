@@ -187,22 +187,17 @@
                                                 <th>[{oxmultilang ident="FCPO_PRODUCT_PRICE"}]</th>
                                                 <th>[{oxmultilang ident="FCPO_PRODUCT_TITLE"}]</th>
                                             </tr>
+                                            [{assign var="blAllowCustomCapture" value=true}]
                                             [{foreach from=$oOrderarticles item=oOrderArt}]
                                                 [{assign var="iLeftAmount" value=$oOrderArt->oxorderarticles__oxamount->value-$oOrderArt->oxorderarticles__fcpocapturedamount->value}]
                                                 [{if $iLeftAmount > 0}]
                                                     <tr>
                                                         <td>
-                                                        [{assign var="blAllowCustomCapture" value=true}]
-                                                        [{if ! $blAllowCustomCapture}]
-                                                            <input type="hidden" name="capture_positions[[{$oOrderArt->getId()}]][price]" value="[{$oOrderArt->oxorderarticles__oxbprice->value}]">
-                                                        [{/if}]
                                                             <input type="hidden" name="capture_positions[[{$oOrderArt->getId()}]][capture]" value="0">
                                                             <input type="checkbox" name="capture_positions[[{$oOrderArt->getId()}]][capture]" value="1" checked>
                                                         </td>
-                                                        [{if $blAllowCustomCapture}]
                                                         <td><input type="text" size="3" name="capture_positions[[{$oOrderArt->getId()}]][amount]" value="[{$iLeftAmount}]"></td>
-                                                        [{/if}]
-                                                        <td><input name="capture_positions[[{$oOrderArt->getId()}]][price]" value="[{$oOrderArt->oxorderarticles__oxbprice->value}]"></td>
+                                                        <td><input readonly="readonly" type="text" class="fcpoCapture" name="capture_positions[[{$oOrderArt->getId()}]][price]" value="[{$oOrderArt->oxorderarticles__oxbprice->value|number_format:2:",":""}]"> [{$edit->oxorder__oxcurrency->value}]</td>
                                                         <td>[{$oOrderArt->oxorderarticles__oxtitle->value}]</td>
                                                     </tr>
                                                 [{/if}]
@@ -216,9 +211,16 @@
                                     </td>
                                     <td class="edittext">
                                         <input type="hidden" name="capture_completeorder" value="0">
-                                        <input type="checkbox" name="capture_completeorder" value="1">
+                                        <input type="checkbox" name="capture_completeorder" value="1" [{if $blAllowCustomCapture}] onclick="onClickCaptureComplete(this.checked);" [{/if}]>
                                     </td>
-                                </tr>    
+                                </tr>
+                                [{if $blAllowCustomCapture}]
+                                <tr>
+                                    <td class="edittext" colspan="2">
+                                        <strong>[{oxmultilang ident="FCPO_COMPLETE_WARNING_ORDER"}]</strong>
+                                    </td>
+                                </tr>
+                                [{/if}]
                                 <tr>
                                     <td class="edittext" colspan="2">
                                         <input type="button" onclick="document.myedit.fnc.value='capture';document.myedit.submit();return false;" value="[{ oxmultilang ident="FCPO_EXECUTE" }]" style="padding: 0 4px 0 4px;">
