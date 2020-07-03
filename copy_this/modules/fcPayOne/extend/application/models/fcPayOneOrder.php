@@ -1076,6 +1076,22 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
 
     /**
      * Checks based on the transaction status received by PAYONE whether
+     * the capture request is available for custom captures for this order at the moment.
+     *
+     * @return bool
+     */
+    public function allowCustomCapture() {
+        $blAllowedCustomCapturePayments = (
+            $this->oxorder__oxpaymenttype->value == 'fcpoklarna_invoice' ||
+            $this->oxorder__oxpaymenttype->value == 'fcpoklarna_directdebit' ||
+            $this->oxorder__oxpaymenttype->value == 'fcpoklarna_installments'
+        );
+        $blReturn = $this->allowCapture() && $blAllowedCustomCapturePayments;
+        return $blReturn;
+    }
+
+    /**
+     * Checks based on the transaction status received by PAYONE whether
      * the debit request is available for this order at the moment.
      * 
      * @return bool
@@ -1088,6 +1104,22 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
             $blReturn = false;
         }
 
+        return $blReturn;
+    }
+
+    /**
+     * Checks based on the transaction status received by PAYONE whether
+     * the debit request is available for custom captures for this order at the moment.
+     *
+     * @return bool
+     */
+    public function allowCustomDebit() {
+        $blAllowedCustomDebitPayments = (
+            $this->oxorder__oxpaymenttype->value == 'fcpoklarna_invoice' ||
+            $this->oxorder__oxpaymenttype->value == 'fcpoklarna_directdebit' ||
+            $this->oxorder__oxpaymenttype->value == 'fcpoklarna_installments'
+        );
+        $blReturn = $this->allowDebit() && $blAllowedCustomDebitPayments;
         return $blReturn;
     }
 

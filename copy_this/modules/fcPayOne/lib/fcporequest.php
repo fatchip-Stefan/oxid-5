@@ -2094,6 +2094,13 @@ class fcpoRequest extends oxSuperCfg {
             foreach ($aPositions as $sOrderArtId => $aPos) {
                 $sQuery = "UPDATE oxorderarticles SET fcpocapturedamount = fcpocapturedamount + {$aPos['amount']} WHERE oxid = '{$sOrderArtId}'";
                 oxDb::getDb()->Execute($sQuery);
+                $aPos['price'] = number_format((float)$aPos['price'],2,'.', '');
+                $sQuery2 = "UPDATE oxorderarticles SET fcpocapturedprice = fcpocapturedprice + {$aPos['price']} WHERE oxid = '{$sOrderArtId}'";
+                oxDb::getDb()->Execute($sQuery2);
+                if ($this->_oFcpoHelper->fcpoGetRequestParameter('capture_completeorder') == '1') {
+                    $sQuery3 = "UPDATE oxorderarticles SET fcpocapturedpricecompleted = 1 WHERE oxid = '{$sOrderArtId}'";
+                    oxDb::getDb()->Execute($sQuery3);
+                }
             }
         }
 

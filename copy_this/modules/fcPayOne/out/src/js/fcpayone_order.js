@@ -52,7 +52,6 @@ function onClickCapture(oElement) {
 }
 
 function onClickCaptureComplete(checkboxValue) {
-    console.log(checkboxValue);
     if (checkboxValue === true) {
         console.log('checked');
         setPriceEdit(false);
