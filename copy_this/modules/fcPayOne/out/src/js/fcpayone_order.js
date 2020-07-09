@@ -53,7 +53,6 @@ function onClickCapture(oElement) {
 
 function onClickCaptureComplete(checkboxValue) {
     if (checkboxValue === true) {
-        console.log('checked');
         setPriceEdit(false);
     } else {
         setPriceEdit(true);
@@ -69,6 +68,33 @@ function setPriceEdit(toggle) {
             formInputFields[i].style.borderColor = "red";
         } else {
             formInputFields[i].style.borderColor = "";
+        }
+        revertAmountToOrderPrice(!toggle);
+    }
+}
+
+function addCaptureData(orderArticleId, price) {
+    if (window.payoneCaptureData === undefined) {
+        window.payoneCaptureData = {};
+    }
+    window.payoneCaptureData[orderArticleId] = {orderPrice: price};
+}
+
+function handleCaptureAmountChange(orderArticleId, element) {
+    if (window.payoneCaptureData[orderArticleId] !== undefined) {
+        window.payoneCaptureData[orderArticleId].changedPrice = element.value;
+    }
+}
+
+function revertAmountToOrderPrice(completeCaptureEnabled) {
+    for (var orderArticleId in window.payoneCaptureData) {
+        var elem = document.getElementById("captureAmount_" + orderArticleId);
+        if (elem !== undefined) {
+            if (completeCaptureEnabled === false) {
+                elem.value = window.payoneCaptureData[orderArticleId].orderPrice;
+            } else if (window.payoneCaptureData[orderArticleId].changedPrice !== undefined){
+                elem.value = window.payoneCaptureData[orderArticleId].changedPrice;
+            }
         }
     }
 }

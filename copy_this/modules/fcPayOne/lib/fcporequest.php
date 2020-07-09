@@ -868,12 +868,13 @@ class fcpoRequest extends oxSuperCfg {
 
         foreach ($aOrderArticleListe->getArray() as $oOrderarticle) {
             if ($aPositions === false || array_key_exists($oOrderarticle->getId(), $aPositions) !== false) {
+                $dItemAmount = $oOrderarticle->oxorderarticles__oxamount->value;
+                $fItemPrice = $oOrderarticle->oxorderarticles__oxbprice->value;
                 if ($aPositions !== false && array_key_exists($oOrderarticle->getId(), $aPositions) !== false) {
                     $dItemAmount = $aPositions[$oOrderarticle->getId()]['amount'];
-                    $fItemPrice  = $aPositions[$oOrderarticle->getId()]['price'];
-                } else {
-                    $dItemAmount = $oOrderarticle->oxorderarticles__oxamount->value;
-                    $fItemPrice = $oOrderarticle->oxorderarticles__oxbprice->value;
+                    if (array_key_exists('price', $aPositions[$oOrderarticle->getId()])) {
+                        $fItemPrice  = $aPositions[$oOrderarticle->getId()]['price'];
+                    }
                 }
                 $this->addParameter('id[' . $i . ']', $oOrderarticle->oxorderarticles__oxartnum->value);
                 $this->addParameter('pr[' . $i . ']', number_format($fItemPrice, 2, '.', '') * 100);
