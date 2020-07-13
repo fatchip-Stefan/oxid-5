@@ -873,7 +873,7 @@ class fcpoRequest extends oxSuperCfg {
                 if ($aPositions !== false && array_key_exists($oOrderarticle->getId(), $aPositions) !== false) {
                     $dItemAmount = $aPositions[$oOrderarticle->getId()]['amount'];
                     if (array_key_exists('price', $aPositions[$oOrderarticle->getId()])) {
-                        $fItemPrice  = $aPositions[$oOrderarticle->getId()]['price'];
+                        $fItemPrice = $aPositions[$oOrderarticle->getId()]['price'];
                     }
                 }
                 $this->addParameter('id[' . $i . ']', $oOrderarticle->oxorderarticles__oxartnum->value);

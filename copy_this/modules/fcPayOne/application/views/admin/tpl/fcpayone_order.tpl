@@ -206,7 +206,7 @@
                                                         <td><input type="text" size="3" name="capture_positions[[{$oOrderArt->getId()}]][amount]" value="[{$iLeftAmount}]"></td>
                                                         [{if $blAllowCustomCapture}]
                                                             <td>
-                                                                <input readonly="readonly" type="text" class="fcpoCapture" id="captureAmount_[{$oOrderArt->getId()}]" name="capture_positions[[{$oOrderArt->getId()}]][price]" value="[{$oOrderArt->oxorderarticles__oxbprice->value}]" onkeyup="handleCaptureAmountChange('[{$oOrderArt->getId()}]', this)"> [{$edit->oxorder__oxcurrency->value}]
+                                                                <input readonly="readonly" type="text" class="fcpoCapture" id="captureAmount_[{$oOrderArt->getId()}]" name="capture_positions[[{$oOrderArt->getId()}]][price]" value="[{$oOrderArt->oxorderarticles__oxbprice->value|number_format:2:".":""}]" onkeydown="checkKeyEvent(event, this)" onkeyup="handleCaptureAmountChange('[{$oOrderArt->getId()}]', this)"> [{$edit->oxorder__oxcurrency->value}]
                                                                 [{capture name="addData"}]
                                                                     addCaptureData('[{$oOrderArt->getId()}]', [{$oOrderArt->oxorderarticles__oxbprice->value}]);
                                                                 [{/capture}]

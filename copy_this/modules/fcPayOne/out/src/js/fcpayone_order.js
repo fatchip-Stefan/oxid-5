@@ -73,6 +73,17 @@ function setPriceEdit(toggle) {
     }
 }
 
+function checkKeyEvent(event, element) {
+    if (event.key == ",") {
+        // Cancel the event
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Add point instead
+        element.value += ".";
+    }
+}
+
 function addCaptureData(orderArticleId, price) {
     if (window.payoneCaptureData === undefined) {
         window.payoneCaptureData = {};
@@ -82,7 +93,7 @@ function addCaptureData(orderArticleId, price) {
 
 function handleCaptureAmountChange(orderArticleId, element) {
     if (window.payoneCaptureData[orderArticleId] !== undefined) {
-        window.payoneCaptureData[orderArticleId].changedPrice = element.value;
+        window.payoneCaptureData[orderArticleId].changedPrice = parseFloat(element.value.replace(",", "."));
     }
 }
 
@@ -91,9 +102,9 @@ function revertAmountToOrderPrice(completeCaptureEnabled) {
         var elem = document.getElementById("captureAmount_" + orderArticleId);
         if (elem !== undefined) {
             if (completeCaptureEnabled === false) {
-                elem.value = window.payoneCaptureData[orderArticleId].orderPrice;
+                elem.value = window.payoneCaptureData[orderArticleId].orderPrice.toFixed(2);
             } else if (window.payoneCaptureData[orderArticleId].changedPrice !== undefined){
-                elem.value = window.payoneCaptureData[orderArticleId].changedPrice;
+                elem.value = window.payoneCaptureData[orderArticleId].changedPrice.toFixed(2);
             }
         }
     }
