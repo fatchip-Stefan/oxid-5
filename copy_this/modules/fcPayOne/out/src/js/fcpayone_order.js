@@ -80,7 +80,9 @@ function checkKeyEvent(event, element) {
         event.stopPropagation();
 
         // Add point instead
-        element.value += ".";
+        if (element.readOnly === false) {
+            element.value += ".";
+        }
     }
 }
 
