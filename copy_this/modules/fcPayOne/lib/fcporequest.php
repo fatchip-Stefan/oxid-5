@@ -1230,17 +1230,14 @@ class fcpoRequest extends oxSuperCfg {
      * @param string $sDeliverySetId
      * @return object
      */
-    protected function _fcpoAddBasketItemsFromSession($sDeliverySetId=false)
+    protected function _fcpoAddBasketItemsFromSession($sDeliverySetId = false)
     {
         $oSession = $this->getSession();
         $oBasket = $oSession->getBasket();
         $iIndex = 1;
         foreach ($oBasket->getContents() as $oBasketItem) {
             $oArticle = $oBasketItem->getArticle();
-            $sArticleIdent =
-                ($oArticle->oxarticles__oxean->value) ?
-                    $oArticle->oxarticles__oxean->value :
-                    $oArticle->oxarticles__oxartnum->value;
+            $sArticleIdent = $oArticle->oxarticles__oxean->value ? $oArticle->oxarticles__oxean->value : $oArticle->oxarticles__oxartnum->value;
 
             $this->addParameter('it[' . (string) $iIndex . ']', 'goods');
             $this->addParameter('id[' . (string) $iIndex . ']', $sArticleIdent);
@@ -1257,9 +1254,7 @@ class fcpoRequest extends oxSuperCfg {
             $oBasket->setCost('oxdelivery', $oDeliveryCosts);
         }
 
-        $sDeliveryCosts =
-            $this->_fcpoFetchDeliveryCostsFromBasket($oBasket);
-
+        $sDeliveryCosts = $this->_fcpoFetchDeliveryCostsFromBasket($oBasket);
         $sDeliveryCosts = (double) str_replace(',', '.', $sDeliveryCosts);
         if ($sDeliveryCosts > 0) {
             $this->addParameter('it[' . (string) $iIndex . ']', 'shipment');
@@ -1267,7 +1262,9 @@ class fcpoRequest extends oxSuperCfg {
             $this->addParameter('pr[' . (string) $iIndex . ']', $this->_fcpoGetCentPrice($sDeliveryCosts));
             $this->addParameter('no[' . (string) $iIndex . ']', '1');
             $this->addParameter('de[' . (string) $iIndex . ']', 'Standard Versand');
-            $this->addParameter('va[' . (string) $iIndex . ']', $this->_fcpoGetCentPrice($oDeliveryCosts->getVat()));
+            if ($oDeliveryCosts) {
+                $this->addParameter('va[' . (string) $iIndex . ']', $this->_fcpoGetCentPrice($oDeliveryCosts->getVat()));
+            }
         }
 
         return $oBasket;
