@@ -17,7 +17,7 @@
  * @copyright (C) Payone GmbH
  * @version   OXID eShop CE
  */
- 
+
 set_time_limit(0);
 ini_set ('memory_limit', '1024M');
 ini_set ('log_errors', 1);

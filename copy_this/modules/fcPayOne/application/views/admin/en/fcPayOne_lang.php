@@ -247,6 +247,7 @@ $aLang = array(
     'FCPO_PRODUCT_PRICE'                        => "Unit price",
     'FCPO_PRODUCT_TITLE'                        => "Product",
     'FCPO_COMPLETE_ORDER'                       => "Complete order",
+    'FCPO_COMPLETE_WARNING_ORDER'               => "Warning! This enables captures of with custom article postions. If you use this, capture is only possible once!",
     'FCPO_CONSUMERSCORE_MOMENT'                 => "Moment of consumerscore",
     'FCPO_CONSUMERSCORE_BEFORE'                 => "Before paymenttype selection",
     'FCPO_CONSUMERSCORE_AFTER'                  => "After paymenttype selection",

@@ -868,14 +868,17 @@ class fcpoRequest extends oxSuperCfg {
 
         foreach ($aOrderArticleListe->getArray() as $oOrderarticle) {
             if ($aPositions === false || array_key_exists($oOrderarticle->getId(), $aPositions) !== false) {
+                $dItemAmount = $oOrderarticle->oxorderarticles__oxamount->value;
+                $fItemPrice = $oOrderarticle->oxorderarticles__oxbprice->value;
                 if ($aPositions !== false && array_key_exists($oOrderarticle->getId(), $aPositions) !== false) {
                     $dItemAmount = $aPositions[$oOrderarticle->getId()]['amount'];
-                } else {
-                    $dItemAmount = $oOrderarticle->oxorderarticles__oxamount->value;
+                    if (array_key_exists('price', $aPositions[$oOrderarticle->getId()])) {
+                        $fItemPrice = $aPositions[$oOrderarticle->getId()]['price'];
+                    }
                 }
                 $this->addParameter('id[' . $i . ']', $oOrderarticle->oxorderarticles__oxartnum->value);
-                $this->addParameter('pr[' . $i . ']', number_format($oOrderarticle->oxorderarticles__oxbprice->value, 2, '.', '') * 100);
-                $dAmount += $oOrderarticle->oxorderarticles__oxbprice->value * $dItemAmount;
+                $this->addParameter('pr[' . $i . ']', number_format($fItemPrice, 2, '.', '') * 100);
+                $dAmount += $fItemPrice * $dItemAmount;
                 $this->addParameter('it[' . $i . ']', 'goods');
                 $this->addParameter('no[' . $i . ']', $dItemAmount);
                 $this->addParameter('de[' . $i . ']', $oOrderarticle->oxorderarticles__oxtitle->value);
@@ -1227,17 +1230,14 @@ class fcpoRequest extends oxSuperCfg {
      * @param string $sDeliverySetId
      * @return object
      */
-    protected function _fcpoAddBasketItemsFromSession($sDeliverySetId=false)
+    protected function _fcpoAddBasketItemsFromSession($sDeliverySetId = false)
     {
         $oSession = $this->getSession();
         $oBasket = $oSession->getBasket();
         $iIndex = 1;
         foreach ($oBasket->getContents() as $oBasketItem) {
             $oArticle = $oBasketItem->getArticle();
-            $sArticleIdent =
-                ($oArticle->oxarticles__oxean->value) ?
-                    $oArticle->oxarticles__oxean->value :
-                    $oArticle->oxarticles__oxartnum->value;
+            $sArticleIdent = $oArticle->oxarticles__oxean->value ? $oArticle->oxarticles__oxean->value : $oArticle->oxarticles__oxartnum->value;
 
             $this->addParameter('it[' . (string) $iIndex . ']', 'goods');
             $this->addParameter('id[' . (string) $iIndex . ']', $sArticleIdent);
@@ -1254,9 +1254,7 @@ class fcpoRequest extends oxSuperCfg {
             $oBasket->setCost('oxdelivery', $oDeliveryCosts);
         }
 
-        $sDeliveryCosts =
-            $this->_fcpoFetchDeliveryCostsFromBasket($oBasket);
-
+        $sDeliveryCosts = $this->_fcpoFetchDeliveryCostsFromBasket($oBasket);
         $sDeliveryCosts = (double) str_replace(',', '.', $sDeliveryCosts);
         if ($sDeliveryCosts > 0) {
             $this->addParameter('it[' . (string) $iIndex . ']', 'shipment');
@@ -1264,7 +1262,9 @@ class fcpoRequest extends oxSuperCfg {
             $this->addParameter('pr[' . (string) $iIndex . ']', $this->_fcpoGetCentPrice($sDeliveryCosts));
             $this->addParameter('no[' . (string) $iIndex . ']', '1');
             $this->addParameter('de[' . (string) $iIndex . ']', 'Standard Versand');
-            $this->addParameter('va[' . (string) $iIndex . ']', $this->_fcpoGetCentPrice($oDeliveryCosts->getVat()));
+            if ($oDeliveryCosts) {
+                $this->addParameter('va[' . (string) $iIndex . ']', $this->_fcpoGetCentPrice($oDeliveryCosts->getVat()));
+            }
         }
 
         return $oBasket;
@@ -2092,6 +2092,13 @@ class fcpoRequest extends oxSuperCfg {
             foreach ($aPositions as $sOrderArtId => $aPos) {
                 $sQuery = "UPDATE oxorderarticles SET fcpocapturedamount = fcpocapturedamount + {$aPos['amount']} WHERE oxid = '{$sOrderArtId}'";
                 oxDb::getDb()->Execute($sQuery);
+                $aPos['price'] = number_format((float)$aPos['price'],2,'.', '');
+                $sQuery2 = "UPDATE oxorderarticles SET fcpocapturedprice = fcpocapturedprice + {$aPos['price']} WHERE oxid = '{$sOrderArtId}'";
+                oxDb::getDb()->Execute($sQuery2);
+                if ($this->_oFcpoHelper->fcpoGetRequestParameter('capture_completeorder') == '1') {
+                    $sQuery3 = "UPDATE oxorderarticles SET fcpocapturedpricecompleted = 1 WHERE oxid = '{$sOrderArtId}'";
+                    oxDb::getDb()->Execute($sQuery3);
+                }
             }
         }
 

@@ -318,6 +318,9 @@ class fcpayone_events
     public static $sQueryAlterOxpaymentsIsPayone = "ALTER TABLE oxpayments ADD COLUMN FCPOISPAYONE TINYINT(1) DEFAULT '0' NOT NULL;";
     public static $sQueryAlterOxorderarticlesCapturedAmount = "ALTER TABLE oxorderarticles ADD COLUMN FCPOCAPTUREDAMOUNT INT(11) DEFAULT '0' NOT NULL;";
     public static $sQueryAlterOxorderarticlesDebitedAmount = "ALTER TABLE oxorderarticles ADD COLUMN FCPODEBITEDAMOUNT INT(11) DEFAULT '0' NOT NULL;";
+    public static $sQueryAlterOxorderarticlesCapturedPrice = "ALTER TABLE oxorderarticles ADD COLUMN FCPOCAPTUREDPRICE DOUBLE DEFAULT 0 NOT NULL;";
+    public static $sQueryAlterOxorderarticlesCapturedPriceCompleted = "ALTER TABLE oxorderarticles ADD COLUMN FCPOCAPTUREDPRICECOMPLETED TINYINT(1) DEFAULT '0' NOT NULL;";
+    public static $sQueryAlterOxorderarticlesDebitedPrice = "ALTER TABLE oxorderarticles ADD COLUMN FCPODEBITEDPRICE DOUBLE DEFAULT 0 NOT NULL;";
     public static $sQueryAlterOxorderDelcostDebited = "ALTER TABLE oxorder ADD COLUMN FCPODELCOSTDEBITED TINYINT(1) DEFAULT '0' NOT NULL;";
     public static $sQueryAlterOxorderPaycostDebited = "ALTER TABLE oxorder ADD COLUMN FCPOPAYCOSTDEBITED TINYINT(1) DEFAULT '0' NOT NULL;";
     public static $sQueryAlterOxorderWrapcostDebited = "ALTER TABLE oxorder ADD COLUMN FCPOWRAPCOSTDEBITED TINYINT(1) DEFAULT '0' NOT NULL;";
@@ -524,6 +527,9 @@ class fcpayone_events
 
         self::addColumnIfNotExists('oxorderarticles', 'FCPOCAPTUREDAMOUNT', self::$sQueryAlterOxorderarticlesCapturedAmount);
         self::addColumnIfNotExists('oxorderarticles', 'FCPODEBITEDAMOUNT', self::$sQueryAlterOxorderarticlesDebitedAmount);
+        self::addColumnIfNotExists('oxorderarticles', 'FCPOCAPTUREDPRICE', self::$sQueryAlterOxorderarticlesCapturedPrice);
+        self::addColumnIfNotExists('oxorderarticles', 'FCPOCAPTUREDPRICECOMPLETED', self::$sQueryAlterOxorderarticlesCapturedPriceCompleted);
+        self::addColumnIfNotExists('oxorderarticles', 'FCPODEBITEDPRICE', self::$sQueryAlterOxorderarticlesDebitedPrice);
 
         self::addColumnIfNotExists('oxpayments', 'FCPOISPAYONE', self::$sQueryAlterOxpaymentsIsPayone);
         self::addColumnIfNotExists('oxpayments', 'FCPOAUTHMODE', self::$sQueryAlterOxpaymentsAuthMode);
