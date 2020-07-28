@@ -355,11 +355,6 @@
                                                     [{assign var="blShowDebit" value=true}]
                                                     <tr>
                                                         <td>
-                                                            [{if $blAllowCustomDebit}]
-                                                                <input type="hidden" name="capture_positions[[{$oOrderArt->getId()}]][price]" value="[{$oOrderArt->oxorderarticles__fcpocapturedprice->value}]">
-                                                            [{else}]
-                                                                <input type="hidden" name="capture_positions[[{$oOrderArt->getId()}]][price]" value="[{$oOrderArt->oxorderarticles__oxbprice->value}]">
-                                                            [{/if}]
                                                             <input type="hidden" name="capture_positions[[{$oOrderArt->getId()}]][debit]" value="0">
                                                             <input type="checkbox" name="capture_positions[[{$oOrderArt->getId()}]][debit]" value="1" checked>
                                                         </td>
@@ -370,10 +365,10 @@
                                                                 <input type="text" size="3" name="capture_positions[[{$oOrderArt->getId()}]][amount]" value="[{$iLeftAmount}]">
                                                             [{/if}]
                                                         </td>
-                                                        [{if $blAllowCustomDebit}]
-                                                            <td>[{$oOrderArt->oxorderarticles__fcpocapturedprice->value|number_format:2:",":""}] [{ $edit->oxorder__oxcurrency->value }]</td>
+                                                        [{if $blAllowCustomDebit && $edit->oxorder__fcpoauthmode->value == 'preauthorization'}]
+                                                            <td><input type="text" name="capture_positions[[{$oOrderArt->getId()}]][price]" value="[{$oOrderArt->oxorderarticles__fcpocapturedprice->value|number_format:2:",":""}]">[{ $edit->oxorder__oxcurrency->value }]</td>
                                                         [{else}]
-                                                            <td>[{$oOrderArt->oxorderarticles__oxbprice->value|number_format:2:",":""}] [{ $edit->oxorder__oxcurrency->value }]</td>
+                                                            <td><input type="text" name="capture_positions[[{$oOrderArt->getId()}]][price]" value="[{$oOrderArt->oxorderarticles__oxbprice->value|number_format:2:",":""}]">[{ $edit->oxorder__oxcurrency->value }]</td>
                                                         [{/if}]
                                                         <td>[{$oOrderArt->oxorderarticles__oxtitle->value}]</td>
                                                     </tr>
