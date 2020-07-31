@@ -328,9 +328,11 @@ class fcpoRequest extends oxSuperCfg {
            if ($this->_stateNeeded($oDelCountry->oxcountry__oxisoalpha2->value)) {
                $this->addParameter('shipping_state', $this->_getShortState($oOrder->oxorder__oxbillstateid->value));
            }
-           $this->addParameter('add_paydata[shipping_title]', $this->_fcpoGetKlarnaTitleParam());
-           $this->addParameter('add_paydata[shipping_telephonenumber]', $oOrder->oxorder__oxbillfon->value);
-           $this->addParameter('add_paydata[shipping_email]', $oOrder->oxorder__oxbillemail->value);
+           if ($blIsKlarnaCombinedPayment) {
+               $this->addParameter('add_paydata[shipping_title]', $this->_fcpoGetKlarnaTitleParam());
+               $this->addParameter('add_paydata[shipping_telephonenumber]', $oOrder->oxorder__oxbillfon->value);
+               $this->addParameter('add_paydata[shipping_email]', $oOrder->oxorder__oxbillemail->value);
+           }
 
        }
 
@@ -2287,10 +2289,11 @@ class fcpoRequest extends oxSuperCfg {
      * Add address parameters by user object
      *
      * @param object $oUser user object
+     * @param boolean $isKlarna
      * 
      * @return null
      */
-    protected function addAddressParamsByUser($oUser) {
+    protected function addAddressParamsByUser($oUser, $isKlarna = false) {
         $oCountry = oxNew('oxcountry');
         $oCountry->load($oUser->oxuser__oxcountryid->value);
 
@@ -2331,9 +2334,11 @@ class fcpoRequest extends oxSuperCfg {
             $this->addParameter('shipping_zip', $oShippingAddress->oxaddress__oxzip->rawValue);
             $this->addParameter('shipping_city', $oShippingAddress->oxaddress__oxcity->rawValue);
             $this->addParameter('shipping_country', $oShippingCountry->oxcountry__oxisoalpha2->value);
-            $this->addParameter('add_paydata[shipping_title]', $this->_fcpoGetKlarnaTitleParam());
-            $this->addParameter('add_paydata[shipping_telephonenumber]', $oShippingAddress->oxaddress__oxfon->rawValue);
-            $this->addParameter('add_paydata[shipping_email]', $oUser->oxuser__oxusername->rawValue);
+            if ($isKlarna) {
+                $this->addParameter('add_paydata[shipping_title]', $this->_fcpoGetKlarnaTitleParam());
+                $this->addParameter('add_paydata[shipping_telephonenumber]', $oShippingAddress->oxaddress__oxfon->rawValue);
+                $this->addParameter('add_paydata[shipping_email]', $oUser->oxuser__oxusername->rawValue);
+            }
         } else {
             $this->addParameter('shipping_firstname', $oUser->oxuser__oxfname->value);
             $this->addParameter('shipping_lastname', $oUser->oxuser__oxlname->value);
@@ -2341,9 +2346,11 @@ class fcpoRequest extends oxSuperCfg {
             $this->addParameter('shipping_zip', $oUser->oxuser__oxzip->value);
             $this->addParameter('shipping_city', $oUser->oxuser__oxcity->value);
             $this->addParameter('shipping_country', $oCountry->oxcountry__oxisoalpha2->value);
-            $this->addParameter('add_paydata[shipping_title]', $this->_fcpoGetKlarnaTitleParam());
-            $this->addParameter('add_paydata[shipping_telephonenumber]', $oUser->oxuser__oxfon->value);
-            $this->addParameter('add_paydata[shipping_email]', $oUser->oxuser__oxusername->rawValue);
+            if ($isKlarna) {
+                $this->addParameter('add_paydata[shipping_title]', $this->_fcpoGetKlarnaTitleParam());
+                $this->addParameter('add_paydata[shipping_telephonenumber]', $oUser->oxuser__oxfon->value);
+                $this->addParameter('add_paydata[shipping_email]', $oUser->oxuser__oxusername->rawValue);
+            }
         }
     }
 
@@ -3307,7 +3314,7 @@ class fcpoRequest extends oxSuperCfg {
         $oCurr = $oConfig->getActShopCurrencyObject();
         $this->addParameter('currency', $oCurr->name);
 
-        $this->addAddressParamsByUser($oUser);
+        $this->addAddressParamsByUser($oUser, true);
         $this->_fcpoAddBasketItemsFromSession($sShippingId);
         $oPrice = $oBasket->getPrice();
         $this->addParameter('amount', number_format($oPrice->getBruttoPrice(), 2, '.', '') * 100);
