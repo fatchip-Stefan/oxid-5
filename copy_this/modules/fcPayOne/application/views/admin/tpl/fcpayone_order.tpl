@@ -203,7 +203,7 @@
                                                             <input type="hidden" name="capture_positions[[{$oOrderArt->getId()}]][capture]" value="0">
                                                             <input type="checkbox" name="capture_positions[[{$oOrderArt->getId()}]][capture]" value="1" checked>
                                                         </td>
-                                                        <td><input type="text" size="3" name="capture_positions[[{$oOrderArt->getId()}]][amountcapture]" value="[{$iLeftAmount}]">Stef1</td>
+                                                        <td><input type="text" size="3" name="capture_positions[[{$oOrderArt->getId()}]][amountcapture]" value="[{$iLeftAmount}]"></td>
                                                         [{if $blAllowCustomCapture}]
                                                             <td>
                                                                 <input readonly="readonly" type="text" class="fcpoCapture" id="captureAmount_[{$oOrderArt->getId()}]" name="capture_positions[[{$oOrderArt->getId()}]][pricecapture]" value="[{$oOrderArt->oxorderarticles__oxbprice->value|number_format:2:".":""}]" onkeydown="checkKeyEvent(event, this)" onkeyup="handleCaptureAmountChange('[{$oOrderArt->getId()}]', this)"> [{$edit->oxorder__oxcurrency->value}]
