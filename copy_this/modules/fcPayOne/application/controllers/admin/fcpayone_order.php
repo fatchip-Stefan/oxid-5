@@ -172,8 +172,11 @@ class fcpayone_order extends fcpayone_admindetails {
                 $oResponse = $oPORequest->sendRequestCapture($oOrder, $dAmount, $blSettleAccount);
             } elseif ($aPositions = $this->_oFcpoHelper->fcpoGetRequestParameter('capture_positions')) {
                 foreach ($aPositions as $sOrderArtKey => $aOrderArt) {
-                    if ($aOrderArt['capture'] == '0') {
+                    if ($aOrderArt['capture'] == '0' || !isset($aOrderArt['capture'])) {
                         unset($aPositions[$sOrderArtKey]);
+                    } else {
+                        $aPositions[$sOrderArtKey]['price'] = $aOrderArt['pricecapture'];
+                        $aPositions[$sOrderArtKey]['amount'] = $aOrderArt['amountcapture'];
                     }
                 }
                 $oResponse = $oPORequest->sendRequestCapture($oOrder, $dAmount, $blSettleAccount, $aPositions);
@@ -216,8 +219,10 @@ class fcpayone_order extends fcpayone_admindetails {
                 }
             } elseif ($aPositions = $this->_oFcpoHelper->fcpoGetRequestParameter('capture_positions')) {
                 foreach ($aPositions as $sOrderArtKey => $aOrderArt) {
-                    if ($aOrderArt['debit'] == '0') {
+                    if ($aOrderArt['debit'] == '0' || !isset($aOrderArt['debit'])) {
                         unset($aPositions[$sOrderArtKey]);
+                    } else {
+                        $aPositions[$sOrderArtKey]['price'] = str_replace(',', '.', $aPositions[$sOrderArtKey]['price']);
                     }
                 }
                 $oResponse = $oPORequest->sendRequestDebit($oOrder, $dAmount, $sBankCountry, $sBankAccount, $sBankCode, $sBankaccountholder, $aPositions);
