@@ -34,11 +34,13 @@ $aModule = array(
                             https://www.payone.de
                         </a>',
     'thumbnail'     => 'picture.gif',
-    'version'       => '2.3.1',
+    'version'       => '2.4.0',
     'author'        => 'FATCHIP GmbH',
     'email'         => 'kontakt@fatchip.de',
     'url'           => 'https://wiki.fatchip.de/public/faqpayone',
     'extend'        => array(
+        // controllers admin
+        'payment_main'                      => 'fcPayOne/extend/application/controllers/admin/fcPayOnePaymentMain',
         // controllers
         'basket'                            => 'fcPayOne/extend/application/controllers/fcPayOneBasketView',
         'user'                              => 'fcPayOne/extend/application/controllers/fcPayOneUserView',
@@ -55,6 +57,7 @@ $aModule = array(
         'oxuser'                            => 'fcPayOne/extend/application/models/fcPayOneUser',
         // core
         'oxviewconfig'                      => 'fcPayOne/extend/core/fcPayOneViewConf',
+        'oxaddress'                         => 'fcPayOne/extend/application/models/fcPayOneAddress',
     ),
     'files'         => array(
         // controllers -> admin

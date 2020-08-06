@@ -1,3 +1,34 @@
+==2.4.0==
+New Features
+
+* Adding option for changing hash algorithm to sha2-384
+* Splitting online payments to single instances
+
+Bugfixes
+
+* Changed giropay to fixed iban request
+* Exchanged certificate
+* Changed handling of paid status
+
+Maintenance
+
+* Masterpass was deprecated by Mastercard, so we removed it
+* Removed cardtype type discover
+* so many translations
+
+==2.3.3==
+New Features
+* Paydirekt Express
+Maintenance
+* remove old docs directory
+
+==2.3.2==
+New Features
+* Amazon Pay is now PSD2 compatible
+
+Bugfixes
+* Fixed English Translations for Paysafe Methods
+
 ﻿==2.3.1==
 Release Date: 2019-07-23
 New Features 

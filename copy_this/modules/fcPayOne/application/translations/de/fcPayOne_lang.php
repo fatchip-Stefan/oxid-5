@@ -100,7 +100,6 @@ $aLang = array(
     'FCPO_KLV_BIRTHDAY'                             => 'Geburtstag',
     'FCPO_KLV_BIRTHDAY_INVALID'                     => 'Bitte geben Sie ein korrektes Geburtsdatum ein.',
     'FCPO_KLV_ADDINFO'                              => 'Zus. Info',
-    'FCPO_MASTERPASS_LEARNMORE'                     => 'Mehr erfahren',
     'FCPO_KLS_CHOOSE_CAMPAIGN'                      => 'Bitte wählen Sie die entsprechende Kampagne',
     'FCPO_KLS_CAMPAIGN_INVALID'                     => 'Sie müssen eine Kampagne auswählen.',
     'FCPO_KLS_NO_CAMPAIGN'                          => 'Für Ihre aktuelle Kombination aus Lieferland, Sprache und Währung gibt es keine Ratenkauf-Optionen.<br>Bitte wählen Sie eine andere Zahlart.',
@@ -201,10 +200,15 @@ $aLang = array(
     'FCPO_NOT_ADULT'                                => 'Sie sind aufgrund Ihres Alters leider nicht berechtigt die gewählte Zahlart zu verwenden. Bitte wählen Sie eine andere Zahlart.',
     'FCPO_BIRTHDATE_INVALID'                        => 'Ihr Geburtsdatum wurde nicht korrekt eingegeben',
     'FCPO_COMPANYDATA_INVALID'                      => 'Ihre Firmendaten sind nicht vollständig. Für eine gewerbliche Bestellung ist die Angabe des Firmennamens und der UStId notwendig.',
-    'FCPO_ERROR_MP_SETCHECKOUT'                     => 'Aufgrund eines technischen Fehlers, kann die Zahlart Masterpass aktuell nicht verwendet werden. Bitte verwenden Sie eine andere Zahlart. Wir bitten um Verzeihung.',
     'FCPO_CC_HOSTED_ERROR_CARDTYPE'                 => 'Bitte wählen Sie einen Kartentyp',
     'FCPO_CC_HOSTED_ERROR_CVC'                      => 'Bitte CVC-Eingabe überprüfen',
-    'FCPO_CC_HOSTED_ERROR_INCOMPLETE'               => 'Eingaben unvollständig'
+    'FCPO_CC_HOSTED_ERROR_INCOMPLETE'               => 'Eingaben unvollständig',
+    'FCPO_KLARNA_COMBINED_DATA_AGREEMENT'           => 'Ich stimme zu, dass meine persönlichen Daten zur Durchführung der Zahlung der Klarna GmbH gesendet werden dürfen.',
+    'FCPO_KLARNA_NOT_AGREED'                        => 'Sie müssen der Übermittlung ihrer Daten zustimmen, um mit Klarna zu bezahlen.',
+    'FCPO_KLARNA_NO_AUTHORIZATION'                  => 'Es ist ein unerwarteter Fehler aufgetreten.',
+    // missing in order email to shop owner
+    'EMAIL_ORDER_CUST_HTML_PLUSTAX1'                              => "zzgl. MwSt.",
+    'SHIPPING_VAT2'                                               => "% Betrag",
 );
 
 /*

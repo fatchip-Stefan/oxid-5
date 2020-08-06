@@ -22,7 +22,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
 
     /**
      * Helper object for dealing with different shop versions
-     * @var object
+     * @var fcpohelper
      */
     protected $_oFcpoHelper = null;
 
@@ -54,7 +54,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * Array of isoalpha2-countries for which birthday is needed
      * @var array
      */
-    protected $_aKlarnaBirthdayNeededCountries = array('DE', 'NL', 'AT');
+    protected $_aKlarnaBirthdayNeededCountries = array('DE', 'NL', 'AT', 'CH');
 
     /**
      * Datacontainer for all cc payment meta data
@@ -126,6 +126,12 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     );
 
     /**
+     * Flag for checking if klarna payment combined payment widget is already present
+     * @var bool
+     */
+    public $_blKlarnaCombinedIsPresent = false;
+
+    /**
      * init object construction
      * 
      * @return null
@@ -135,6 +141,24 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         $this->_oFcpoHelper = oxNew('fcpohelper');
         $this->_oFcpoDb = oxDb::getDb();
         $this->_blIsPayolutionInstallmentAjax = false;
+    }
+
+    /**
+     * Wrapper for checking if payment is allowed to be in usual payment
+     * selection
+     *
+     * @param void
+     * @return bool
+     */
+    public function fcpoShowAsRegularPaymentSelection($sPaymentId)
+    {
+        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxPayment');
+        $oPayment->load($sPaymentId);
+
+        $blShowAsRegularPaymentSelection =
+            $oPayment->fcpoShowAsRegularPaymentSelection();
+
+        return $blShowAsRegularPaymentSelection;
     }
 
     /**
@@ -164,54 +188,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         $this->_oFcpoHelper->fcpoDeleteSessionVariable('sess_challenge');
 
         parent::init();
-    }
-
-    /**
-     * Catches success return for validating and processing next steps
-     *
-     * @param void
-     * @return void
-     */
-    public function fcpoMasterpassSuccessReturn() {
-        $oRequest = $this->_oFcpoHelper->getFactoryObject('fcporequest');
-        $aResponse = $oRequest->fcpoSendRequestMasterpassGetCheckout();
-        $blError = ($aResponse['status'] == 'ERROR');
-
-        if ($blError) {
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
-            return $this->render();
-        }
-
-        $oUser = $this->_oFcpoHelper->getFactoryObject('oxUser');
-        $blSuccess = $oUser->fcpoSetMasterpassUser($aResponse);
-
-        if (!$blSuccess) {
-            $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
-            return $this->render();
-        }
-
-        // redirect for executing orderprocess
-        $this->_fcpoSetMasterpassCCDataIntoSession($aResponse);
-        $this->fcSetPaymentId('fcpomasterpass');
-        $this->fcSetShipSet('oxidstandard');
-        $oConfig = $this->getConfig();
-        $sShopUrl = $oConfig->getShopUrl();
-        $sOrderRedirectUrl = $sShopUrl."index.php?cl=order";
-        $oUtils = $this->_oFcpoHelper->fcpoGetUtils();
-        $oUtils->redirect($sOrderRedirectUrl);
-    }
-
-    /**
-     * Writes CC-DataString
-     *
-     * @param $aResponse
-     * @return void
-     */
-    protected function _fcpoSetMasterpassCCDataIntoSession($aResponse) {
-        $sSessionString  = $aResponse['add_paydata[cardtype]']."|";
-        $sSessionString .= $aResponse['add_paydata[truncatedcardpan]'];
-
-        $this->_oFcpoHelper->fcpoSetSessionVariable('fcpompdata', $sSessionString);
     }
 
     /**
@@ -279,16 +255,33 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
 
     /**
      * Returns matching notiication string if sofo is configured to show iban
-     * 
-     * @param void
-     * @return string
+     *
+     * @param  void
+     * @return bool
      */
-    public function fcpoGetSofoShowIban() {
+    public function fcpoGetSofoShowIban()
+    {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
         $blFCPOSofoShowIban = $oConfig->getConfigParam('blFCPOSofoShowIban');
+        return (bool) $blFCPOSofoShowIban;
+    }
 
-        $sReturn = ($blFCPOSofoShowIban) ? 'true' : 'false';
-        return $sReturn;
+    /**
+     * Method checks if deprecated bankdata should be requested instead of
+     * IBAN/BIC
+     *
+     * @param void
+     * @return bool
+     */
+    public function fcpoForceDeprecatedBankData() {
+        $oCur = $this->getActCurrency();
+        $sCurrencySign = $oCur->sign;
+        $sBillCountrySign = $this->fcGetBillCountry();
+        return (
+            $this->fcpoGetSofoShowIban() &&
+            $sCurrencySign == 'CHF' &&
+            $sBillCountrySign == 'CH'
+        );
     }
 
     /**
@@ -385,7 +378,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
                 $this->getJCB(),
                 $this->getMaestroInternational(),
                 $this->getMaestroUK(),
-                $this->getDiscover(),
                 $this->getCarteBleue(),
             ),
             'sb' => array(
@@ -466,15 +458,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      */
     public function getMaestroUK() {
         return ($this->getConfigParam('blFCPOMaestroUKActivated') && $this->isPaymentMethodAvailableToUser('U', 'cc'));
-    }
-
-    /**
-     * Check if sub payment method Discover is available to the user
-     * 
-     * @return bool
-     */
-    public function getDiscover() {
-        return ($this->getConfigParam('blFCPODiscoverActivated') && $this->isPaymentMethodAvailableToUser('C', 'cc'));
     }
 
     /**
@@ -613,18 +596,26 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * 
      * @return string
      */
-    public function getHashCC($sType = '') {
-        $sHash = md5(
-                $this->getSubAccountId() .
-                $this->getEncoding() .
-                $this->getMerchantId() .
-                $this->_getOperationModeCC($sType) .
-                $this->getPortalId() .
-                'creditcardcheck' .
-                'JSON' .
-                'yes' .
-                $this->getPortalKey()
-        );
+    public function getHashCC($sType = '')
+    {
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $sFCPOHashMethod = $oConfig->getConfigParam('sFCPOHashMethod');
+        $sKey = $this->getPortalKey();
+        $sData =
+            $this->getSubAccountId() .
+            $this->getEncoding() .
+            $this->getMerchantId() .
+            $this->_getOperationModeCC($sType) .
+            $this->getPortalId() .
+            'creditcardcheck' .
+            'JSON' .
+            'yes';
+
+        $sHashMD5 = md5($sData.$sKey);
+        $sHashSha2 = hash_hmac('sha384', $sData, $sKey);
+        $sHash = ($sFCPOHashMethod == 'sha2-384')
+            ? $sHashSha2 : $sHashMD5;
+
         return $sHash;
     }
 
@@ -648,7 +639,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         $this->_fcpoSetCCMetaData($oPayment, 'J', 'JCB');
         $this->_fcpoSetCCMetaData($oPayment, 'O', 'Maestro International');
         $this->_fcpoSetCCMetaData($oPayment, 'U', 'Maestro UK');
-        $this->_fcpoSetCCMetaData($oPayment, 'C', 'Discover');
         $this->_fcpoSetCCMetaData($oPayment, 'B', 'Carte Bleue');
 
         return $this->_aPaymentCCMetaData;
@@ -1130,7 +1120,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
             'J' => $this->getJCB(),
             'O' => $this->getMaestroInternational(),
             'U' => $this->getMaestroUK(),
-            'C' => $this->getDiscover(),
             'B' => $this->getCarteBleue(),
         );
 
@@ -1350,12 +1339,55 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
 
             $this->_fcCleanupSessionFragments($oPayment);
 
+            $mReturn = $this->_fcpoKlarnaCombinedValidate($mReturn, $sPaymentId);
+
             $mReturn = $this->_fcpoPayolutionPreCheck($mReturn, $sPaymentId);
             if ($sPaymentId == 'fcporp_bill') {
                 $mReturn = $this->_fcpoCheckRatePayBillMandatoryUserData($mReturn, $sPaymentId);
             }
             $mReturn = $this->_fcpoAdultCheck($mReturn, $sPaymentId);
+        }
 
+        return $mReturn;
+    }
+
+    /**
+     * Sets a error message into session, so it will be displayed in frontend
+     *
+     * @param  $sLangString
+     * @return void
+     */
+    protected function _fcpoSetErrorMessage($sLangString)
+    {
+        if ($sLangString) {
+            $oLang = $this->_oFcpoHelper->fcpoGetLang();
+            $sTranslatedString = $oLang->translateString($sLangString);
+            $this->_oFcpoHelper->fcpoSetSessionVariable('payerror', -20);
+            $this->_oFcpoHelper->fcpoSetSessionVariable('payerrortext', $sTranslatedString);
+        }
+    }
+
+    /**
+     * Validating new klarna payment
+     *
+     * @param $mReturn
+     * @param $sPaymentId
+     * @return mixed
+     */
+    protected function _fcpoKlarnaCombinedValidate($mReturn, $sPaymentId)
+    {
+        if ($this->fcpoIsKlarnaCombined($sPaymentId)) {
+            $aDynValues = $this->_fcpoGetDynValues();
+            if (!$aDynValues['fcpo_klarna_combined_agreed']) {
+                $this->_fcpoSetErrorMessage('FCPO_KLARNA_NOT_AGREED');
+                return null;
+            }
+            if (empty($aDynValues['klarna_authorization_token']) && ! $sPaymentId === 'fcpoklarna_directdebit') {
+                $this->_fcpoSetErrorMessage('FCPO_KLARNA_NO_AUTHORIZATION');
+                return null;
+            } else {
+                $this->_oFcpoHelper->fcpoSetSessionVariable('klarna_authorization_token', $aDynValues['klarna_authorization_token']);
+            }
         }
 
         return $mReturn;
@@ -2632,7 +2664,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return mixed
      */
     protected function _fcpoGetPaymentId() {
-        $sPaymentId = $sPaymentId = $this->_oFcpoHelper->fcpoGetRequestParameter('paymentid');
+        $sPaymentId = $this->_oFcpoHelper->fcpoGetRequestParameter('paymentid');
         if (!$sPaymentId) {
             $sPaymentId = $this->_oFcpoHelper->fcpoGetSessionVariable('paymentid');
         }
@@ -2758,9 +2790,10 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      * @return bool
      */
     public function fcpoKlarnaIsTelephoneNumberNeeded() {
+        $sBillCountryIso2 = strtolower($this->fcGetBillCountry());
         $oUser = $this->getUser();
-        $blReturn = ($oUser->oxuser__oxfon->value) ? false : true;
-
+        $blCountryNeedsPhone = (array_search($sBillCountryIso2, array('no', 'se', 'dk')) !== false);
+        $blReturn = $blCountryNeedsPhone && $oUser->oxuser__oxfon->value == '';
         return $blReturn;
     }
 
@@ -3334,7 +3367,7 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     }
 
     /**
-     * Method saves a single value to a cerrtain field of user table
+     * Method saves a single value to a certain field of user table
      *
      * @param $sField
      * @param $sValue
@@ -3472,5 +3505,110 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
         $sLink = 'https://www.ratepay.com/zgb-dse';
 
         return $sLink;
+    }
+
+    /**
+     * checks if chosen payment method is allowed according to
+     * consumer score setting
+     *
+     * @param $oPayment
+     * @return bool
+     */
+    public function isPaymentMethodAllowedByBoniCheck($oPayment)
+    {
+        $oUser = $this->_fcpoGetUserFromSession();
+        return ((int)$oPayment->oxpayments__oxfromboni->value <= (int)$oUser->oxuser__oxboni->value);
+    }
+
+    /**
+     * Returns if given paymentid represents an active payment
+     *
+     * @param $sPaymentId
+     * @return bool
+     */
+    public function fcpoPaymentActive($sPaymentId)
+    {
+        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxPayment');
+        $oPayment->load($sPaymentId);
+        $blPaymentActive = (bool) ($oPayment->oxpayments__oxactive->value);
+        // also check boni score
+        $blPaymentAllowed = $this->isPaymentMethodAllowedByBoniCheck($oPayment);
+        return ($blPaymentActive && $blPaymentAllowed );
+    }
+
+    /**
+     * Checks if given payment id is of type of new klarna
+     * implementation
+     *
+     * @param $sPaymentId
+     * @return bool
+     */
+    public function fcpoIsKlarnaCombined($sPaymentId)
+    {
+        return (
+        in_array($sPaymentId, array(
+            'fcpoklarna_invoice',
+            'fcpoklarna_directdebit',
+            'fcpoklarna_installments',
+        ))
+        );
+    }
+
+    /**
+     * Method decides if certain paymentid is of newer klarna type,
+     * the currency and country is supported and
+     * the combined widget already has been displayed.
+     *
+     * @param $sPaymentId
+     * @return bool
+     */
+    public function fcpoShowKlarnaCombined($sPaymentId)
+    {
+        $blIsKlarnaCombined = $this->fcpoIsKlarnaCombined($sPaymentId);
+        $blIsCountryCurrencySupportedFromKlarna = $this->_fcpoIsCountryCurrencySupportedFromKlarna();
+        if (
+            $blIsKlarnaCombined &&
+            $blIsCountryCurrencySupportedFromKlarna &&
+            $this->_blKlarnaCombinedIsPresent === false
+        ) {
+            $this->_blKlarnaCombinedIsPresent = true;
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if klarna supports the user's billing country in combination
+     * with currency
+     * @see https://developers.klarna.com/documentation/klarna-payments/in-depth-knowledge/puchase-countries-currencies-locales/
+     * @return bool
+     */
+    protected function _fcpoIsCountryCurrencySupportedFromKlarna()
+    {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oBasket = $oSession->getBasket();
+        $oUser = $oBasket->getUser();
+
+        $sCountry = $oUser->fcpoGetUserCountryIso();
+        $oConfig = $this->_oFcpoHelper->getConfig();
+        $oActCurrency = $oConfig->getActShopCurrencyObject();
+        $sCurrency = $oActCurrency->name;
+
+        $aMap = array (
+            'DE' => 'EUR',
+            'AT' => 'EUR',
+            'CH' => 'CHF',
+            'NL' => 'EUR',
+            'DK' => 'DKK',
+            'NO' => 'NOK',
+            'SE' => 'SEK',
+            'FI' => 'EUR',
+            'GB' => 'GBP',
+            'US' => 'USD',
+            'AU' => 'AUD',
+        );
+
+        return ($aMap[$sCountry] === $sCurrency);
     }
 }

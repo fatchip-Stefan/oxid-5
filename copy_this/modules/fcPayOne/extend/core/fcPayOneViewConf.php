@@ -61,12 +61,6 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
     protected $_sCurrentAmazonButtonId = null;
 
     /**
-     * Determines the source of a button include
-     * @var string|null
-     */
-    protected $_sCurrentMasterpassButtonId = null;
-
-    /**
      * List of themes and their button names
      * @var array
      */
@@ -266,7 +260,7 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
         $oUser = $oBasket->getBasketUser();
         $oAddress = $oUser->getSelectedAddress();
         $sSalutation = $oUser->oxuser__oxsal->value;
-        $sSalutationDelAddress = $oAddress->oxaddress__oxsal->value;
+        $sSalutationDelAddress = is_null($oAddress) ? $sSalutation : $oAddress->oxaddress__oxsal->value;
 
         $blHasSalutation = (
             $sSalutation &&
@@ -277,15 +271,62 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
     }
 
     /**
+     * Returns session variable
+     *
+     * @param void
+     * @return bool
+     */
+    public function fcpoGetClientToken() {
+        return  $this->_oFcpoHelper->fcpoGetSessionVariable('klarna_client_token');
+    }
+
+    /**
+     * Returns session variable
+     *
+     * @param void
+     * @return bool
+     */
+    public function fcpoGetKlarnaAuthToken() {
+        return  $this->_oFcpoHelper->fcpoGetSessionVariable('klarna_authorization_token');
+    }
+
+    /**
+     * Returns cancel url for klarna payments
+     *
+     * @param void
+     * @return bool
+     */
+    public function fcpoGetKlarnaCancelUrl() {
+        $oConfig = $this->getConfig();
+        $sShopURL = $oConfig->getCurrentShopUrl();
+        $oLang = $this->_oFcpoHelper->fcpoGetLang();
+        $sPaymentErrorTextParam =  "&payerrortext=".urlencode($oLang->translateString('FCPO_PAY_ERROR_REDIRECT', null, false));
+        $sPaymentErrorParam = '&payerror=-20'; // see source/modules/fc/fcpayone/out/blocks/fcpo_payment_errors.tpl
+        $sErrorUrl = $sShopURL . 'index.php?type=error&cl=payment' . $sPaymentErrorParam . $sPaymentErrorTextParam;
+        return  $sErrorUrl;
+    }
+
+    /**
+     * Checks if selected payment method is pay now
+     *
+     * @return bool
+     */
+    public function fcpoIsKlarnaPaynow()
+    {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        /** @var oxBasket $oBasket */
+        $oBasket = $oSession->getBasket();
+        return ($oBasket->getPaymentId() === 'fcpoklarna_directdebit');
+    }
+
+    /**
      * Returns if amazonpay is active and though button can be displayed
      *
      * @param void
      * @return bool
      */
     public function fcpoCanDisplayAmazonPayButton() {
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
-        $oPayment->load('fcpoamazonpay');
-        $blIsActive = (bool) $oPayment->oxpayments__oxactive->value;
+        $blIsActive = $this->_fcpoPaymentIsActive('fcpoamazonpay');
 
         return $blIsActive;
     }
@@ -472,23 +513,6 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
     }
 
     /**
-     * Returns if amazon runs in async mode
-     *
-     * @param void
-     * @return bool
-     */
-    public function fcpoIsAmazonAsyncMode() {
-        $oConfig = $this->getConfig();
-        $sFCPOAmazonMode = $oConfig->getConfigParam('sFCPOAmazonMode');
-        $blReturn = false;
-        if ($sFCPOAmazonMode == 'alwaysasync') {
-            $blReturn = true;
-        }
-
-        return $blReturn;
-    }
-
-    /**
      * Checks if popup method should be used. Depends on setting and/or
      * ssl state
      *
@@ -560,62 +584,6 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
     }
 
     /**
-     * Template getter for receiving masterpass button url
-     *
-     * @param void
-     * @return string
-     */
-    public function fcpoGetMasterpassButtonImg() {
-        $sUrl = 'https://masterpass.com/dyn/img/btn/global/mp_chk_btn_147x034px.svg';
-
-        return $sUrl;
-    }
-
-    /**
-     * Returns url of masterpass js library depending on set mode
-     *
-     * @param void
-     * @return string
-     */
-    public function fcpoGetMasterpassJsLibUrl() {
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
-        $oPayment->load('fcpomasterpass');
-        $blIsLive = $oPayment->oxpayments__fcpolivemode->value;
-
-        $sUrl = "https://sandbox.masterpass.com/lightbox/Switch/integration/MasterPass.client.js";
-        if ($blIsLive) {
-            $sUrl = "https://www.masterpass.com/lightbox/Switch/integration/MasterPass.client.js";
-        }
-
-        return $sUrl;
-    }
-
-    /**
-     * Template getter for deciding if masterpass button can be shown
-     *
-     * @param void
-     * @return bool
-     */
-    public function fcpoCanDisplayMasterpassButton() {
-        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
-        $oPayment->load('fcpomasterpass');
-        $blIsActive = (bool) $oPayment->oxpayments__oxactive->value;
-
-        return $blIsActive;
-    }
-
-    /**
-     * References current button id set in template
-     * for determine the last masterpass button on current page
-     *
-     * @param string $sButtonId
-     * @return void
-     */
-    public function fcpoSetCurrentMasterpassButtonId($sButtonId) {
-        $this->_sCurrentMasterpassButtonId = $sButtonId;
-    }
-
-    /**
      * Returns the expected amount of amazon buttons on current page
      *
      * @param void
@@ -679,6 +647,34 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
         return $blIsPayOne;
     }
 
+    /**
+     * Returns if paydirekt express button can be shown
+     *
+     * @param void
+     * @return bool
+     */
+    public function fcpoCanDisplayPaydirektExpressButton()
+    {
+        $blIsActive = $this->_fcpoPaymentIsActive('fcpopaydirekt_express');
+
+        return $blIsActive;
+    }
+
+    /**
+     * Checks is given payment is active
+     *
+     * @param $sPaymentId
+     * @return bool
+     */
+    protected function _fcpoPaymentIsActive($sPaymentId)
+    {
+        $oPayment = $this->_oFcpoHelper->getFactoryObject('oxpayment');
+        $oPayment->load($sPaymentId);
+        $blIsActive = (bool) $oPayment->oxpayments__oxactive->value;
+
+        return $blIsActive;
+    }
+  
     /**
      * Return amazon confirmation error url
      *
@@ -781,4 +777,59 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
         return $sPayErrorText;
     }
 
+    /**
+     * Checks if session variable paySafeSessionId exists and returns it if true
+     * Otherwise value will be generated, saved and returned
+     *
+     * @param void
+     * @return string
+     */
+    public function fcpoGetPaySafeSessionId()
+    {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $sPaySafeSessionId = $oSession->getVariable('paySafeSessionId');
+
+        if ($sPaySafeSessionId) {
+            return $sPaySafeSessionId;
+        }
+
+        $sPaySafeSessionId =
+            $this->_fcpoGetGeneratedPaySafeSessionId();
+        $oSession->setVariable('paySafeSessionId', $sPaySafeSessionId);
+
+        return (string) $sPaySafeSessionId;
+    }
+
+    /**
+     * Removes paysafe session id from php session
+     *
+     * @param void
+     * @return void
+     */
+    public function fcpoRemovePaySafeSessionId()
+    {
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+        $oSession->deleteVariable('paySafeSessionId');
+    }
+
+    /**
+     * Creates and returns a pay safe session id
+     *
+     * @param void
+     * @return string
+     */
+    protected function _fcpoGetGeneratedPaySafeSessionId()
+    {
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $oSession = $this->_oFcpoHelper->fcpoGetSession();
+
+        $sMerchantId = $oConfig->getConfigParam('sFCPOMerchantID');
+        $sPhpSessionId = $oSession->getId();
+        $sTimestamp = microtime(false);
+        $sSessionIdInput = $sMerchantId.$sPhpSessionId.$sTimestamp;
+        $sPortalKey = $oConfig->getConfigParam('sFCPOPortalKey');
+        $sHashSha2 = hash_hmac('sha384', $sSessionIdInput, $sPortalKey);
+
+        return $sHashSha2;
+    }
 }

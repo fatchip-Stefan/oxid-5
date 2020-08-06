@@ -42,10 +42,12 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         'fcpodebitnote',
         'fcpocashondel',
         'fcpocreditcard',
-        'fcpoonlineueberweisung',
         'fcpopaypal',
         'fcpopaypal_express',
         'fcpoklarna',
+        'fcpoklarna_invoice',
+        'fcpoklarna_installments',
+        'fcpoklarna_directdebit',
         'fcpobarzahlen',
         'fcpopaydirekt',
         'fcpopo_bill',
@@ -54,7 +56,15 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         'fcporp_bill',
         'fcpoamazonpay',
         'fcpo_secinvoice',
-        'fcpomasterpass',
+        'fcpopaydirekt_express',
+        'fcpo_sofort',
+        'fcpo_giropay',
+        'fcpo_eps',
+        'fcpo_pf_finance',
+        'fcpo_pf_card',
+        'fcpo_ideal',
+        'fcpo_p24',
+        'fcpo_bancontact',
     );
 
     /**
@@ -72,7 +82,22 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         'fcpopaypal',
         'fcpopaypal_express',
         'fcpoklarna',
+        'fcpoklarna_invoice',
+        'fcpoklarna_installments',
+        'fcpoklarna_directdebit',
         'fcpopaydirekt',
+        'fcpopaydirekt_express',
+    );
+
+    /**
+     * List of payments that are not foreseen to be shown as regular payment
+     * selection
+     *
+     * @var array
+     */
+    protected $_aExpressPayments = array(
+        'fcpoamazonpay',
+        'fcpopaydirekt_express'
     );
 
     /**
@@ -138,6 +163,23 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         }
         return $blReturn;
     }
+
+    /**
+     * Checks if this payment is foreseen to be shown as standard
+     * payment selection
+     *
+     * @param string $sPaymentId
+     * @return bool
+     */
+    public function fcpoShowAsRegularPaymentSelection($sPaymentId=false)
+    {
+        $sPaymentId = (!$sPaymentId) ? $this->getId() : $sPaymentId;
+        $blPaymentAllowedInSelection =
+            !in_array($sPaymentId, $this->_aExpressPayments);
+
+        return $blPaymentAllowedInSelection;
+    }
+
 
     /**
      * Determines the operation mode ( live or test ) used in this order based on the payment (sub) method
@@ -485,7 +527,7 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
     public function fcpoGetMode($aDynvalue) {
         $sReturn = '';
         $sId = $this->getId();
-        $blIdAffected = in_array($sId, array('fcpocreditcard', 'fcpoonlineueberweisung'));
+        $blIdAffected = in_array($sId, array('fcpocreditcard'));
 
         if ($blIdAffected) {
             $aMap = array(

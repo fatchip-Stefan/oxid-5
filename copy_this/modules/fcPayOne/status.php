@@ -17,7 +17,7 @@
  * @copyright (C) Payone GmbH
  * @version   OXID eShop CE
  */
- 
+
 set_time_limit(0);
 ini_set ('memory_limit', '1024M');
 ini_set ('log_errors', 1);
@@ -33,6 +33,11 @@ if(file_exists(dirname(__FILE__)."/config.ipwhitelist.php")) {
 $sClientIp = null;
 if(isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
     $aIps = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+    $sTmpClientIp = trim($aIps[0]);
+    $blAllowed = in_array($sTmpClientIp, $aWhitelistForwarded);
+    if ($blAllowed) {
+        $sClientIp = $sTmpClientIp;
+    }
     $sClientIp = trim($aIps[0]);
 }
 
@@ -287,7 +292,21 @@ class fcPayOneTransactionStatusHandler extends oxBase {
                     oxDb::getDb()->Execute($query);
                 }
                 if($this->fcGetPostParam('txaction') == 'paid') {
-                    $query = "UPDATE oxorder SET oxfolder = 'ORDERFOLDER_NEW', oxtransstatus = 'OK' WHERE oxid = '{$sOrderId}' AND oxtransstatus = 'INCOMPLETE' AND oxfolder = 'ORDERFOLDER_PROBLEMS'";
+                    $oLang = oxNew('oxLang');
+                    $sReplacement = $oLang->translateString('FCPO_REMARK_APPOINTED_MISSING');
+
+                    $query = "
+                        UPDATE 
+                            oxorder 
+                        SET 
+                            oxfolder = 'ORDERFOLDER_NEW', 
+                            oxtransstatus = 'OK',
+                            oxremark = REPLACE(oxremark, '".$sReplacement."', '') 
+                        WHERE 
+                            oxid = '{$sOrderId}' AND 
+                            oxtransstatus IN ('INCOMPLETE', 'ERROR') AND 
+                            oxfolder = 'ORDERFOLDER_PROBLEMS'
+                    ";
                     oxDb::getDb()->Execute($query);
                 }
 

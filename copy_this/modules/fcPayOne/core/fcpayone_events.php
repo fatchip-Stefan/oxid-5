@@ -44,7 +44,9 @@ class fcpayone_events
         'fcpocommerzfinanz',
         'fcpoklarna_installment',
         'fcpocreditcard_iframe',
-        'fcpobillsafe'
+        'fcpobillsafe',
+        'fcpomasterpass',
+        'fcpoonlineueberweisung',
     );
 
     public static $sQueryTableFcporefnr = "
@@ -316,6 +318,9 @@ class fcpayone_events
     public static $sQueryAlterOxpaymentsIsPayone = "ALTER TABLE oxpayments ADD COLUMN FCPOISPAYONE TINYINT(1) DEFAULT '0' NOT NULL;";
     public static $sQueryAlterOxorderarticlesCapturedAmount = "ALTER TABLE oxorderarticles ADD COLUMN FCPOCAPTUREDAMOUNT INT(11) DEFAULT '0' NOT NULL;";
     public static $sQueryAlterOxorderarticlesDebitedAmount = "ALTER TABLE oxorderarticles ADD COLUMN FCPODEBITEDAMOUNT INT(11) DEFAULT '0' NOT NULL;";
+    public static $sQueryAlterOxorderarticlesCapturedPrice = "ALTER TABLE oxorderarticles ADD COLUMN FCPOCAPTUREDPRICE DOUBLE DEFAULT 0 NOT NULL;";
+    public static $sQueryAlterOxorderarticlesCapturedPriceCompleted = "ALTER TABLE oxorderarticles ADD COLUMN FCPOCAPTUREDPRICECOMPLETED TINYINT(1) DEFAULT '0' NOT NULL;";
+    public static $sQueryAlterOxorderarticlesDebitedPrice = "ALTER TABLE oxorderarticles ADD COLUMN FCPODEBITEDPRICE DOUBLE DEFAULT 0 NOT NULL;";
     public static $sQueryAlterOxorderDelcostDebited = "ALTER TABLE oxorder ADD COLUMN FCPODELCOSTDEBITED TINYINT(1) DEFAULT '0' NOT NULL;";
     public static $sQueryAlterOxorderPaycostDebited = "ALTER TABLE oxorder ADD COLUMN FCPOPAYCOSTDEBITED TINYINT(1) DEFAULT '0' NOT NULL;";
     public static $sQueryAlterOxorderWrapcostDebited = "ALTER TABLE oxorder ADD COLUMN FCPOWRAPCOSTDEBITED TINYINT(1) DEFAULT '0' NOT NULL;";
@@ -339,6 +344,9 @@ class fcpayone_events
         'fcpopaypal' => 'PayPal',
         'fcpopaypal_express' => 'PayPal Express',
         'fcpoklarna' => 'Klarna Rechnung',
+        'fcpoklarna_invoice' => 'Klarna Pay Later',
+        'fcpoklarna_installments' => 'Klarna Slice It',
+        'fcpoklarna_directdebit' => 'Klarna Pay Now',
         'fcpobarzahlen' => 'Barzahlen',
         'fcpopaydirekt' => 'Paydirekt',
         'fcpopo_bill' => 'Paysafe Pay Later™ Rechnungskauf',
@@ -347,7 +355,15 @@ class fcpayone_events
         'fcporp_bill' => 'Ratepay Rechnungskauf',
         'fcpoamazonpay' => 'AmazonPay',
         'fcpo_secinvoice' => 'Gesicherter Rechnungskauf',
-        'fcpomasterpass' => 'Masterpass',
+        'fcpopaydirekt_express' => 'Paydirekt Express',
+        'fcpo_sofort' => 'Sofortüberweisung',
+        'fcpo_giropay' => 'Giropay',
+        'fcpo_eps' => 'eps - Onlineüberweisung',
+        'fcpo_pf_finance' => 'PostFinance E-Finance',
+        'fcpo_pf_card' => 'PostFinance Card',
+        'fcpo_ideal' => 'iDeal',
+        'fcpo_p24' => 'P24',
+        'fcpo_bancontact' => 'Bancontact',
     );
 
     /**
@@ -382,7 +398,7 @@ class fcpayone_events
     public static function onDeactivate()
     {
         self::$_oFcpoHelper = oxNew('fcpohelper');
-        self::deactivePaymethods();
+        self::deactivatePaymethods();
         $sMessage = "Payone-Zahlarten deaktiviert!<br>";
         self::clearTmp();
         $sMessage .= "Tmp geleert...<br>";
@@ -511,6 +527,9 @@ class fcpayone_events
 
         self::addColumnIfNotExists('oxorderarticles', 'FCPOCAPTUREDAMOUNT', self::$sQueryAlterOxorderarticlesCapturedAmount);
         self::addColumnIfNotExists('oxorderarticles', 'FCPODEBITEDAMOUNT', self::$sQueryAlterOxorderarticlesDebitedAmount);
+        self::addColumnIfNotExists('oxorderarticles', 'FCPOCAPTUREDPRICE', self::$sQueryAlterOxorderarticlesCapturedPrice);
+        self::addColumnIfNotExists('oxorderarticles', 'FCPOCAPTUREDPRICECOMPLETED', self::$sQueryAlterOxorderarticlesCapturedPriceCompleted);
+        self::addColumnIfNotExists('oxorderarticles', 'FCPODEBITEDPRICE', self::$sQueryAlterOxorderarticlesDebitedPrice);
 
         self::addColumnIfNotExists('oxpayments', 'FCPOISPAYONE', self::$sQueryAlterOxpaymentsIsPayone);
         self::addColumnIfNotExists('oxpayments', 'FCPOAUTHMODE', self::$sQueryAlterOxpaymentsAuthMode);
@@ -781,7 +800,7 @@ class fcpayone_events
      * 
      * @return void
      */
-    public static function deactivePaymethods()
+    public static function deactivatePaymethods()
     {
         $sPaymenthodIds = "'" . implode("','", array_keys(self::$aPaymentMethods)) . "'";
         $sQ = "update oxpayments set oxactive = 0 where oxid in ($sPaymenthodIds)";
@@ -790,14 +809,36 @@ class fcpayone_events
 
     /**
      * Sets default config values on activation.
-     * 
+     *
      * @return void
      */
     public static function setDefaultConfigValues()
     {
-        if (!self::$_oFcpoHelper->fcpoGetConfig()->getConfigParam('sFCPOAddresscheck')) {
-            self::$_oFcpoHelper->fcpoGetConfig()->saveShopConfVar('str', 'sFCPOAddresscheck', 'NO');
+        $oConfig = self::$_oFcpoHelper->fcpoGetConfig();
+        $blIsUpdate = self::isUpdate();
+        $blHashMethodSet = (bool) $oConfig->getConfigParam('sFCPOHashMethod');
+
+
+        if (!$blHashMethodSet && $blIsUpdate) {
+            $oConfig->saveShopConfVar('str', 'sFCPOHashMethod', 'md5');
+        } elseif (!$blHashMethodSet) {
+            $oConfig->saveShopConfVar('str', 'sFCPOHashMethod', 'sha2-384');
+        }
+
+        if (!$oConfig->getConfigParam('sFCPOAddresscheck')) {
+            $oConfig->saveShopConfVar('str', 'sFCPOAddresscheck', 'NO');
         }
     }
-
+    /**
+     * If there is an existing merchant id we assume, that current activation
+     * is an update
+     *
+     * @param void
+     * @return bool
+     */
+    public static function isUpdate()
+    {
+        $oConfig = self::$_oFcpoHelper->fcpoGetConfig();
+        return (bool) ($oConfig->getConfigParam('sFCPOMerchantID'));
+    }
 }
