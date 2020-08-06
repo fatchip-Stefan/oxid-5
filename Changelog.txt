@@ -1,3 +1,17 @@
+==2.5.0==
+New Feature(s)
+ 
+* new klarna implementation
+
+Maintenance
+ 
+* remove DISCOVER
+* sooo many translations
+ 
+Warning(s)
+ 
+* klarna legacy will be shut down in the end of Sep 2020
+
 ==2.4.0==
 New Features
 
