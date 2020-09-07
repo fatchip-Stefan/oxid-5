@@ -434,8 +434,13 @@ class fcPayOneOrderView extends fcPayOneOrderView_parent {
 
         $oRequest   = $this->_oFcpoHelper->getFactoryObject('fcporequest');
         $aOutput    = $oRequest->sendRequestPaydirektCheckout($sWorkorderId);
+        $aOutputEncoded = array();
+        // Fix double utf-8 encoded strings in response
+        foreach ($aOutput As $sKey => $sValue) {
+            $aOutputEncoded[$sKey] = utf8_decode($sValue);
+        }
         $this->_oFcpoHelper->fcpoSetSessionVariable('paymentid', "fcpopaydirekt_express");
-        $oUser = $this->_fcpoHandleExpressUser($aOutput);
+        $oUser = $this->_fcpoHandleExpressUser($aOutputEncoded);
 
         if($oUser) {
             $this->_fcpoUpdateUserOfExpressBasket($oUser, "fcpopaydirekt_express");
