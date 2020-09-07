@@ -588,6 +588,11 @@ class fcpoRequest extends oxSuperCfg {
                     $sWorkorderId = $oSession->getVariable('fcpoWorkorderId');
 
                     $this->addParameter('workorderid', $sWorkorderId);
+
+                    // remove birthday if it is 00000000, possibly breaking payments
+                    if (isset($this->_aParameters['birthday']) && $this->_aParameters['birthday'] === '00000000') {
+                        unset($this->_aParameters['birthday']);
+                    }
                 }
 
                 $blAddRedirectUrls = true;
