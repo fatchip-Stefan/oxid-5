@@ -1883,7 +1883,7 @@ class fcpoRequest extends oxSuperCfg {
     public function sendRequestPaydirektCheckout($sWorkorderId = false) {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
 
-        $sOperationMode = $this->getOperationMode('fcpoamazonpay');
+        $sOperationMode = $this->getOperationMode('fcpopaydirekt_express');
         $sSubAccountId = $oConfig->getConfigParam('sFCPOSubAccountID');
         $sShippingSetId = $oConfig->getConfigParam('sPaydirektExpressDeliverySetId');
         $sShippingSetId = ($sShippingSetId == 'none') ? 'oxidstandard' : $sShippingSetId;
