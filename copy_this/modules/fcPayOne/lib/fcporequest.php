@@ -1381,7 +1381,7 @@ class fcpoRequest extends oxSuperCfg {
             $dAmount = $mValue->getAmount();
             $dBruttoPrice = round($dBruttoPricePosSum/$dAmount, 2);
         } else if (is_float($mValue)) {
-            $dBruttoPrice = $mValue;
+            $dBruttoPrice = round($mValue,2);
         }
         if (isset($dBruttoPrice)) {
             $oCur = $oConfig->getActShopCurrencyObject();
@@ -1390,7 +1390,7 @@ class fcpoRequest extends oxSuperCfg {
             $dReturnPrice = $dBruttoPrice * $dFactor;
         }
 
-        return $dReturnPrice;
+        return (int) $dReturnPrice;
     }
 
     protected function _fcpoAddAmazonPayParameters($oOrder) {
