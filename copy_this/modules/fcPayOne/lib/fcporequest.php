@@ -611,11 +611,6 @@ class fcpoRequest extends oxSuperCfg {
                 return false;
         }
 
-        // remove birthday if it is 00000000, possibly breaking payments
-        if (isset($this->_aParameters['birthday']) && $this->_aParameters['birthday'] === '00000000') {
-            unset($this->_aParameters['birthday']);
-        }
-
         if ($blAddRedirectUrls === true) {
             $this->_addRedirectUrls('payment', $sRefNr);
         }
@@ -2954,6 +2949,11 @@ class fcpoRequest extends oxSuperCfg {
 
         $iErrorNumber = '';
         $sErrorString = '';
+
+        // remove birthday if it is 00000000, possibly breaking payments
+        if (isset($this->_aParameters['birthday']) && $this->_aParameters['birthday'] === '00000000') {
+            unset($this->_aParameters['birthday']);
+        }
 
         if ($this->getParameter('mid') === false || $this->getParameter('portalid') === false ||
                 $this->getParameter('key') === false || $this->getParameter('mode') === false) {
