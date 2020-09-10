@@ -948,7 +948,7 @@ class fcpoRequest extends oxSuperCfg {
 
             $oSession = $this->getSession();
             $oBasket = $oSession->getBasket();
-            if ($oBasket != null) {
+            if ($oBasket != null && count($oBasket->getVouchers()) > 0) {
                 foreach ($oBasket->getVouchers() AS $oVoucher) {
                     $this->addParameter('it[' . $i . ']', 'voucher');
                     $this->addParameter('id[' . $i . ']', $oVoucher->sVoucherNr);
@@ -975,7 +975,7 @@ class fcpoRequest extends oxSuperCfg {
                 $this->addParameter('it[' . $i . ']', 'voucher');
                 $this->addParameter('no[' . $i . ']', 1);
                 $this->addParameter('de[' . $i . ']', $oLang->translateString('FCPO_DISCOUNT', null, false));
-                $this->addParameter('va[' . $i . ']', number_format($oOrder->oxorder__oxartvat1->value * 100, 0, '.', ''));
+                $this->addParameter('va[' . $i . ']', '0');
             }
         }
         return $dAmount;
@@ -1325,6 +1325,16 @@ class fcpoRequest extends oxSuperCfg {
             $this->addParameter('pr[' . $iIndex . ']', $this->_fcpoGetCentPrice($oVoucher->dVoucherdiscount * -1));
             $this->addParameter('no[' . $iIndex . ']', '1');
             $this->addParameter('de[' . $iIndex . ']',  $oLang->translateString('FCPO_VOUCHER', null, false));
+            $this->addParameter('va[' . $iIndex . ']', '0');
+            $iIndex++;
+        }
+        // discounts
+        foreach ($oBasket->getDiscounts() AS $oDiscount) {
+            $this->addParameter('it[' . $iIndex . ']', 'voucher');
+            $this->addParameter('id[' . $iIndex . ']', 'discount');
+            $this->addParameter('pr[' . $iIndex . ']', $this->_fcpoGetCentPrice($oDiscount->dDiscount * -1));
+            $this->addParameter('no[' . $iIndex . ']', '1');
+            $this->addParameter('de[' . $iIndex . ']',  $oLang->translateString('FCPO_DISCOUNT', null, false));
             $this->addParameter('va[' . $iIndex . ']', '0');
             $iIndex++;
         }
