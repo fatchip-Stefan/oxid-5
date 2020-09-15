@@ -249,6 +249,9 @@ class fcPayOneBasketView extends fcPayOneBasketView_parent {
     public function fcpoUsePaydirektExpress()
     {
         $this->fcpoLogoutUser();
+        $oSession = $this->getSession();
+        $oBasket = $oSession->getBasket();
+        $oBasket->calculateBasket(true);
 
         $oRequest = $this->_oFcpoHelper->getFactoryObject('fcporequest');
         $aOutput = $oRequest->sendRequestPaydirektCheckout();
