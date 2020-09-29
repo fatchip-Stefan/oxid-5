@@ -3502,7 +3502,20 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
      */
     public function fcpoGetRatepayAgreementLink() {
 
-        $sLink = 'https://www.ratepay.com/zgb-dse';
+        $sLink = 'https://www.ratepay.com/legal-payment-terms';
+
+        return $sLink;
+    }
+
+    /**
+     * Returns link for displaying data privacy statement for Ratepay
+     *
+     * @param void
+     * @return string
+     */
+    public function fcpoGetRatepayPrivacyLink() {
+
+        $sLink = 'https://www.ratepay.com/legal-payment-dataprivacy';
 
         return $sLink;
     }
