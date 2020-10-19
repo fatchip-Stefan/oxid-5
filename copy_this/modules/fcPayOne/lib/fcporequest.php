@@ -869,7 +869,7 @@ class fcpoRequest extends oxSuperCfg {
                 $fItemPrice = $oOrderarticle->oxorderarticles__oxbprice->value;
                 if ($aPositions !== false && array_key_exists($oOrderarticle->getId(), $aPositions) !== false) {
                     $dItemAmount = $aPositions[$oOrderarticle->getId()]['amount'];
-                    if (array_key_exists('price', $aPositions[$oOrderarticle->getId()])) {
+                    if (array_key_exists('price', $aPositions[$oOrderarticle->getId()]) && ! is_null($aPositions[$oOrderarticle->getId()]['price']) ) {
                         $fItemPrice = $aPositions[$oOrderarticle->getId()]['price'];
                     }
                 }
@@ -2246,6 +2246,7 @@ class fcpoRequest extends oxSuperCfg {
                 $this->addParameter('amount', number_format($dAmount, 2, '.', '') * 100); //Total order sum in smallest currency unit
             }
         }
+        $this->_fcpoAddCaptureRatePayParams($oOrder);
 
         $aResponse = $this->send();
 
