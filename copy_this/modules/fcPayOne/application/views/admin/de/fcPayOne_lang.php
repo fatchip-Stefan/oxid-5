@@ -62,6 +62,7 @@ $aLang = array(
     'fcpo_clearingtype_wlt'                     => 'e-Wallet',
     'fcpo_clearingtype_fnc'                     => 'Finanzierung',
     'fcpo_clearingtype_csh'                     => 'Barzahlen',
+    'fcpo_clearingtype_fcporp_bill'             => 'Ratepay Rechnung',
     'fcpo_clearingtype_fcpoklarna'              => 'Klarna Rechnung',
     'fcpo_clearingtype_fcpopo_bill'             => 'Paysafe Pay Later™ Rechnung',
     'fcpo_clearingtype_fcpopo_debitnote'        => 'Paysafe Pay Later™ Lastschrift',

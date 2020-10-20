@@ -869,7 +869,7 @@ class fcpoRequest extends oxSuperCfg {
                 $fItemPrice = $oOrderarticle->oxorderarticles__oxbprice->value;
                 if ($aPositions !== false && array_key_exists($oOrderarticle->getId(), $aPositions) !== false) {
                     $dItemAmount = $aPositions[$oOrderarticle->getId()]['amount'];
-                    if (array_key_exists('price', $aPositions[$oOrderarticle->getId()])) {
+                    if (array_key_exists('price', $aPositions[$oOrderarticle->getId()]) && ! is_null($aPositions[$oOrderarticle->getId()]['price']) ) {
                         $fItemPrice = $aPositions[$oOrderarticle->getId()]['price'];
                     }
                 }
@@ -1319,24 +1319,28 @@ class fcpoRequest extends oxSuperCfg {
         }
 
         // voucher discounts
-        foreach ($oBasket->getVouchers() AS $oVoucher) {
-            $this->addParameter('it[' . $iIndex . ']', 'voucher');
-            $this->addParameter('id[' . $iIndex . ']', $oVoucher->sVoucherNr);
-            $this->addParameter('pr[' . $iIndex . ']', $this->_fcpoGetCentPrice($oVoucher->dVoucherdiscount * -1));
-            $this->addParameter('no[' . $iIndex . ']', '1');
-            $this->addParameter('de[' . $iIndex . ']',  $oLang->translateString('FCPO_VOUCHER', null, false));
-            $this->addParameter('va[' . $iIndex . ']', '0');
-            $iIndex++;
+        if ($oBasket->getVouchers() !== null) {
+            foreach ($oBasket->getVouchers() as $oVoucher) {
+                $this->addParameter('it[' . $iIndex . ']', 'voucher');
+                $this->addParameter('id[' . $iIndex . ']', $oVoucher->sVoucherNr);
+                $this->addParameter('pr[' . $iIndex . ']', $this->_fcpoGetCentPrice($oVoucher->dVoucherdiscount * -1));
+                $this->addParameter('no[' . $iIndex . ']', '1');
+                $this->addParameter('de[' . $iIndex . ']', $oLang->translateString('FCPO_VOUCHER', null, false));
+                $this->addParameter('va[' . $iIndex . ']', '0');
+                $iIndex++;
+            }
         }
         // discounts
-        foreach ($oBasket->getDiscounts() AS $oDiscount) {
-            $this->addParameter('it[' . $iIndex . ']', 'voucher');
-            $this->addParameter('id[' . $iIndex . ']', 'discount');
-            $this->addParameter('pr[' . $iIndex . ']', $this->_fcpoGetCentPrice($oDiscount->dDiscount * -1));
-            $this->addParameter('no[' . $iIndex . ']', '1');
-            $this->addParameter('de[' . $iIndex . ']',  $oLang->translateString('FCPO_DISCOUNT', null, false));
-            $this->addParameter('va[' . $iIndex . ']', '0');
-            $iIndex++;
+        if ($oBasket->getDiscounts() !== null) {
+            foreach ($oBasket->getDiscounts() AS $oDiscount) {
+                $this->addParameter('it[' . $iIndex . ']', 'voucher');
+                $this->addParameter('id[' . $iIndex . ']', 'discount');
+                $this->addParameter('pr[' . $iIndex . ']', $this->_fcpoGetCentPrice($oDiscount->dDiscount * -1));
+                $this->addParameter('no[' . $iIndex . ']', '1');
+                $this->addParameter('de[' . $iIndex . ']',  $oLang->translateString('FCPO_DISCOUNT', null, false));
+                $this->addParameter('va[' . $iIndex . ']', '0');
+                $iIndex++;
+            }
         }
 
         return $oBasket;
@@ -2242,6 +2246,7 @@ class fcpoRequest extends oxSuperCfg {
                 $this->addParameter('amount', number_format($dAmount, 2, '.', '') * 100); //Total order sum in smallest currency unit
             }
         }
+        $this->_fcpoAddCaptureRatePayParams($oOrder);
 
         $aResponse = $this->send();
 
@@ -3487,6 +3492,20 @@ class fcpoRequest extends oxSuperCfg {
             (isset($aMap[$sPaymentId])) ? $aMap[$sPaymentId] : '';
 
         return $sFinancingType;
+    }
+
+    /**
+     * Returns delivery costs of given basket object
+     *
+     * @param $oBasket
+     * @return object $oDelivery
+     */
+    protected function _fcpoFetchDeliveryCostsFromBasket($oBasket)
+    {
+        $oDelivery = $oBasket->getCosts('oxdelivery');
+        if ($oDelivery === null) return 0.0;
+
+        return $oDelivery->getBruttoPrice();
     }
 
 }
