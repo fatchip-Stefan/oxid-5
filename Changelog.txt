@@ -1,3 +1,20 @@
+==2.5.1==
+
+New Feature(s)
+
+* None, this is a bugfix release
+
+Bugfix(es)
+
+* Removed invalid birthday parameter from request when no data was present
+* Fixed vouchers with Klarna Payments
+* Fixed encoding error with Paydirekt Express
+* Article list is now always sent when active, also in preauthorization mode
+
+Maintenance
+
+* None
+
 ==2.5.0==
 New Feature(s)
  
