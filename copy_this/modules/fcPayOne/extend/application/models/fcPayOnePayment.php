@@ -65,6 +65,7 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         'fcpo_ideal',
         'fcpo_p24',
         'fcpo_bancontact',
+        'fcpo_alipay',
     );
 
     /**
@@ -87,6 +88,7 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         'fcpoklarna_directdebit',
         'fcpopaydirekt',
         'fcpopaydirekt_express',
+        'fcpo_alipay',
     );
 
     /**
