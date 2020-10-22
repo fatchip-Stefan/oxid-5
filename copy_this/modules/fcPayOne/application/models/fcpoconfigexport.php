@@ -327,7 +327,7 @@ class fcpoconfigexport extends oxBase {
                 $subtype = $index;
                 $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<{$subtype}>" . $this->_sN;
                 foreach ($aMappings[$subtype] as $aMap) {
-                    $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . '<map from="' . $aMap['from'] . '" to="' . $aMap['to'] . '"/>' . $this->_sN;
+                    $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . '<map from="' . $aMap['from'] . '" to="' . $aMap['name'] . '" name="' . $aMap['name'] .  '"/>' . $this->_sN;
                 }
                 $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . "</{$subtype}>" . $this->_sN;
             }
@@ -553,6 +553,7 @@ class fcpoconfigexport extends oxBase {
             'fcpopo_debitnote' => 'PYD',
             'fcpopo_installment' => 'PYS',
             'fcporp_bill' => 'RPV',
+            'fcporp_debitnote' => 'RPD',
             'fcpocreditcard_iframe' => 'V,M,A,D,J,O,U,B',
             'fcpoamazonpay' => 'AMZ',
             'fcpo_secinvoice' => 'POV',
@@ -663,6 +664,7 @@ class fcpoconfigexport extends oxBase {
                 $aMappings[$sAbbr][$sType][] = array(
                     'from' => $oCurrentMapping->sPayoneStatusId,
                     'to' => $oCurrentMapping->sShopStatusId,
+                    'name' => $oCurrentMapping->sPaymentType,
                 );
             }
         }
