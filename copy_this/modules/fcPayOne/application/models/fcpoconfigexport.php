@@ -327,7 +327,7 @@ class fcpoconfigexport extends oxBase {
                 $subtype = $index;
                 $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . "<{$subtype}>" . $this->_sN;
                 foreach ($aMappings[$subtype] as $aMap) {
-                    $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . '<map from="' . $aMap['from'] . '" to="' . $aMap['name'] . '" name="' . $aMap['name'] .  '"/>' . $this->_sN;
+                    $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . '<map from="' . $aMap['from'] . '" to="' . $aMap['to'] . '" name="' . $aMap['name'] .  '"/>' . $this->_sN;
                 }
                 $sXml .= $this->_sT . $this->_sT . $this->_sT . $this->_sT . $this->_sT . "</{$subtype}>" . $this->_sN;
             }
