@@ -911,6 +911,8 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
      */
     protected function _fcpoSaveOrderValues($sTxid, $iOrderNotChecked) {
         $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $sPaymentId = $this->_oFcpoHelper->fcpoGetSessionVariable('paymentid');
+        $aDynvalues = $this->_oFcpoHelper->fcpoGetSessionVariable('dynvalue');
         $blPresaveOrder = (bool) $oConfig->getConfigParam('blFCPOPresaveOrder');
         if ($blPresaveOrder === true) {
             $this->oxorder__oxordernr = new oxField($this->_oFcpoHelper->fcpoGetSessionVariable('fcpoOrderNr'), oxField::T_RAW);
@@ -924,6 +926,12 @@ class fcPayOneOrder extends fcPayOneOrder_parent {
         if ($sWorkorderId) {
             $this->oxorder__fcpoworkorderid = new oxField($sWorkorderId, oxField::T_RAW);
         }
+
+        if ($sPaymentId === 'fcpo_trustly') {
+            $this->oxorder__fcpoiban = new oxField($aDynvalues['fcpo_trustly_iban'], oxField::T_RAW);
+            $this->oxorder__fcpobic = new oxField($aDynvalues['fcpo_trustly_bic'], oxField::T_RAW);
+        }
+
         $this->_oFcpoDb->Execute("UPDATE fcporefnr SET fcpo_txid = '" . $sTxid . "' WHERE fcpo_refnr = '" . $this->_oFcpoHelper->fcpoGetRequestParameter('refnr') . "'");
         $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoOrderNr');
         $this->_oFcpoHelper->fcpoDeleteSessionVariable('fcpoTxid');

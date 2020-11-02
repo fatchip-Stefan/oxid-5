@@ -267,6 +267,20 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
     }
 
     /**
+     * Returns matching notiication string if trustly is configured to show iban
+     *
+     * @param  void
+     * @return bool
+     */
+    public function fcpoGetTrustlyShowIban()
+    {
+        $oConfig = $this->_oFcpoHelper->fcpoGetConfig();
+        $blFCPOSofoShowIban = $oConfig->getConfigParam('blFCPOTrustlyShowIban');
+
+        return (bool) $blFCPOSofoShowIban;
+    }
+
+    /**
      * Method checks if deprecated bankdata should be requested instead of
      * IBAN/BIC
      *
@@ -1611,8 +1625,6 @@ class fcPayOnePaymentView extends fcPayOnePaymentView_parent {
 
         if ($blPayolutionPayment) {
             $blSavedSuccessfully = $this->_fcpoPayolutionSaveRequestedValues($sPaymentId);
-            // Steftest
-            $blSavedSuccessfully = true;
             $blAgreedDataUsage = $this->_fcpoCheckAgreedDataUsage($sPaymentId);
             $blValidMandatoryUserData = $this->_fcpoCheckPayolutionMandatoryUserData($sPaymentId);
 
