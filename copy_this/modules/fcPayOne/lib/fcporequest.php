@@ -2372,9 +2372,9 @@ class fcpoRequest extends oxSuperCfg {
      * @param type $oOrder
      * @return void
      */
-    protected function _fcpoAddCaptureTrustlyParams($oOrder) {
+    protected function _fcpoAddDebitTrustlyParams($oOrder) {
         $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
-        if ($sPaymentId === 'fcpo_truslty') {
+        if ($sPaymentId === 'fcpo_trustly') {
             $this->addParameter('iban', $oOrder->oxorder__fcpoiban->rawValue);
             $this->addParameter('bic', $oOrder->oxorder__fcpobic->rawValue);
         }
