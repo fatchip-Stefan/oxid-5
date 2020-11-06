@@ -2281,7 +2281,7 @@ class fcpoRequest extends oxSuperCfg {
             }
         }
         $this->_fcpoAddCaptureRatePayParams($oOrder);
-        $this->_fcpoAddCaptureTrustlyParams($oOrder);
+        $this->_fcpoAddDebitTrustlyParams($oOrder);
 
         $aResponse = $this->send();
 
