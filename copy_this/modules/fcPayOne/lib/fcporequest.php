@@ -1319,8 +1319,9 @@ class fcpoRequest extends oxSuperCfg {
         }
 
         // voucher discounts
-        if ($oBasket->getVouchers() !== null) {
-            foreach ($oBasket->getVouchers() as $oVoucher) {
+        $aVouchers = $oBasket->getVouchers();
+        if ($aVouchers !== null && count($aVouchers) > 0 ) {
+            foreach ($aVouchers as $oVoucher) {
                 $this->addParameter('it[' . $iIndex . ']', 'voucher');
                 $this->addParameter('id[' . $iIndex . ']', $oVoucher->sVoucherNr);
                 $this->addParameter('pr[' . $iIndex . ']', $this->_fcpoGetCentPrice($oVoucher->dVoucherdiscount * -1));
