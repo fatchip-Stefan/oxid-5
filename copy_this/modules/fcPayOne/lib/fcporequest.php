@@ -607,6 +607,11 @@ class fcpoRequest extends oxSuperCfg {
             case 'fcpo_secinvoice':
                 $blAddRedirectUrls = $this->_fcpoAddSecInvoiceParameters($oOrder);
                 break;
+            case 'fcpo_wechatpay':
+                $this->addParameter('clearingtype', 'wlt');
+                $this->addParameter('wallettype', 'WCP');
+                $blAddRedirectUrls = true;
+                break;
             default:
                 return false;
         }
