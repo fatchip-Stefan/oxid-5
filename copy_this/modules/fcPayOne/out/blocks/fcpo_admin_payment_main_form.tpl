@@ -46,7 +46,7 @@
     [{assign var="confbools" value=$oView->fcpoGetConfBools()}]
     <tr>
         <td class="edittext" width="70">
-            [{oxmultilang ident="FCPO_SHOW_SOFO_IBAN_FIELDS"}]
+            [{oxmultilang ident="FCPO_SHOW_IBAN_FIELDS"}]
         </td>
         <td>
             <input type=hidden name="confbools[blFCPOSofoShowIban]" value="0">
@@ -54,6 +54,20 @@
         </td>
     </tr>
     [{/if}]
+
+    [{if $edit->getId() == 'fcpo_trustly'}]
+    [{assign var="confbools" value=$oView->fcpoGetConfBools()}]
+    <tr>
+        <td class="edittext" width="70">
+            [{oxmultilang ident="FCPO_SHOW_IBAN_FIELDS"}]
+        </td>
+        <td>
+            <input type=hidden name="confbools[blFCPOTrustlyShowIban]" value="0">
+            <input type="checkbox" name="confbools[blFCPOTrustlyShowIban]" value="1"  [{if ($confbools.blFCPOTrustlyShowIban)}]checked[{/if}]>
+        </td>
+    </tr>
+    [{/if}]
+
     [{else}]
     <tr>
         <td colspan="2">

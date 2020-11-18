@@ -331,6 +331,8 @@ class fcpayone_events
     public static $sQueryAlterOxorderWorkOrderId = "ALTER TABLE oxorder ADD COLUMN FCPOWORKORDERID VARCHAR(16) DEFAULT '' NOT NULL;";
     public static $sQueryAlterOxorderClearingReference = "ALTER TABLE oxorder ADD COLUMN FCPOCLEARINGREFERENCE VARCHAR(32) DEFAULT '' NOT NULL;";
     public static $sQueryAlterOxorderProfileIdent = "ALTER TABLE oxorder ADD COLUMN FCPOPROFILEIDENT VARCHAR(32) DEFAULT '' NOT NULL;";
+    public static $sQueryAlterOxorderIban = "ALTER TABLE oxorder ADD COLUMN FCPOIBAN VARCHAR(32) DEFAULT '' NOT NULL;";
+    public static $sQueryAlterOxorderBic = "ALTER TABLE oxorder ADD COLUMN FCPOBIC VARCHAR(32) DEFAULT '' NOT NULL;";
     public static $sQueryChangeToVarchar1 = "ALTER TABLE fcpotransactionstatus CHANGE FCPO_USERID FCPO_USERID VARCHAR(32) DEFAULT '0' NOT NULL;";
     public static $sQueryChangeToVarchar2 = "ALTER TABLE fcpotransactionstatus CHANGE FCPO_TXID FCPO_TXID VARCHAR(32) DEFAULT '0' NOT NULL;";
     public static $sQueryChangeRefNrToVarchar = "ALTER TABLE oxorder CHANGE FCPOREFNR FCPOREFNR VARCHAR( 32 ) NOT NULL DEFAULT '0'";
@@ -364,6 +366,7 @@ class fcpayone_events
         'fcpo_ideal' => 'iDeal',
         'fcpo_p24' => 'P24',
         'fcpo_bancontact' => 'Bancontact',
+        'fcpo_trustly' => 'Trustly',
         'fcpo_wechatpay'=> 'WeChatPay',
     );
 
@@ -525,6 +528,8 @@ class fcpayone_events
         self::addColumnIfNotExists('oxorder', 'FCPOWORKORDERID', self::$sQueryAlterOxorderWorkOrderId);
         self::addColumnIfNotExists('oxorder', 'FCPOCLEARINGREFERENCE', self::$sQueryAlterOxorderClearingReference);
         self::addColumnIfNotExists('oxorder', 'FCPOPROFILEIDENT', self::$sQueryAlterOxorderProfileIdent);
+        self::addColumnIfNotExists('oxorder', 'FCPOIBAN', self::$sQueryAlterOxorderIban);
+        self::addColumnIfNotExists('oxorder', 'FCPOBIC', self::$sQueryAlterOxorderBic);
 
         self::addColumnIfNotExists('oxorderarticles', 'FCPOCAPTUREDAMOUNT', self::$sQueryAlterOxorderarticlesCapturedAmount);
         self::addColumnIfNotExists('oxorderarticles', 'FCPODEBITEDAMOUNT', self::$sQueryAlterOxorderarticlesDebitedAmount);
