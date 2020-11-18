@@ -611,6 +611,11 @@ class fcpoRequest extends oxSuperCfg {
                 $this->fcpoAddParametersOnlineTrustly($oOrder, $aDynvalue);
                 $blAddRedirectUrls = true;
                 break;
+            case 'fcpo_wechatpay':
+                $this->addParameter('clearingtype', 'wlt');
+                $this->addParameter('wallettype', 'WCP');
+                $blAddRedirectUrls = true;
+                break;
             default:
                 return false;
         }

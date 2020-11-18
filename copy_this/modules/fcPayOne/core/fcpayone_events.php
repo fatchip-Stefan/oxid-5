@@ -367,6 +367,7 @@ class fcpayone_events
         'fcpo_p24' => 'P24',
         'fcpo_bancontact' => 'Bancontact',
         'fcpo_trustly' => 'Trustly',
+        'fcpo_wechatpay'=> 'WeChatPay',
     );
 
     /**
