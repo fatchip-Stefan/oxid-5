@@ -65,6 +65,8 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         'fcpo_ideal',
         'fcpo_p24',
         'fcpo_bancontact',
+        'fcpo_trustly',
+        'fcpo_wechatpay',
         'fcpo_alipay',
     );
 
@@ -88,6 +90,8 @@ class fcPayOnePayment extends fcPayOnePayment_parent {
         'fcpoklarna_directdebit',
         'fcpopaydirekt',
         'fcpopaydirekt_express',
+        'fcpo_wechatpay',
+        'fcpo_trustly',
         'fcpo_alipay',
     );
 

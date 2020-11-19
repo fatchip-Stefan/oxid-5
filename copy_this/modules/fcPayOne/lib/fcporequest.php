@@ -607,6 +607,15 @@ class fcpoRequest extends oxSuperCfg {
             case 'fcpo_secinvoice':
                 $blAddRedirectUrls = $this->_fcpoAddSecInvoiceParameters($oOrder);
                 break;
+            case 'fcpo_trustly':
+                $this->fcpoAddParametersOnlineTrustly($oOrder, $aDynvalue);
+                $blAddRedirectUrls = true;
+                break;
+            case 'fcpo_wechatpay':
+                $this->addParameter('clearingtype', 'wlt');
+                $this->addParameter('wallettype', 'WCP');
+                $blAddRedirectUrls = true;
+                break;
             case 'fcpo_alipay':
                 $this->addParameter('clearingtype', 'wlt');
                 $this->addParameter('wallettype', 'ALP');
@@ -621,6 +630,36 @@ class fcpoRequest extends oxSuperCfg {
         }
         return true;
     }
+
+    /**
+     * Add parameters needed for Trustly
+     *
+     * @param $oOrder
+     * @param $aDynvalue
+     * @return void
+     */
+    protected function fcpoAddParametersOnlineTrustly($oOrder, $aDynvalue)
+    {
+        $this->addParameter('clearingtype', 'sb'); //Payment method
+        $this->addParameter('onlinebanktransfertype', 'TRL');
+
+        $blUseSepaData = (
+            isset($aDynvalue['fcpo_trustly_iban']) &&
+            $aDynvalue['fcpo_trustly_iban'] != '' &&
+            isset($aDynvalue['fcpo_trustly_bic']) &&
+            $aDynvalue['fcpo_trustly_bic'] != ''
+        );
+
+        if ($blUseSepaData) {
+            $this->addParameter('iban', $aDynvalue['fcpo_trustly_iban']);
+            $this->addParameter('bic', $aDynvalue['fcpo_trustly_bic']);
+        }
+
+        $oBillCountry = oxNew('oxcountry');
+        $oBillCountry->load($oOrder->oxorder__oxbillcountryid->value);
+        $this->addParameter('bankcountry', $oBillCountry->oxcountry__oxisoalpha2->value);
+    }
+
 
     /**
      * Adds additional parameters for secure invoice payment rec/POV
@@ -1324,8 +1363,9 @@ class fcpoRequest extends oxSuperCfg {
         }
 
         // voucher discounts
-        if ($oBasket->getVouchers() !== null) {
-            foreach ($oBasket->getVouchers() as $oVoucher) {
+        $aVouchers = $oBasket->getVouchers();
+        if ($aVouchers !== null && count($aVouchers) > 0 ) {
+            foreach ($aVouchers as $oVoucher) {
                 $this->addParameter('it[' . $iIndex . ']', 'voucher');
                 $this->addParameter('id[' . $iIndex . ']', $oVoucher->sVoucherNr);
                 $this->addParameter('pr[' . $iIndex . ']', $this->_fcpoGetCentPrice($oVoucher->dVoucherdiscount * -1));
@@ -2252,6 +2292,7 @@ class fcpoRequest extends oxSuperCfg {
             }
         }
         $this->_fcpoAddCaptureRatePayParams($oOrder);
+        $this->_fcpoAddDebitTrustlyParams($oOrder);
 
         $aResponse = $this->send();
 
@@ -2333,6 +2374,20 @@ class fcpoRequest extends oxSuperCfg {
         $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
         if (in_array($sPaymentId, $this->_aRatePayPayents)) {
             $this->addParameter('add_paydata[shop_id]', $oOrder->oxorder__fcpoprofileident->rawValue);
+        }
+    }
+
+    /**
+     * Adds Trustly specific parameters
+     *
+     * @param type $oOrder
+     * @return void
+     */
+    protected function _fcpoAddDebitTrustlyParams($oOrder) {
+        $sPaymentId = $oOrder->oxorder__oxpaymenttype->value;
+        if ($sPaymentId === 'fcpo_trustly') {
+            $this->addParameter('iban', $oOrder->oxorder__fcpoiban->rawValue);
+            $this->addParameter('bic', $oOrder->oxorder__fcpobic->rawValue);
         }
     }
 

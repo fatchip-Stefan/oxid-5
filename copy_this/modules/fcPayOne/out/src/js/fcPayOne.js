@@ -168,6 +168,12 @@ function resetErrorContainers() {
     if(document.getElementById('fcpo_kls_confirmation_missing')) {
         document.getElementById('fcpo_kls_confirmation_missing').style.display = '';
     }
+    if(document.getElementById('fcpo_trustly_iban_invalid')) {
+        document.getElementById('fcpo_trustly_iban_invalid').style.display = '';
+    }
+    if(document.getElementById('fcpo_trustly_bic_invalid')) {
+        document.getElementById('fcpo_trustly_bic_invalid').style.display = '';
+    }
 }
 
 function fcpoGetCreditcardType() {
@@ -468,9 +474,42 @@ function fcCheckPaymentSelection() {
             return startELVRequest(true);
         } else if(sCheckedValue == 'fcpoklarna') {
             return checkKlarna();
+        } else if (sCheckedValue === 'fcpo_trustly') {
+            return checkTrustly();
         }
     }
     return true;
+}
+
+function checkTrustly() {
+    resetErrorContainers();
+    var oForm = getPaymentForm();
+    var blShowIbanMessage = false;
+    var blShowBicMessage = false;
+    if(oForm['dynvalue[fcpo_trustly_iban]']) {
+        oForm['dynvalue[fcpo_trustly_iban]'].value = getCleanedNumberIBAN(oForm['dynvalue[fcpo_trustly_iban]'].value);
+        if (oForm['dynvalue[fcpo_trustly_iban]'].value === '') {
+            blShowIbanMessage = true;
+        }
+    }
+    if(oForm['dynvalue[fcpo_trustly_bic]']) {
+        oForm['dynvalue[fcpo_trustly_bic]'].value = getCleanedNumberIBAN(oForm['dynvalue[fcpo_trustly_bic]'].value);
+        if (oForm['dynvalue[fcpo_trustly_bic]'].value === '') {
+            blShowBicMessage = true;
+        }
+    }
+
+    if (blShowIbanMessage === true) {
+        document.getElementById('fcpo_trustly_iban_invalid').style.display = 'block';
+    }
+
+    if (blShowBicMessage === true) {
+        document.getElementById('fcpo_trustly_bic_invalid').style.display = 'block';
+    }
+    var blShowError = blShowIbanMessage || blShowBicMessage;
+    if (blShowError === true) {
+        return false;
+    }
 }
 
 function processPayoneResponseELV(response) {
@@ -885,7 +924,6 @@ function fcpoGetIsPaymentSelected(paymentId) {
             blReturn =  true;
         }
     }
-
     return blReturn;
 }
 
