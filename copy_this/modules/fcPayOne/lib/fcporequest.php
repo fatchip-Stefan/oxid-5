@@ -616,6 +616,11 @@ class fcpoRequest extends oxSuperCfg {
                 $this->addParameter('wallettype', 'WCP');
                 $blAddRedirectUrls = true;
                 break;
+            case 'fcpo_alipay':
+                $this->addParameter('clearingtype', 'wlt');
+                $this->addParameter('wallettype', 'ALP');
+                $blAddRedirectUrls = true;
+                break;
             default:
                 return false;
         }

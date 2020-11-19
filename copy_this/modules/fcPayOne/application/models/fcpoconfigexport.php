@@ -516,6 +516,7 @@ class fcpoconfigexport extends oxBase {
             'fcpo_ideal' => 'sb',
             'fcpo_p24' => 'sb',
             'fcpo_bancontact' => 'sb',
+            'fcpo_alipay' => 'wlt',
             'fcpo_trustly' => 'sb',
             'fcpo_wechatpay' => 'wlt',
         );
@@ -569,6 +570,7 @@ class fcpoconfigexport extends oxBase {
             'fcpo_bancontact' => 'BCT',
             'fcpo_trustly' => 'TRL',
             'fcpo_wechatpay' => 'WCP',
+            'fcpo_alipay' => 'ALP',
         );
 
         if (isset($aAbbreviations[$sPaymentId])) {

@@ -368,6 +368,7 @@ class fcpayone_events
         'fcpo_bancontact' => 'Bancontact',
         'fcpo_trustly' => 'Trustly',
         'fcpo_wechatpay'=> 'WeChatPay',
+        'fcpo_alipay' => 'Alipay',
     );
 
     /**
