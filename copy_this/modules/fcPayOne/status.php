@@ -259,7 +259,7 @@ class fcPayOneTransactionStatusHandler extends oxBase {
         curl_setopt($oCurl, CURLOPT_SSL_VERIFYHOST, false);
 
         curl_setopt($oCurl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($oCurl, CURLOPT_TIMEOUT_MS, 100);
+        curl_setopt($oCurl, CURLOPT_TIMEOUT_MS, 5500);
 
         $oResult = curl_exec($oCurl);
 
