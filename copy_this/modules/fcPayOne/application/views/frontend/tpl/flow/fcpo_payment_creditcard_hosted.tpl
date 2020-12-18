@@ -54,7 +54,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label id="fcpo_cc_cardholder_label" class="control-label col-lg-3">[{oxmultilang ident="FCPO_CC_CARDHOLDER"}]</label>
+                    <label id="fcpo_cc_cardholder_label" class="control-label col-lg-3"><b>[{oxmultilang ident="FCPO_CC_CARDHOLDER"}]</b>b</label>
                     <div class="col-lg-9">
                         <input autocomplete="off" type="text"
                                class="form-control"
