@@ -249,28 +249,6 @@ class fcPayOneViewConf extends fcPayOneViewConf_parent {
     }
 
     /**
-     * Returns if a complete set of salutations is available
-     *
-     * @param void
-     * @return bool
-     */
-    public function fcpoUserHasSalutation() {
-        $oSession = $this->_oFcpoHelper->fcpoGetSession();
-        $oBasket = $oSession->getBasket();
-        $oUser = $oBasket->getBasketUser();
-        $oAddress = $oUser->getSelectedAddress();
-        $sSalutation = $oUser->oxuser__oxsal->value;
-        $sSalutationDelAddress = is_null($oAddress) ? $sSalutation : $oAddress->oxaddress__oxsal->value;
-
-        $blHasSalutation = (
-            $sSalutation &&
-            $sSalutationDelAddress
-        );
-
-        return $blHasSalutation;
-    }
-
-    /**
      * Returns session variable
      *
      * @param void

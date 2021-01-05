@@ -3,6 +3,7 @@
         var sellerId = '[{$oViewConf->fcpoGetAmazonPaySellerId()}]';
         var Id = '[{$oViewConf->fcpoGetAmazonPayReferenceId()}]'; // use the Order Reference AmazonOrderReferenceId
         var orderForm = document.getElementById('orderConfirmAgbBottom');
+        removeLeadingSpace();
 
         orderForm.addEventListener('submit', function (e) {
             e.preventDefault();
@@ -10,6 +11,13 @@
                 placeOrder(confirmationFlow);
             });
         });
+
+        function removeLeadingSpace(){
+            var children = document.querySelectorAll('#orderAddress .panel-body')
+            for (var i = 0; i < children.length; i++) {
+                children[i].innerHTML = children[i].innerHTML.trim().replace(/(?:^(?:&nbsp;)+)|(?:(?:&nbsp;)+$)/g, '');
+            }
+        }
 
         function placeOrder(confirmationFlow) {
             console.log('triggered placeOrder');
