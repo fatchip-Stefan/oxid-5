@@ -981,11 +981,12 @@ function fcpoGetIsPaymentSelected(paymentId) {
     setTimeout(function(){
         if(document.getElementById('fcpoCreditcard') && typeof PayoneRequest == 'function') {
             var blCCSelected = fcpoGetIsPaymentSelected('fcpocreditcard');
-            var sDisplayType = (blCCSelected) ? 'block': '';
-            document.getElementById('fcpoCreditcard').style.display = sDisplayType;
             // remove loading spinner
             var oSpinnerNode = document.getElementById('fcpoCreditcardSpinner');
             oSpinnerNode.parentNode.removeChild(oSpinnerNode);
+            if (blCCSelected) {
+                document.getElementById('fcpoCreditcard').style.display = 'block';
+            }
         }
     }, 2000);
     
